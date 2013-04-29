@@ -9,6 +9,6 @@
  * Email: bpteam22@gmail.com
  */
 include_once "get_content.php";
-include_once "proxy.php";
+include_once "c_proxy.php";
 include_once "string_work.php";
 ?>

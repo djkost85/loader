@@ -1,5 +1,5 @@
 <?php
-include_once "proxy.php";
+include_once "c_proxy.php";
 include_once "get_content.php";
 /**
 Класс для обработки строки и извлечения необходимой информации используя набор фильтров

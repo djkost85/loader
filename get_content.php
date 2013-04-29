@@ -1,5 +1,5 @@
 <?php
-include_once "proxy.php";
+include_once "c_proxy.php";
 include_once "string_work.php";
 class get_content
 {
@@ -16,7 +16,7 @@ class get_content
 	//CURLOPT_POSTFIELDS Все данные, передаваемые в HTTP POST-запросе. Для передачи файла, укажите перед именем файла @, а также используйте полный путь к файлу. Тип файла также может быть указан с помощью формата ';type=mimetype', следующим за именем файла. Этот параметр может быть передан как в качестве url-закодированной строки, наподобие 'para1=val1&para2=val2&...', так и в виде массива, ключами которого будут имена полей, а значениями - их содержимое.
 	private $allSetting;// массив с перечислением всех настроек для cURL
 	private $useProxy; // использовать прокси или нет 1 да 0 нет
-	public $proxy; // прокси для использование в cURL, класс proxy для работы с прокси серверами
+	public $proxy; // прокси для использование в cURL, класс __construct для работы с прокси серверами
 	private $answer; // возвращенный ответ из функций curl_exec() и curl_multi_exec() c curl_multi_getcontent() в зависимости от режима работы класса
 	private $descriptor; // массив с компонентами ['descriptor'] дескриптор инициируемый при помощи функции curl_init() или curl_multi_init() в зависимости от режима работы класса, ['option'][имя опции] значение в value ['idCode'] идентификационный код для дискриптора по которому будут присваиваться файлы cookie, аренда proxy
 	private $descriptorArray; // массив массивов с дескрипторами для работы в режиме multi структура опций и  идентификационных кодов схожа с $descriptor descriptorArray[key]['descriptor']
@@ -82,7 +82,7 @@ public function functionCheck()
 			else echo "Success: The rules have changed for the necessary\n";
 		}
 	}
-	if(!class_exists('proxy')) echo "Warning: proxy class is declared, can not work with proxy\n";
+	if(!class_exists('c_proxy')) echo "Warning: c_proxy class is declared, can not work with proxy\n";
 	if(!class_exists('string_work')) echo "Warning: string_work class is declared, word processing is not possible\n";
 }
 
@@ -138,7 +138,7 @@ public function setUseProxy($value=0)
 		case'1':
 		if(!isset($this->proxy) || !is_object($this->proxy))
 			{
-				$this->proxy=new proxy();
+				$this->proxy=new c_proxy();
 			}
 			break;
 		case'0':
