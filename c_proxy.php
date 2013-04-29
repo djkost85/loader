@@ -1,6 +1,6 @@
 <?php
 include_once "get_content.php";
-include_once "string_work.php";
+include_once "c_string_work.php";
 /**
 Класс для получения актуального списка прокси
 __construct() Конструктор инициализирующий параметры по умолчанию

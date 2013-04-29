@@ -1,6 +1,6 @@
 <?php
 include_once "c_proxy.php";
-include_once "string_work.php";
+include_once "c_string_work.php";
 class get_content
 {
 	private $defaultSettings; //Настройки по умолчанию, если не задано значение, то берет из этого списка
@@ -30,7 +30,7 @@ class get_content
 	private $encodingName;//Имя кодировки в которую преобразовывать ответ если включена декадировка
 	private $encodingNameAnswer; // базовая кадировка текста полученным от донора
 	private $checkAnswer; //Вкл/выкл проверку результата
-	private $stringWork;//Класс для работы с строкой string_work для сжатия, проверки данных
+	private $stringWork;//Класс для работы с строкой c_string_work для сжатия, проверки данных
 	private $modeGetContent;//Тип скачивания контента multi или single
 	private $dirCookie;// Папка где храняться файлы cookie
 
@@ -57,7 +57,7 @@ function get_content()
 	$this->setEncodingName("UTF-8");
 	$this->setCheckAnswer(1);
 	$this->setModeGetContent('single');
-	$this->stringWork =new string_work();
+	$this->stringWork =new c_string_work();
 	$this->clearCookie();
 
 }
@@ -83,7 +83,7 @@ public function functionCheck()
 		}
 	}
 	if(!class_exists('c_proxy')) echo "Warning: c_proxy class is declared, can not work with proxy\n";
-	if(!class_exists('string_work')) echo "Warning: string_work class is declared, word processing is not possible\n";
+	if(!class_exists('c_string_work')) echo "Warning: c_string_work class is declared, word processing is not possible\n";
 }
 
 public function clearCookie($time=172800)
@@ -561,7 +561,7 @@ public function setOptionsToDescriptor(&$descriptor,$optionArray=array())
 		else $this->setOptionToDescriptor($descriptor,$keySetting);
 	}
 	unset($keySetting);
-	if($this->getUseProxy() && !isset($descriptor['option'][CURLOPT_PROXY])) $this->setOptionToDescriptor($descriptor,CURLOPT_PROXY,$this->proxy->getProxy($descriptor['idCode'],$this->stringWork->getDomainName($descriptor['option'][CURLOPT_URL])));
+	if($this->getUseProxy() && !isset($descriptor['option'][CURLOPT_PROXY])) $this->setOptionToDescriptor($descriptor,CURLOPT_PROXY,$this->proxy->getProxy($descriptor['idCode'],$this->stringWork->get_domain_name($descriptor['option'][CURLOPT_URL])));
 	$this->setOptionToDescriptor($descriptor,CURLOPT_COOKIEJAR,$this->getDirCookie().$descriptor['idCode'].".cookie");
 	$this->setOptionToDescriptor($descriptor,CURLOPT_COOKIEFILE,$this->getDirCookie().$descriptor['idCode'].".cookie");
 	if(!$returnSetOpt=curl_setopt_array($descriptor['descriptor'],$descriptor['option']))
@@ -736,7 +736,7 @@ private function prepareContent($answer)
 				break;
 			case 'html':
 				$answer=$this->encodingAnswerText($answer);
-				$answer=$this->stringWork->clearNote($answer,array("/\s+/","/&nbsp;/i","/\n/i","/\r\n/i"));
+				$answer=$this->stringWork->clear_note($answer,array("/\s+/","/&nbsp;/i","/\n/i","/\r\n/i"));
 				break;
 			default:
 				break;
