@@ -1,5 +1,5 @@
 <?php
-include_once "get_content.php";
+include_once "c_get_content.php";
 include_once "c_string_work.php";
 /**
 Класс для получения актуального списка прокси
@@ -80,8 +80,8 @@ function __construct($update=1)
 										"cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
 										"seprox.ru"=>"http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_"
 										);
-	$this->get_content           = new get_content();
-	$this->get_content->setTypeContent('html');
+	$this->get_content           = new c_get_content();
+	$this->get_content->set_type_content('html');
 	$this->set_method_get_proxy("random");
 	$this->dirProxyFile         ="proxy_files";
 	$this->table_proxy_list_db  ="proxy_list";
@@ -149,13 +149,13 @@ public function get_proxy_storage()
 public function get_server_ip()
 {
 	if(isset($this->server_ip)) return $this->server_ip;
-	$this->get_content->setUseProxy(0);
-	$this->get_content->setTypeContent('html');
-	$this->get_content->setModeGetContent('single');
+	$this->get_content->set_use_proxy(0);
+	$this->get_content->set_type_content('html');
+	$this->get_content->set_mode_get_content('single');
 	for($i=0;$i<10;$i++)
 	{
-		$this->get_content->getContent("http://2ip.ru/");
-		$answer=$this->get_content->getAnswer();
+		$this->get_content->get_content("http://2ip.ru/");
+		$answer=$this->get_content->get_answer();
 		$reg="/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
 		if(preg_match($reg, $answer,$match)) break;
 	}
@@ -171,14 +171,14 @@ public function set_need_proxy_cookie($new_need_proxy_cookie=1)
 public function get_anonim_checker($check_url_proxy_array="")
 {
 	if($check_url_proxy_array==="") $check_url_proxy_array=$this->checkURLProxyArray;
-	$get_сontent=new get_content();
-	$get_сontent->setUseProxy(0);
-	$get_сontent->setTypeContent('text');
-	$get_сontent->setModeGetContent('multi');
-	$get_сontent->setCountMultiCURL(1);
-	$get_сontent->setMinSizeAnswer(0);
-	$get_сontent->getContent($check_url_proxy_array);
-	$answer=$get_сontent->getAnswer();
+	$get_сontent=new c_get_content();
+	$get_сontent->set_use_proxy(0);
+	$get_сontent->set_type_content('text');
+	$get_сontent->set_mode_get_content('multi');
+	$get_сontent->set_count_multi_curl(1);
+	$get_сontent->set_min_size_answer(0);
+	$get_сontent->get_content($check_url_proxy_array);
+	$answer=$get_сontent->get_answer();
 	foreach($answer as $key => $value)
 	{
 		foreach($value as $subKey => $sub_value)
@@ -215,12 +215,12 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 	{
 		case "cool-proxy.net":
 		//break;
-			$get_content->setTypeContent("html");
-			if(!$page=$get_content->getContent($value_proxy_list."1"."/sort:working_average/direction:asc"))
+			$get_content->set_type_content("html");
+			if(!$page=$get_content->get_content($value_proxy_list."1"."/sort:working_average/direction:asc"))
 			{
-				$get_content->setInCache(1);
-				$page=$get_content->getContent($value_proxy_list."1"."/sort:working_average/direction:asc");
-				$get_content->setInCache(0);
+				$get_content->set_in_cache(1);
+				$page=$get_content->get_content($value_proxy_list."1"."/sort:working_average/direction:asc");
+				$get_content->set_in_cache(0);
 			}
 			$reg="#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<count_page>\d*)\"#iUm";
 			if(preg_match_all($reg, $page, $matches))
@@ -235,11 +235,11 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 			}
 			for($i=1;$i<$count_page;$i++)
 			{
-				if(!$page=$get_content->getContent($value_proxy_list.$i."/sort:working_average/direction:asc"))
+				if(!$page=$get_content->get_content($value_proxy_list.$i."/sort:working_average/direction:asc"))
 				{
-					$get_content->setInCache(1);
-					$page=$get_content->getContent($value_proxy_list.$i."/sort:working_average/direction:asc");
-					$get_content->setInCache(0);
+					$get_content->set_in_cache(1);
+					$page=$get_content->get_content($value_proxy_list.$i."/sort:working_average/direction:asc");
+					$get_content->set_in_cache(0);
 				}
 				sleep(1);
 				$reg="#<td\s*style=\"text.align.left.\s*font.weight.bold.\">(.*)</td>\s*<td>(\d+)</td>#iUm";
@@ -269,8 +269,8 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 			}
 			break;
 		case "proxyhub.ru":
-			$get_content->setTypeContent("text");
-			$page=$get_content->getContent($value_proxy_list);
+			$get_content->set_type_content("text");
+			$page=$get_content->get_content($value_proxy_list);
 			$reg="/\s*(?<proxy>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),(?<port>\d{1,5}),(?<type_proxy>HTTP|SOCKS5),\s*/iUm";
 			//$iTMP=0;
 			if(preg_match_all($reg, $page, $matches_proxy))
@@ -294,12 +294,12 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 		case "seprox.ru":
 		//break;
 			$i=0;
-			$get_content->setTypeContent("html");
-			if(!$page=$get_content->getContent($value_proxy_list.$i.".html"))
+			$get_content->set_type_content("html");
+			if(!$page=$get_content->get_content($value_proxy_list.$i.".html"))
 			{
-				$get_content->setInCache(1);
-				$page=$get_content->getContent($value_proxy_list.$i.".html");
-				$get_content->setInCache(0);
+				$get_content->set_in_cache(1);
+				$page=$get_content->get_content($value_proxy_list.$i.".html");
+				$get_content->set_in_cache(0);
 			}
 			if(!$page)
 			{
@@ -365,11 +365,11 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 					}//setLog(__FILE__,__LINE__,"Не канает этот IP ".$is_ip);
 				}
 				$i++;
-				if(!$page=$get_content->getContent($value_proxy_list.$i.".html"))
+				if(!$page=$get_content->get_content($value_proxy_list.$i.".html"))
 				{
-					$get_content->setInCache(1);
-					$page=$get_content->getContent($value_proxy_list.$i.".html");
-					$get_content->setInCache(0);
+					$get_content->set_in_cache(1);
+					$page=$get_content->get_content($value_proxy_list.$i.".html");
+					$get_content->set_in_cache(0);
 				}
 				if(!$page)
 				{
@@ -821,10 +821,10 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 	{
 		if(preg_match("/\s*\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(:+\d+)\s*/",$proxy))
 		{
-			$this->get_content->setModeGetContent('single');
-			//$this->get_content->setProxy($proxy);
-			$this->get_content->setOptionToDescriptor($this->get_content->getDescriptor(),CURLOPT_PROXY,$proxy);
-			$this->get_content->setCheckAnswer(0);
+			$this->get_content->set_mode_get_content('single');
+			//$this->get_content->set_proxy($proxy);
+			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor(),CURLOPT_PROXY,$proxy);
+			$this->get_content->set_check_answer(0);
 			$get=array();
 //			if($this->need_anonim_proxy) $get[]="ip=".$this->server_ip;
 //			if($this->need_proxy_cookie) $get[]="cookie";
@@ -840,7 +840,7 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 					$query.=$get[$i];
 				}
 			}
-			$answer_content=$this->get_content->getContent($url);
+			$answer_content=$this->get_content->get_content($url);
 			if(preg_match("/yandex/i",$answer_content))
 			{
 				return $proxy;
@@ -858,16 +858,16 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 	if(is_array($proxy))
 	{
 		$good_proxy=array();
-		$this->get_content->setModeGetContent('multi');
-		$this->get_content->setCountMultiCURL(count($proxy));
+		$this->get_content->set_mode_get_content('multi');
+		$this->get_content->set_count_multi_curl(count($proxy));
 		reset($proxy);
 		for($i=0;current($proxy)!==false;$i++)
 		{
-			$this->get_content->setOptionToDescriptor($this->get_content->getDescriptorArray(),CURLOPT_PROXY,current($proxy),$i);
-			//$this->get_content->setProxy(current($proxy),$i);
+			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor_array(),CURLOPT_PROXY,current($proxy),$i);
+			//$this->get_content->set_proxy(current($proxy),$i);
 			next($proxy);
 		}
-		$this->get_content->setCheckAnswer(0);
+		$this->get_content->set_check_answer(0);
 		$get=array();
 		//if($this->need_anonim_proxy) $get[]="ip=".$this->server_ip;
 		//if($this->need_proxy_cookie) $get[]="cookie";
@@ -883,7 +883,7 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 				$query.=$get[$i];
 			}
 		}
-		$answer_content=$this->get_content->getContent($this->check_url_proxy."?".$query);
+		$answer_content=$this->get_content->get_content($this->check_url_proxy."?".$query);
 		reset($proxy);
 		foreach ($answer_content as $key => $value)
 		{
@@ -908,16 +908,16 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 
 private function check_proxy_array_to_site($proxy,$url,$check_word)
 {
-		$this->get_content->setModeGetContent('multi');
-		$this->get_content->setCountMultiCURL(count($proxy));
+		$this->get_content->set_mode_get_content('multi');
+		$this->get_content->set_count_multi_curl(count($proxy));
 		reset($proxy);
 		for($i=0;current($proxy)!==false;$i++)
 		{
-			$this->get_content->setOptionToDescriptor($this->get_content->getDescriptorArray(),CURLOPT_PROXY,current($proxy),$i);
+			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor_array(),CURLOPT_PROXY,current($proxy),$i);
 			next($proxy);
 		}
-		$this->get_content->setCheckAnswer(0);
-		$answer_content=$this->get_content->getContent($url);
+		$this->get_content->set_check_answer(0);
+		$answer_content=$this->get_content->get_content($url);
 		reset($proxy);
 		$good_proxy=array();
 		foreach ($answer_content as $key => $value)
@@ -953,16 +953,16 @@ private function check_proxy_array_to_site($proxy,$url,$check_word)
 private function check_proxy_array_to_function($proxy,$need_function)
 {
 		if(!$url=$this->get_anonim_checker()) return 0;
-		$this->get_content->setModeGetContent('multi');
-		$this->get_content->setCountMultiCURL(count($proxy));
+		$this->get_content->set_mode_get_content('multi');
+		$this->get_content->set_count_multi_curl(count($proxy));
 		reset($proxy);
 		for($i=0;current($proxy)!==false;$i++)
 		{
-			$this->get_content->setOptionToDescriptor($this->get_content->getDescriptorArray(),CURLOPT_PROXY,current($proxy),$i);
-			//$this->get_content->setProxy(current($proxy),$i);
+			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor_array(),CURLOPT_PROXY,current($proxy),$i);
+			//$this->c_get_content->set_proxy(current($proxy),$i);
 			next($proxy);
 		}
-		$this->get_content->setCheckAnswer(0);
+		$this->get_content->set_check_answer(0);
 		$get=array();
 		if(array_search("anonim",$need_function))
 		{
@@ -981,7 +981,7 @@ private function check_proxy_array_to_function($proxy,$need_function)
 				$query.=$get[$i];
 			}
 		}
-		$answer_content=$this->get_content->getContent($url."?".$query);
+		$answer_content=$this->get_content->get_content($url."?".$query);
 		reset($proxy);
 		$good_proxy=array();
 		foreach ($answer_content as $key => $value)
