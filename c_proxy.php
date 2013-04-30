@@ -2,9 +2,7 @@
 include_once "c_get_content.php";
 include_once "c_string_work.php";
 /**
-Класс для получения актуального списка прокси
-__construct() Конструктор инициализирующий параметры по умолчанию
-update_proxy() Обновить список прокси если это требуется
+
 get_random_proxy() Пулучить случайный прокси из $proxy_list
 get_proxy_list() Получить список прокси в классе
 check_proxy($proxy,$key) проверка прокси по средствам сайта ya.ru $proxy адрес прокси сервера, $key ключ в массиве для получения этого адреса
@@ -13,7 +11,7 @@ checkAllFreeProxy() полная проверка всех адресов, дл�
 get_proxy_list_in_file() получить список прокси из файла
 check_all_proxy()//Проверяет весь список прокси по определенным критериям
 set_method_get_proxy($new_method_get_proxy="random") метод получения прокси из списка random случайное значение, rent аренда адресов, с привязкой к определенному потоку
-get_anonim_checker() // опрос страниц отвечающих за проверку прокси и выбор рабочей
+get_proxy_checker() // опрос страниц отвечающих за проверку прокси и выбор рабочей
 getMyIP() получить IP парсера, используется для проверки анонимности прокси
 free_proxy_list() освобождает файл/таблицу от блокировки для использования другими потоками
 bloc_proxy_list() Блокирует файл/таблицу чтоб обезопасить от вне очередного доступа в многопоточном режиму
@@ -31,69 +29,198 @@ add_proxy($proxy)//добавляет в список прокси, если е�
 **/
 //      Не реализовал поддержку храниения в БД и допилить функции
 //		Необходимо доделать фильтр для необходимого типа прокси need_anonim_proxy и проверку на передачу COOKIE
+/**
+ * Class c_proxy
+ * Класс для получения актуального списка прокси, проверки работоспособности прокси с определенными сайтами
+ * Распределяет адреса между потоками для исключения запросов с одного ip
+ * Проверяет функционал который поддерживает прокси
+ * Скачивает с представленных источников адреса прокси
+ * @author Evgeny Pynykh <bpteam22@gmail.com>
+ * @package get_content
+ * @version 2.0
+ */
 class c_proxy
 {
-	protected $proxy_list;//Массив состоящий из перечня прокси адресов и информации о них
-	/*
-	структура :
-	proxy_list['content'][индекс]["c_proxy"] адрес прокси сервера
-	proxy_list['content'][индекс]["source_proxy"]  источник прокси
-	proxy_list['content'][индекс]["type_proxy"]  протокол прокси HTTP SOCKS5
-	proxy_list['content'][индекс]["renters"]  нформация об арендаторе адреса прокси
-	proxy_list['content'][индекс]["renters"][индекс]["start_rent"] время начала аренды прокси адреса
-	proxy_list['content'][индекс]["renters"][индекс]["renter_code"] код аренды
-	proxy_list['content'][индекс]["renters"][индекс]["user_site"] сайт на котором используется прокси один прокси могут использовать несколько потоков, главное чтоб ресурсы были разные
-	proxy_list["time"] время последнего обновления
-	proxy_list["count"] количество подходящих прокси
-	proxy_list["url"] URL сайта на котором проверяется прокси
-	proxy_list[""check_word""][индекс] Проверочное слово которое должно быть в ответе с сервера- это регулярное выражение
-	proxy_list["need_function"][индекс] Необходимые функции которые должен поддерживать прокси
-	proxy_list["name_list"] Имя лисат этому имени будет соответствовать имя файла
-	*/
-    protected $dir_proxy_file; // Папка где храняться файлы с прокси
-	protected $url_proxy_list;// адреса для скачивания прокси серверов
-	protected $storage_time;//Время актуальности прокси (в секундах)
-	protected $rent_time;//Время аренды прокси (в секундах)
-	protected $get_content; //(класс для тестирования и получения прокси)
-	protected $mode_save_data;//тип сохранения прокси адресов [file] в файл [db] в бд
-	protected $file_proxy_list;//Имя файла в котором храняться адреса прокси
-	protected $name_list;// имя списак прокси
-	protected $f_heandle_proxy_list;// Указатель на файл с списком прокси
-	protected $table_proxy_list_db;//Таблица в БД в которой храниться адреса прокси.
-	//protected $type_proxy;//Тип прокси free бесплатный pay платный
-	protected $need_check_proxy;//Проверять прокси перед использованием?
-	protected $need_anonim_proxy;//Проверяет анонимность прокси
-	protected $need_proxy_cookie;// Проверяет поддержку прокси Cookie
-	protected $server_ip;//IP сервера на котором работает скрипт
-	protected $check_url_proxy;//URL для проверки http заголовков отправляемых прокси
-	protected $address_key_rent;// массив для хранения адресов для ячеек с информацией об аренде, для осуществления быстрого доступа к данным(не реализовал, не придумал как эфективней сделать)
-	protected $method_get_proxy;//Метод получения адресов прокси  "random" получение случайных прокси, безконтрольное распределение адресов "rent" аренда  прокси(через один и то-же прокси не могут два потока опрашивать один сайт)
-	protected $last_use_proxy;// Последний использованый прокси
-	protected $remove_proxy;// можно удалять прокси из списка?
-	protected $access_to_proxy_list;// показатель состояния доступа к файлу или таблице с прокси из этого потока 1 поток занимает 0 не занимает
- 	
-function __construct($update=1)
+
+    /**
+     * Массив состоящий из перечня прокси адресов и информации о них
+     * Структура:
+     * proxy_list['content'][индекс]["proxy"] адрес прокси сервера
+     * proxy_list['content'][индекс]["source_proxy"]  источник прокси
+     * proxy_list['content'][индекс]["type_proxy"]  протокол прокси HTTP SOCKS5
+     * proxy_list['content'][индекс]["renters"]  нформация об арендаторе адреса прокси
+     * proxy_list['content'][индекс]["renters"][индекс]["start_rent"] время начала аренды прокси адреса
+     * proxy_list['content'][индекс]["renters"][индекс]["renter_code"] код аренды
+     * proxy_list['content'][индекс]["renters"][индекс]["user_site"] сайт на котором используется прокси один прокси могут использовать несколько потоков, главное чтоб ресурсы были разные
+     * proxy_list["time"] время последнего обновления
+     * proxy_list["count"] количество подходящих прокси
+     * proxy_list["url"] URL сайта на котором проверяется прокси
+     * proxy_list[""check_word""][индекс] Проверочное слово которое должно быть в ответе с сервера- это регулярное выражение
+     * proxy_list["need_function"][индекс] Необходимые функции которые должен поддерживать прокси
+     * proxy_list["name_list"] Имя лисат этому имени будет соответствовать имя файла
+     * @access protected
+     * @var array
+     */
+    protected $proxy_list;
+    /**
+     * Адрес папки где храняться файлы для работы класса
+     * @access protected
+     * @var string
+     */
+    protected $dir_proxy_file;
+    /**
+     * Адреса для скачивания списков прокси
+     * @access protected
+     * @var array
+     */
+    protected $url_proxy_list;
+    /**
+     * Время актуальности прокси (в секундах) в профиле
+     * @access protected
+     * @var int
+     */
+    protected $storage_time;
+    /**
+     * Максимально время для аренды прокси, после истечения выдается другой адрес
+     * @access protected
+     * @var int
+     */
+    protected $rent_time;
+    /**
+     * Класс для тестирования и скачивания списков прокси
+     * @access protected
+     * @var c_get_content
+     */
+    protected $get_content;
+    /**
+     * Название метода хранения информации о прокси и адреса прокси серверов
+     * В БД db
+     * В текстовых файлах file
+     * @access protected
+     * @var string
+     */
+    protected $mode_save_data;
+    /**
+     * Имя текущего файла с адресами прокси и характеристиками
+     * @access protected
+     * @var string
+     */
+    protected $file_proxy_list;
+    /**
+     * Имя списка с адресами прокси и характеристиками
+     * @access protected
+     * @var string
+     */
+    protected $name_list;
+    /**
+     * Указатель на файл $file_proxy_list
+     * @access protected
+     * @var file_handle
+     */
+    protected $f_heandle_proxy_list;
+    /**
+     * Префикс для таблиц в БД хранящих данные о проски и их конфигурации
+     * @access protected
+     * @var string
+     */
+    protected $prefix_table_db;
+    /**
+     * Флаг для выставления опции проверки прокси черес специально зарезервированный сервер на работоспособность прокси
+     * перед использованием
+     * @access protected
+     * @var bool
+     */
+    protected $need_check_proxy;
+    /**
+     * Флаг для проверки прокси на анонимность
+     * @access protected
+     * @var bool
+     */
+    protected $need_anonim_proxy;
+    /**
+     * Флаг для проверки функции cookie в прокси сервере
+     * @access protected
+     * @var bool
+     */
+    protected $need_proxy_cookie;
+    /**
+     * IP сервера на котором работает скрипт используется для проверки анонимности прокси
+     * @access protected
+     * @var string
+     */
+    protected $server_ip;
+    /**
+     * Основной URL на странуцу проверки функций прокси сервера
+     * @access protected
+     * @var string
+     */
+    protected $check_url_proxy;
+    /**
+     * Набор URL на странуцы проверки функций прокси сервера если не работает основной
+     * @access protected
+     * @var array
+     */
+    protected $check_url_proxy_array;
+    /**
+     * Массив для хранения адресов для ячеек с информацией об аренде, для осуществления быстрого доступа к данным
+     * @access protected
+     * @var array
+     */
+    protected $address_key_rent;
+    /**
+     * Метод получения адресов прокси
+     * "random" получение случайных прокси, безконтрольное распределение адресов
+     * "rent" аренда прокси(через один и то-же прокси не могут два потока опрашивать один сайт)
+     * @access protected
+     * @var string
+     */
+    protected $method_get_proxy;
+    /**
+     * Последний использованый прокси
+     * @access protected
+     * @var string
+     */
+    protected $last_use_proxy;
+    /**
+     * Флаг на разрешение даления прокси из списка
+     * @access protected
+     * @var bool
+     */
+    protected $remove_proxy;
+    /**
+     * Флаг подтверждающий блокировку таблици или файл на чтение и запись для текущего потока
+     * @access protected
+     * @var bool
+     */
+    protected $access_to_proxy_list;
+
+ /**
+  * Конструктор инициализируте переменные значениями по умолчанию
+  * @param bool $update флаг при инициализации обновить принудительно список прокси или нет
+  * @return \c_proxy
+  */
+ function __construct($update=true)
 {
-	$this->storage_time          =86400;
-	$this->rent_time             =3600;
-	$this->url_proxy_list 		=array(
-										"cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
-										"seprox.ru"=>"http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_"
-										);
-	$this->get_content           = new c_get_content();
+	$this->storage_time            =86400;
+	$this->rent_time               =3600;
+	$this->url_proxy_list 		   =array(
+										    "cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
+										    "seprox.ru"=>"http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_"
+										 );
+	$this->get_content             = new c_get_content();
 	$this->get_content->set_type_content('html');
 	$this->set_method_get_proxy("random");
-	$this->dirProxyFile         ="proxy_files";
-	$this->table_proxy_list_db  ="proxy_list";
-	$this->check_url_proxy      ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
-	$this->checkURLProxyArray[] ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
-	$this->checkURLProxyArray[] ="http://free-lance.dyndns.info/proxy_checker/anonimCheck.php";
-	$this->checkURLProxyArray[] ="http://kingnothing.koding.com/proxy_checker/anonimCheck.php";
-	$this->proxy_list           =array();
-	$this->need_check_proxy       =1;
-	$this->last_use_proxy         =0;
-	$this->mode_save_data         ='file';
-	$this->name_list             ='all';
+	$this->dir_proxy_file          ="proxy_files";
+	$this->prefix_table_db         ="proxy_list";
+	$this->check_url_proxy         ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
+	$this->check_url_proxy_array[] ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
+	$this->check_url_proxy_array[] ="http://free-lance.dyndns.info/proxy_checker/anonimCheck.php";
+	$this->check_url_proxy_array[] ="http://kingnothing.koding.com/proxy_checker/anonimCheck.php";
+	$this->proxy_list              =array();
+	$this->need_check_proxy        =1;
+	$this->last_use_proxy          =0;
+	$this->mode_save_data          ='file';
+	$this->name_list               ='all';
 	$this->select_proxy_list($this->name_list);
 	$this->set_mode_save_data("file");
 	$this->set_remove_proxy(1);
@@ -101,13 +228,21 @@ function __construct($update=1)
 	//else $this->proxy_list=$this->get_proxy_list_file_without_lock();
 }
 
+/**
+ * Закрывает все соединения перед уничтожением объекта
+ */
 function __destruct()
 {
 	$this->close_proxy_list();
     unset($this->get_content);
 }
 
-public function update_proxy($force=0)
+/**
+ * Обновляет текущий список прокси адресов если истекло время хранения
+ * @param bool $force Принудительное обновление
+ * @return array Обновленный список прокси
+ */
+public function update_proxy($force=false)
 {
 	$proxy=$this->get_proxy_list();
 	$this->free_proxy_list();
@@ -121,11 +256,17 @@ public function update_proxy($force=0)
 	return $this->proxy_list;
 }
 
-public function set_remove_proxy($new_remove_proxy=1)
+    /**
+     * @param bool $new_remove_proxy
+     */
+public function set_remove_proxy($new_remove_proxy)
 {
 	$this->remove_proxy=$new_remove_proxy;
 }
 
+    /**
+     * @param bool $new_access_to_proxy_list
+     */
 public function set_access_to_proxy_list($new_access_to_proxy_list)
 {
 	$this->access_to_proxy_list=$new_access_to_proxy_list;
@@ -141,11 +282,19 @@ public function get_remove_proxy()
 	return $this->remove_proxy;
 }
 
+    /**
+     * Получение абсолютного адреса к папке гда лежат файлы конфигурации прокси листов
+     * @return string
+     */
 public function get_proxy_storage()
 {
 	return dirname(__FILE__)."/".$this->dir_proxy_file."/";
 }
 
+    /**
+     * Возвращает ip сервера с которого запущен скрипт или false
+     * @return bool|string
+     */
 public function get_server_ip()
 {
 	if(isset($this->server_ip)) return $this->server_ip;
@@ -159,18 +308,26 @@ public function get_server_ip()
 		$reg="/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
 		if(preg_match($reg, $answer,$match)) break;
 	}
-	if(!$match['ip']) return 0;
+	if(!$match['ip']) return false;
 	return $this->server_ip=$match['ip'];
 }
 
-public function set_need_proxy_cookie($new_need_proxy_cookie=1)
+    /**
+     * @param bool $new_need_proxy_cookie
+     */
+public function set_need_proxy_cookie($new_need_proxy_cookie)
 {
 	$this->need_proxy_cookie=$new_need_proxy_cookie;
 }
 
-public function get_anonim_checker($check_url_proxy_array="")
+    /**
+     * Поиск сервера из каталога для проверки функций прокси
+     * @param string $check_url_proxy_array  url сервера для проверки функций прокси, если не работает выберает другой из каталога
+     * @return string возвращает рабочий url для проверки прокси
+     */
+public function get_proxy_checker($check_url_proxy_array="")
 {
-	if($check_url_proxy_array==="") $check_url_proxy_array=$this->checkURLProxyArray;
+	if($check_url_proxy_array==="") $check_url_proxy_array=$this->check_url_proxy_array;
 	$get_сontent=new c_get_content();
 	$get_сontent->set_use_proxy(0);
 	$get_сontent->set_type_content('text');
@@ -193,6 +350,10 @@ public function get_anonim_checker($check_url_proxy_array="")
 	exit(__FILE__." no checker");
 }
 
+    /**
+     * Загружает список прокси из внешних источников
+     * @return array массив с адресами прокси
+     */
 public function download_proxy()
 {
 	$proxy['content']=array();
@@ -207,6 +368,12 @@ public function download_proxy()
 	return $proxy;
 }
 
+    /**
+     * Загружает из канкретного сайта списки прокси
+     * @param string $key_proxy_list название сайта источника прокси адресов
+     * @param string $value_proxy_list ссыка на страницу с прокси
+     * @return array прокси адресы
+     */
 public function download_proxy_site($key_proxy_list,$value_proxy_list)
 {
 	$get_content= new c_get_content();
@@ -383,6 +550,11 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 	return $proxy;
 }
 
+    /**
+     * Устанавливает фильтр для необходимых прокси
+     * @param string $new_name_type_proxy протокол через который работает прокси
+     * @return string имя протокола
+     */
 private function set_name_type_proxy($new_name_type_proxy="http")
 {
 	if(preg_match("#https#i", $new_name_type_proxy))
@@ -403,6 +575,9 @@ private function set_name_type_proxy($new_name_type_proxy="http")
 	}
 }
 
+    /**
+     * @param string $new_method_get_proxy тип получения прокси адреса
+     */
 public function set_method_get_proxy($new_method_get_proxy="random")
 {
 	switch ($new_method_get_proxy)
@@ -420,12 +595,20 @@ public function set_method_get_proxy($new_method_get_proxy="random")
 	}
 }
 
-public function set_need_anonim_proxy($new_need_anonim_proxy=1)
+    /**
+     * Установка фильтра на анонимность прокси
+     * @param bool $new_need_anonim_proxy флаг для фильрации функций прокси
+     */
+public function set_need_anonim_proxy($new_need_anonim_proxy=true)
 {
 	$this->need_anonim_proxy=$new_need_anonim_proxy;
 }
 
-public function set_need_check_proxy($new_need_check_proxy=1)
+    /**
+     * Установка флага на проверку прокси перед использованием
+     * @param bool $new_need_check_proxy
+     */
+public function set_need_check_proxy($new_need_check_proxy=true)
 {
 	$this->need_check_proxy=$new_need_check_proxy;
 }
@@ -435,47 +618,70 @@ public function get_url_proxy_list()
 	return $this->url_proxy_list;
 }
 
+    /**
+     * Флаг метода хранения прокси
+     * @param string $new_mode_save_data тип хранения прокси file|db
+     * @return bool
+     */
 public function set_mode_save_data($new_mode_save_data)
 {
 	switch ($new_mode_save_data)
 	{
 		case 'file':
 			$this->mode_save_data="file";
+            return true;
 			break;
 		case 'db':
 			$this->mode_save_data="db";
+            return true;
 			break;
 		
 		default:
-			return 0;
+			return false;
 			break;
 	}
 }
 
-public function open_proxy_list()
+    /**
+     * Открывает прокси лист
+     * @param string $proxy_list имя прокси листа, по умолчанию текущий прокси лист
+     */
+public function open_proxy_list($proxy_list='')
 {
 	$this->close_proxy_list();
 	$this->f_heandle_proxy_list=fopen($this->file_proxy_list,"c+");
 }
 
+    /**
+     *Закрывает текущий прокси лист
+     */
 public function close_proxy_list()
 {
 	$this->free_proxy_list();
-	@fclose($this->f_heandle_proxy_list);
-	$this->f_heandle_proxy_list=NULL;
+	fclose($this->f_heandle_proxy_list);
+    unset($this->f_heandle_proxy_list);
 	unset($this->proxy_list);
 }
 
+    /**
+     * Освобождает прокси лист от блокировки текущим процессом
+     * @return bool
+     */
 public function free_proxy_list()
 {
-	if(!$this->get_access_to_proxy_list()) return 1; // проверяет занят ли этим потоком файл?
+	if(!$this->get_access_to_proxy_list()) return true; // проверяет занят ли этим потоком файл?
 	flock($this->f_heandle_proxy_list,LOCK_UN);
 	$this->set_access_to_proxy_list(0);
+    return false;
 }
 
+    /**
+     * Блокирует прокси лист от остальных потоков
+     * @return bool
+     */
 public function bloc_proxy_list()
 {
-	if($this->get_access_to_proxy_list()) return 1; // проверяет не блокирован ли этим потоком файл?
+	if($this->get_access_to_proxy_list()) return true; // проверяет не блокирован ли этим потоком файл?
 	do{
 		if(flock($this->f_heandle_proxy_list,LOCK_EX))
 		{
@@ -485,8 +691,13 @@ public function bloc_proxy_list()
 		setLog(__FILE__,__LINE__,"файл занят");
 		sleep(1);
 		}while(true);
+    return false;
 }
 
+    /**
+     * Возвращает случайный прокси из текцщего списка
+     * @return bool|string
+     */
 public	function get_random_proxy()
 {
 	$proxy_list=$this->get_proxy_list_file_without_lock();
@@ -517,12 +728,20 @@ public	function get_random_proxy()
 	}
 	return "";
 }
-// Функция для обхода блокировки файла с прокси, использовать только для чтения
+
+    /**
+     * Возвращает список прокси не взирая на блокировку (только для чтения)
+     * @return array список прокси адресов
+     */
 public function get_proxy_list_file_without_lock()
 {
 	return json_decode(file_get_contents($this->file_proxy_list),true);
 }
 
+    /**
+     * Открывает текущий прокси лист с блокировкой
+     * @return array прокси лист
+     */
 public function get_proxy_list_in_file()
 {
 	$this->bloc_proxy_list();
@@ -531,6 +750,12 @@ public function get_proxy_list_in_file()
 	return $this->proxy_list;
 }
 
+    /**
+     * Выдает потоку прокси адрес
+     * @param string $rent_code код потока арендатора
+     * @param string $site_for_use сайт на который будут посылать запросы
+     * @return bool|string
+     */
 public function get_proxy($rent_code="",$site_for_use="")
 {
 	switch ($this->method_get_proxy)
@@ -540,38 +765,48 @@ public function get_proxy($rent_code="",$site_for_use="")
 			return $this->last_use_proxy;
 			break;
 		case 'rent':
-			if($rent_code=="" || $site_for_use=="") return 0;
+			if($rent_code=="" || $site_for_use=="") return false;
 			$this->last_use_proxy=$this->get_rented_proxy($rent_code,$site_for_use);
 			return $this->last_use_proxy;
 			break;
 		
 		default:
-			return 0;
+			return false;
 			break;
 	}
 }
 
-public function add_proxy($proxy,$rent_code="",$site_for_use="")
+    /**
+     * Добавляет в текущий список новый прокси адрес
+     * @param string $proxy адрес прокси сервера
+     * @param string $type_proxy протокол прокси
+     * @param string $source_proxy источник прокси
+     * @return bool
+     */
+public function add_proxy($proxy,$type_proxy="http",$source_proxy="")
 {
 	if(!$result=$this->search_proxy_in_list($proxy))
 	{
 		$tmp_array['proxy']=trim($proxy);
-		$tmp_array["source_proxy"]='none';
-		$tmp_array["type_proxy"]=$this->set_name_type_proxy('http');
+		$tmp_array["source_proxy"]=$source_proxy;
+		$tmp_array["type_proxy"]=$type_proxy;
 		$this->proxy_list['content'][]=$tmp_array;
 		$this->save_proxy_list($this->proxy_list);
 	}
-	if($rent_code)
-	{
-		$this->set_rented_proxy($rent_code,$site_for_use,$proxy);
-		$this->save_proxy_list($this->proxy_list);
-	}
+    else return false;
 }
 
+    /**
+     * Получить в аренду прокси адрес
+     * @param $rent_code код арендатора
+     * @param $site_for_use сайт на который будут поступать запросы
+     * @param bool $key_address адрес для быстрого поиска прокси для снятия аренды или удаления
+     * @return bool|string
+     */
 public function get_rented_proxy($rent_code,$site_for_use,$key_address=false)
 {
 	//Максимальное время ожидания сутки
-	for($i=0;$i<144;$i++)
+	for($i=0;$i<1440;$i++)
 	{
 		$this->proxy_list=$this->get_proxy_list_in_file();
 		if($ip_proxy=$this->search_rental_address($rent_code,$site_for_use,$key_address)) return $ip_proxy["proxy"];
@@ -583,12 +818,19 @@ public function get_rented_proxy($rent_code,$site_for_use,$key_address=false)
 		}
 		// все прокси заняты, записываем изменения и освобождаем файл. ждем когда освободится
 		$this->save_proxy_list($this->proxy_list);
-		setLog(__FILE__,__LINE__," All Proxy busy");
-		sleep(300);
+		//setLog(__FILE__,__LINE__," All Proxy busy");
+		sleep(60);
 	}
 	return 0;
 }
 
+    /**
+     * Поиск прокси по коду арендатора
+     * @param string $rent_code код арендатора
+     * @param string $site_for_use сайт на который отправляют запросы черз прокси
+     * @param bool|array $key_address адрес для быстрого доступа
+     * @return bool|string
+     */
 public function search_rental_address($rent_code,$site_for_use,$key_address=false)
 {
 	$this->proxy_list=$this->get_proxy_list_in_file();
@@ -601,44 +843,49 @@ public function search_rental_address($rent_code,$site_for_use,$key_address=fals
 			// проверяем время аренды прокси
 			if($key_address["start_rent"]>$end_term_rent) return $this->proxy_list['content'][$key_address['key_content']]["proxy"];
             else
-                {
-                    $this->remove_rent($key_address['key_content'],$key_address['key_renters']);
-                    return 0;
-                }
+            {
+                $this->remove_rent($key_address['key_content'],$key_address['key_renters']);
+                return false;
             }
         }
-        $end_term_rent=time()-$this->rent_time;
-        // Если нет , то ищем в ручную
-        foreach ($this->proxy_list['content'] as $key_content => $value_content)
+    }
+    $end_term_rent=time()-$this->rent_time;
+    // Если нет , то ищем в ручную
+    foreach ($this->proxy_list['content'] as $key_content => $value_content)
+    {
+        //$this->proxy_list['content'][$key_content]["renters"] === $value_content["renters"]
+        foreach($value_content["renters"] as $key_renters => $value_renters)
         {
-            //$this->proxy_list['content'][$key_content]["renters"] === $value_content["renters"]
-            foreach($value_content["renters"] as $key_renters => $value_renters)
+            //$this->proxy_list['content'][$key_content]["renters"][$key_renters]["renter_code"] === $valueRentCode["renter_code"]
+            //$this->proxy_list['content'][$key_content]["renters"][$key_renters]["user_site"] === $valueRentCode["user_site"]
+            if($value_renters["renter_code"]==$rent_code)// && $value_renters["user_site"]==$site_for_use)
             {
-                //$this->proxy_list['content'][$key_content]["renters"][$key_renters]["renter_code"] === $valueRentCode["renter_code"]
-                //$this->proxy_list['content'][$key_content]["renters"][$key_renters]["user_site"] === $valueRentCode["user_site"]
-                if($value_renters["renter_code"]==$rent_code)// && $value_renters["user_site"]==$site_for_use)
-                {
-                    // проверяем время аренды прокси
-				if($value_renters["start_rent"]>$end_term_rent)
-				{
-					$return_array["proxy"]=$value_content["proxy"];
-					$return_array["key_content"]=$key_content;
-					$return_array["key_renters"]=$key_renters;
-					return $return_array;
-				}
-				else
-				{
-					$this->remove_rent($key_content,$key_renters);
-					return 0;
-				}
-			}
-		}
-		unset($value_renters);
+                // проверяем время аренды прокси
+		        if($value_renters["start_rent"]>$end_term_rent)
+		        {
+		        	$return_array["proxy"]=$value_content["proxy"];
+		        	$return_array["key_content"]=$key_content;
+		        	$return_array["key_renters"]=$key_renters;
+		        	return $return_array;
+		        }
+		        else
+		        {
+		        	$this->remove_rent($key_content,$key_renters);
+		        	return false;
+		        }
+	        }
+	   }
+	   unset($value_renters);
 	}
 	unset($value_content);
-	return 0;
+	return false;
 }
 
+    /**
+     * Поиск адрес прокси в текущем списке
+     * @param string $proxy адрес прокси
+     * @return array|bool
+     */
 public function search_proxy_in_list($proxy)
 {
 	$this->proxy_list=$this->get_proxy_list_in_file();
@@ -652,9 +899,16 @@ public function search_proxy_in_list($proxy)
 		}
 	}
 	unset($value_content);
-	return 0;
+	return false;
 }
 
+    /**
+     * Ставит пометку в списке прокси что этот прокси арендован
+     * @param $rent_code код арендатора
+     * @param $site_for_use сайт на который будут посылать запросы через прокси
+     * @param string $proxy прокси адрес
+     * @return array|bool
+     */
 protected function set_rented_proxy($rent_code,$site_for_use,$proxy="")
 {
 	$this->proxy_list=$this->get_proxy_list_in_file();
@@ -696,14 +950,19 @@ protected function set_rented_proxy($rent_code,$site_for_use,$proxy="")
 			}
 		}
 		unset($value_content);
-		return 0;
+		return false;
 	}
 }
 
+    /**
+     * Удаляет аренды с всех прокси для текущего арендатора
+     * @param string $rent_code код арендатора
+     * @return bool
+     */
 public function remove_all_rent_from_code($rent_code)
 {
 	$this->proxy_list=$this->get_proxy_list_in_file();
-	if(!isset($this->proxy_list['content'])) return 0;
+	if(!isset($this->proxy_list['content'])) return false;
 	foreach ($this->proxy_list['content'] as $key_content => $value_content)
 	{
 		//$this->proxy_list['content'][$key_content]["renters"] === $value_content["renters"]
@@ -720,8 +979,12 @@ public function remove_all_rent_from_code($rent_code)
 	}
 	unset($value_content);
 	$this->save_proxy_list($this->proxy_list);
+    return true;
 }
 
+    /**
+     * Убирает все аренды из текущего списка прокси
+     */
 public function remove_all_rent()
 {
 	$this->proxy_list=$this->get_proxy_list_in_file();
@@ -743,24 +1006,46 @@ public function remove_all_rent()
 	$this->save_proxy_list($this->proxy_list);
 }
 
-public function remove_rent($key_content,$key_renters,$without_saving=0)
+    /**
+     * Удаляет и списка прокси аренду по ключу в списке и коду арендатора
+     * @param int $key_content ключ в списке
+     * @param int $key_renters ключ арендатора в списке
+     * @param bool $without_saving с сохранением в файл
+     * @return bool
+     */
+public function remove_rent($key_content,$key_renters,$without_saving=false)
 {
 	if(!count($this->proxy_list)) $this->proxy_list=$this->get_proxy_list_in_file();
 	if(isset($this->proxy_list['content'][$key_content]["renters"][$key_renters]))
 	{
 		unset($this->proxy_list['content'][$key_content]["renters"][$key_renters]);
-	}
-	if(!$without_saving) $this->save_proxy_list($this->proxy_list);
+        if(!$without_saving) $this->save_proxy_list($this->proxy_list);
+        return true;
+    }
+	else return false;
 }
 
+    /**
+     * Убирает аренду по коду арендатора и сайту на который посылают запрос
+     * @param $rent_code код арендатора
+     * @param $site_for_use сайт на который посылают запросы
+     * @return bool
+     */
 public function remove_rent_to_code_site($rent_code,$site_for_use)
 {
 	if($result_array=$this->search_rental_address($rent_code,$site_for_use))
 	{
 		$this->remove_rent($result_array['key_content'],$result_array['key_renters']);
+        return true;
 	}
+    else return false;
 }
 
+    /**
+     * Удаляет прокси из текущего списка
+     * @param string $proxy прокси адрес
+     * @return bool
+     */
 public function remove_proxy_in_list($proxy)
 {
 	if($this->remove_proxy)
@@ -776,15 +1061,18 @@ public function remove_proxy_in_list($proxy)
 		}
 		unset($value_content);
 		$this->save_proxy_list($this->proxy_list);
-		return 1;
+		return true;
 	}
 	else
 	{
-		return 0;
+		return false;
 	}
 }
 
-public	function get_proxy_list()
+    /**
+     * @return array|bool
+     */
+    public	function get_proxy_list()
 {
 	if(isset($this->proxy_list) && count($this->proxy_list) && ($this->proxy_list['time']>(time()-3600)))	return $this->proxy_list;
 	switch ($this->mode_save_data)
@@ -792,7 +1080,7 @@ public	function get_proxy_list()
 		case 'file':
 			if(!$proxy=$this->get_proxy_list_in_file())
 			{
-				return 0;
+				return false;
 			}
 			return $this->proxy_list=$proxy;
 			break;
@@ -809,13 +1097,21 @@ public function get_last_use_proxy()
 {
 	return $this->last_use_proxy;
 }
+/* TODO: Обязательный рефакторинг функции check_proxy */
+    /**
+     * Проверяет прокси адрес
+     * @param string|array $proxy прокси адрес
+     * @param string $method ХЗ
+     * @param array $data ХЗ
+     * @return array|int|string
+     */
 public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.ru"))//function
 {
 	if(!$this->need_check_proxy) return $proxy;
 	if($method=='function')
 	{
 		$this->get_server_ip();
-		if(!$url=$this->get_anonim_checker()) return 0;
+		if(!$url=$this->get_proxy_checker()) return false;
 	}
 	if(is_string($proxy))
 	{
@@ -847,12 +1143,12 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 		else
 		{
-			return 0;
+			return false;
 		}
 	}
 	if(is_array($proxy))
@@ -900,12 +1196,12 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 		}
 		else
 		{
-			return 0;
+			return false;
 		}
 
 	}
-} 
-
+}
+    /* TODO: Обязательный рефакторинг функции check_proxy_array_to_site */
 private function check_proxy_array_to_site($proxy,$url,$check_word)
 {
 		$this->get_content->set_mode_get_content('multi');
@@ -949,10 +1245,10 @@ private function check_proxy_array_to_site($proxy,$url,$check_word)
 			return 0;
 		}
 }
-
+    /* TODO: Обязательный рефакторинг функции check_proxy_array_to_function */
 private function check_proxy_array_to_function($proxy,$need_function)
 {
-		if(!$url=$this->get_anonim_checker()) return 0;
+		if(!$url=$this->get_proxy_checker()) return 0;
 		$this->get_content->set_mode_get_content('multi');
 		$this->get_content->set_count_multi_curl(count($proxy));
 		reset($proxy);
@@ -1003,7 +1299,11 @@ private function check_proxy_array_to_function($proxy,$need_function)
 		}
 }
 
-public function save_proxy_list($proxy_list='')
+    /**
+     * Сохраняет прокси список
+     * @param array|bool $proxy_list сохраняемый список прокси
+     */
+public function save_proxy_list($proxy_list=false)
 {
 	if(!is_array($proxy_list)) $proxy_list=$this->proxy_list;
 	/*if(!isset($proxy_list['content']))
@@ -1066,7 +1366,11 @@ public function save_proxy_list($proxy_list='')
 			break;
 	}
 }
-//количество прокси пришедшие с определенных источников
+
+    /**
+     * Считает количество прокси пришедшие с определенных источников
+     * @return array
+     */
 private function count_proxy_in_source()
 {
 	foreach ($this->proxy_list['content'] as $key => $value)
@@ -1083,6 +1387,13 @@ private function count_proxy_in_source()
 	return $result;
 }
 
+    /**
+     * Создает профиль прокси адресов
+     * @param string $name_list название
+     * @param string $check_url проверочный URL
+     * @param array $check_word_array Проверочные регулярные выражения
+     * @param array $need_function_array Перечень поддерживаемых функций
+     */
 public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_word_array=array("#yandex#iUm"),$need_function_array=array())
 {
 	$this->close_proxy_list();
@@ -1104,7 +1415,11 @@ public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_wo
 	$this->create_proxy_list_buk($proxy_list);
 	$this->save_proxy_list($proxy_list);
 }
-
+/* TODO: Добавить время в имя файла копии для сохранения нескольких резервных копий */
+    /**
+     * Создает резервную копию текущего профиля
+     * @param $proxy_list список прокси
+     */
 protected function create_proxy_list_buk($proxy_list)
 {
 	$json_proxy=json_encode($proxy_list);
@@ -1116,6 +1431,10 @@ protected function create_proxy_list_buk($proxy_list)
 	fclose($fh);
 }
 
+    /*TODO: Добавить востановление по дате и имени */
+    /**
+     * Востанавливает профиль из резервной копии
+     */
 protected function restore_proxy_list_from_buk()
 {
 	$buk_file=$this->file_proxy_list.".buk";
@@ -1127,7 +1446,11 @@ protected function restore_proxy_list_from_buk()
 }
 
 
-public function delete_proxy_list($name_list)
+    /**
+     * Удаляет прокси лист
+     * @param $name_list имя прокси листа
+     */
+    public function delete_proxy_list($name_list)
 {
 	if(file_exists($this->get_proxy_storage().$name_list.".proxy"))
 	{
@@ -1135,6 +1458,10 @@ public function delete_proxy_list($name_list)
 	}
 }
 
+    /**
+     * Очищает прокси лист от прокси, но оставляет конфигурацию необходимых функций
+     * @param $name_list имя прокси листа
+     */
 public function clear_proxy_list($name_list)
 {
 	$this->select_proxy_list($name_list);
@@ -1142,13 +1469,23 @@ public function clear_proxy_list($name_list)
 	$this->save_proxy_list($this->proxy_list);
 }
 
-public function set_update_proxy_list($name_list,$value=1)
+    /**
+     * Включает регулярное обновление прокси списка или выключает
+     * @param $name_list имя прокси списка
+     * @param bool $value вкл./выкл.
+     */
+public function set_update_proxy_list($name_list,$value=true)
 {
 	$this->select_proxy_list($name_list);
 	$this->proxy_list['need_update']=$value;
 	$this->save_proxy_list($this->proxy_list);
 }
 
+    /**
+     * Генерация списка прокси адресов собраных из разных источников в один список с уникальными адресами
+     * @param array $proxy_array список прокси
+     * @return array
+     */
 private function get_unique_proxy_ip($proxy_array)
 {
 	foreach ($proxy_array['content'] as $key => $value)
@@ -1172,7 +1509,13 @@ private function get_unique_proxy_ip($proxy_array)
 	return $proxy_array;
 }
 
-public function update_proxy_list($name_list,$force=0)
+    /**
+     * Обновляет прокси лист
+     * @param $name_list имя прокси листа
+     * @param bool $force Принудительное обновление
+     * @return array обновленный список прокси
+     */
+public function update_proxy_list($name_list,$force=false)
 {
 	if($name_list=='all')
 	{
@@ -1213,6 +1556,11 @@ public function update_proxy_list($name_list,$force=0)
 	return $this->proxy_list;
 }
 
+    /**
+     * Выбор прокси листа
+     * @param string $name_list имя прокси листа
+     * @return array выбранный прокси лист
+     */
 public function select_proxy_list($name_list)
 {
 	$this->close_proxy_list();
@@ -1238,6 +1586,10 @@ public function select_proxy_list($name_list)
 	return $this->proxy_list;
 }
 
+    /**
+     * Возвращает имена всех профилей прокси списков
+     * @return array перечень имен списков прокси
+     */
 public function get_all_name_proxy_list()
 {
 	$file_list=glob($this->get_proxy_storage()."*.proxy");
@@ -1252,6 +1604,10 @@ public function get_all_name_proxy_list()
 	return $proxy_list_array;
 }
 
+    /**
+     * Проверяет список прокси на необходимые функции заданые в этом списке
+     * @param string $name_list имя прокси профиля
+     */
 private function check_proxy_list($name_list="")
 {
 	if(!$name_list) $name_list=$this->name_list;
@@ -1260,6 +1616,11 @@ private function check_proxy_list($name_list="")
 	if(count($this->proxy_list['need_function']))$this->check_proxy_to($name_list,'need_function');
 }
 
+    /**
+     * Проверяет прокси на конкретную функцию
+     * @param string $name_list имя списка
+     * @param string $method необходимая функция
+     */
 private function check_proxy_to($name_list="",$method="check_word")
 {
 	if(!$name_list) $name_list=$this->name_list;
@@ -1311,6 +1672,9 @@ private function check_proxy_to($name_list="",$method="check_word")
 	$this->save_proxy_list($this->proxy_list);
 }
 
+    /**
+     * Проверяет все прокси на работоспособность
+     */
 public function check_all_proxy()
 {
 	setLog(__FILE__,__LINE__," check All Proxy ");
