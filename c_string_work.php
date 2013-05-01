@@ -1,19 +1,6 @@
 <?php
 include_once "c_proxy.php";
 include_once "c_get_content.php";
-/*
-Класс для обработки строки и извлечения необходимой информации используя набор фильтров
-Методы
-__construct($text) Конструктор в качестве параметра принимает текст для обработки
-divided_text($text, $part_size,$offset)//Разбивает строку по предложениям для обработки через переводчик или синонимайзер в котором есть лимит на размер строки. $text - обрабатываемый текст, $part_size - максимальный размер строки для обрезки, $offset - максимальное количество частей для нарезки.
-[НЕ РЕАЛИЗОВАННО] clear_note($text,$rep_text_array) уберает из текста не нужные знаки. $text обрабатываемый текст, $rep_text_array массив состоящий из стираемых элементов.
-encrypt_tag($text,$reg) заменяет необходимый текст(HTML теги) на хеш для обработки через переводчик или синонимайзер и тд. $text обрабатываемый текст, $reg регулярное выражение по которому выбераются теги.
-decrypt_tag($text,$cript_tag_array) Возвращают обратно в текст HTML теги после обработки функцией encrypt_tag(). $text текст с зашифроваными частями, $cript_tag_array набор асоциаций, тегов и хешей.
-between_tag($text,$start_tag,$without_tag) вырезает контент в пределах тега. $text текст в котором осуществляется поиск, $start_tag искомый тег, $without_tag оставлять тег или без него.
-get_domain_name($url) возвращает доменное имя сайта без субдоменов и структуры каталогов
-[НЕ РЕАЛИЗОВАННО] compareText($text1,$text2,$register=1) ищет различия в строках между $text1 и $text2, $register обращать внимание на регистр или нет.
-*/
-
 /**
  * Class c_string_work
  * Класс для обработки строки и извлечения необходимой информации используя набор фильтров
@@ -32,12 +19,6 @@ class c_string_work
      */
     private $cript_tag_array;
     /**
-     * Массив состоящий из частей одного большого текста разбитый на примерно равные части не более заданых знаков,
-     * с сохранением структуры предложений.
-     * @var array
-     */
-    private $divided_text_array;
-    /**
      * Текст который обрабатывается в классе
      * @var string
      */
@@ -55,10 +36,9 @@ function __construct($text="")
      * @param int $offset максимальное количество частей 0=бесконечно
      * @return array
      */
-public function divided_text($text="", $part_size=4900,$offset=0)
+public static function divided_text($text="", $part_size=4900,$offset=0)
 {	
-	if($text=="")$text=$this->text;
-	$this->divided_text_array=array();
+	$divided_text_array=array();
 	if(strlen($text)>$part_size)
 	{
 		for($i=0;($i<$offset || $offset==0) && $text;$i++)
@@ -66,15 +46,15 @@ public function divided_text($text="", $part_size=4900,$offset=0)
 		    $part_text=substr($text,0,$part_size);
 		    preg_match("/^(.*\.)[^\.]*$/i",$part_text,$match);
 		    if(strlen($match[1])==0) break;
-		    $this->divided_text_array[]=$match[1];
+		    $divided_text_array[]=$match[1];
 		    $text=trim(str_replace($match[1],"",$text));
 		}		
 	}
 	else
 	{
-		$this->divided_text_array[]=$text;
+		$divided_text_array[]=$text;
 	}
-	return $this->divided_text_array;
+	return $divided_text_array;
 }
     /**
      * Стирание спец. символов, двойных и более пробелов, табуляций и переводов строки
@@ -82,12 +62,11 @@ public function divided_text($text="", $part_size=4900,$offset=0)
      * @param array $rep_text_array массив регулярных выражений для выполнения
      * @return string
      */
-    public function clear_note($text="",$rep_text_array=array("/\s+/"))
+public static function clear_note($text="",$rep_text_array=array("/\s+/"))
 {
-		if($text==="")$text=$this->text;
-		if(!is_array($rep_text_array) && is_string($rep_text_array)) $text=preg_replace($rep_text_array, " ", $text);
-		else foreach ($rep_text_array as $key => $value) $text=preg_replace($value, " ", $text);
-		return $this->text=$text;
+		if(is_string($rep_text_array)) $text=preg_replace($rep_text_array, " ", $text);
+		elseif(is_array($rep_text_array)) foreach ($rep_text_array as $value) $text=preg_replace($value, " ", $text);
+		return $text;
 }
     /**
      * Заменяет HTML код  на хеши, чтоб при пропуске через спец программы не потерять теги(синонимайзей, переводчик)
@@ -125,17 +104,15 @@ public function decrypt_tag($text="",$cript_tag_array=array())
 	return $this->text=$text;
 }
 
-/*TODO: Вынести функцию в parse_url*/
     /**
      * Вытаскивает доменное имя из url
      * @param $url исходный адрес
      * @return bool|string
      */
-public function get_domain_name($url)
+public static function get_domain_name($url)
 {
-	$reg="/(?:http:\/\/|\s*)[-\w\.]*(?<domain>(?:[-\w]+)\.+(?:[-\w]+))(?:\/|$|\?)/iU";
-	if(preg_match($reg, $url,$match)) return $match['domain'];
-	else return 0;
+	$url_data=c_string_work::parse_url($url);
+    return $url_data['host'];
 }
 
 public function get_cript_tag_array()
@@ -162,20 +139,12 @@ public function set_text($text)
      */
 public static function between_tag($text="",$start_tag='<div class="xxx">',$without_tag=true)
 {
-	$count=0;
-	//Проверяем тег это или нет
 	if(!preg_match('#<(?<tag>\w+)[^>]*>#im', $start_tag,$tag)) return "";
-	// Есть ли параметры
 	if(preg_match('#<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>#im', $start_tag))
 	{
-		// Выдергиваем все параметры
-		$countParametr=preg_match_all("#(?<parametr>[\w-]+=[\"\']+[^\'\"]+[\"\']+)#im", $start_tag, $matches);
-		// Составляем регулярное выражение
-		$reg="#<".$tag["tag"]."\s*";
-		//var_dump($matches["parametr"]);
-		do{
-			$reg.="[^>]*".current($matches["parametr"])."[^>]*";
-		}while(next($matches["parametr"]));
+		preg_match_all("#(?<parametr>[\w-]+=[\"\']+[^\'\"]+[\"\']+)#im", $start_tag, $matches);
+		$reg="#<".preg_quote($tag["tag"])."\s*";
+        foreach ($matches['parametr'] as $value) $reg.="[^>]*".preg_quote($value)."[^>]*";
 		$reg.=">#im";
 		if(!preg_match($reg,$text,$match)) return "";
 		$start_tag=$match[0];
@@ -186,11 +155,13 @@ public static function between_tag($text="",$start_tag='<div class="xxx">',$with
 		preg_match('/<(?<tag>'.preg_quote($tag[1]).')[^>]*>/i', $text, $tag);
 	}
 	unset($match);
+    unset($matches);
 	$tag_name=$tag["tag"];
 	unset($tag);
 	$open_tag="<".$tag_name;
 	$close_tag="</".$tag_name;
 	$text=substr($text,strpos($text,$start_tag));
+    $count_open_tag=0;
 	$pos_end=0;
 	for($i=0;$i<1000;$i++)
 	{
@@ -199,39 +170,32 @@ public static function between_tag($text="",$start_tag='<div class="xxx">',$with
 		if($pos_open_tag===false)
 		{
 			$pos_open_tag=$pos_close_tag+1;
-			//$pos_end+=$pos_close_tag+1-$pos_end;
-			//break;
 		}
 		if($pos_open_tag<$pos_close_tag)
 		{
-			$count++;
+			$count_open_tag++;
 			$pos_end+=$pos_open_tag+1-$pos_end;
 		}
 		else
 		{
-			$count--;
+			$count_open_tag--;
 			$pos_end+=$pos_close_tag+1-$pos_end;
 		}
-		if(!$count)
+		if(!$count_open_tag)
 		{
 			break;
 		}
 	}
-	if($without_tag)
-	{
-		$return_text=substr($text,strlen($start_tag),$pos_end-strlen($start_tag)-1);
-	}
-	else
-	{
-		$return_text=substr($text,0,$pos_end+strlen($tag_name)+2);
-	}
+	if($without_tag) $return_text=substr($text,strlen($start_tag),$pos_end-strlen($start_tag)-1);
+	else $return_text=substr($text,0,$pos_end+strlen($tag_name)+2);
+
 	return $return_text;
 }
 
     /**
      * Аналог встроеной функции parse_url но с дополнительным разбитием на масив параметры query и fragment
      * @param $url
-     * @return mixed
+     * @return array
      * scheme Протокол
      * host имя хоста
      * port порт
@@ -268,4 +232,3 @@ public static function parse_url($url)
 }
 
 }
-?>
