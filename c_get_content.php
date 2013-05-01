@@ -1,38 +1,141 @@
 <?php
 include_once "c_proxy.php";
 include_once "c_string_work.php";
+/**
+ * Class c_get_content
+ * С помощью основных функций библиотеки cURL посылает http запросы для скачивания контента из сети
+ * Умеет работать через прокси сервера, в много поточном режиме с верификацией данных.
+ * @author Evgeny Pynykh <bpteam22@gmail.com>
+ * @package get_content
+ * @version 2.0
+ */
 class c_get_content
 {
-	private $default_settings; //Настройки по умолчанию, если не задано значение, то берет из этого списка
-	//CURLOPT_HEADER - для включения заголовков в вывод. bool
-	//CURLOPT_URL - Загружаемый URL. Данный параметр может быть также установлен при инициализации сенса с помощью curl_init(). string
-	//CURLOPT_TIMEOUT - Максимально прозволенное количество секунд для выполнения cURL-функций. int
-	//CURLOPT_USERAGENT - Содержимое заголовка "User-Agent: ", посылаемого в HTTP-запросе. string
-	//CURLOPT_PROXY - HTTP-прокси, через который будут направляться запросы.
-	//CURLOPT_RETURNTRANSFER - для возврата результата передачи в качестве строки из curl_exec() вместо прямого вывода в браузер.
-	//CURLOPT_REFERER - Содержимое заголовка "Referer: ", который будет использован в HTTP-запросе, с какой страници перешли на $URL.string
-	//CURLOPT_FOLLOWLOCATION - для следования любому заголовку "Location: ", отправленному сервером в своем ответе (учтите, что это происходит рекурсивно, PHP будет следовать за всеми посылаемыми заголовками "Location: ", за исключением случая, когда установлена константа CURLOPT_MAXREDIRS).
-	//CURLOPT_POST отправлять ли POST запросы 1 да 0 нет
-	//CURLOPT_POSTFIELDS Все данные, передаваемые в HTTP POST-запросе. Для передачи файла, укажите перед именем файла @, а также используйте полный путь к файлу. Тип файла также может быть указан с помощью формата ';type=mimetype', следующим за именем файла. Этот параметр может быть передан как в качестве url-закодированной строки, наподобие 'para1=val1&para2=val2&...', так и в виде массива, ключами которого будут имена полей, а значениями - их содержимое.
-	private $all_setting;// массив с перечислением всех настроек для cURL
-	private $use_proxy; // использовать прокси или нет 1 да 0 нет
-	public $proxy; // прокси для использование в cURL, класс __construct для работы с прокси серверами
-	private $answer; // возвращенный ответ из функций curl_exec() и curl_multi_exec() c curl_multi_getcontent() в зависимости от режима работы класса
-	private $descriptor; // массив с компонентами ['descriptor'] дескриптор инициируемый при помощи функции curl_init() или curl_multi_init() в зависимости от режима работы класса, ['option'][имя опции] значение в value ['descriptor_key'] идентификационный код для дискриптора по которому будут присваиваться файлы cookie, аренда proxy
-	private $descriptor_array; // массив массивов с дескрипторами для работы в режиме multi структура опций и  идентификационных кодов схожа с $descriptor descriptor_array[key]['descriptor']
-	private $count_multi_curl; // количество дескрипторов для режима multi
-	private $number_repeat;// Номер повтора для получения коректного ответа
-	private $max_number_repeat; // максимальное количество повторных запросов на получение контента
-	private $min_size_answer; //Минимальная длинна ответа от сервера(по байтово)
-	private $type_content;//Тип контента (Файл[file]|Текст[text]|html страницы[html])
-	private $in_cache;//Если страница не доступна, то забирать контент из кеша гугла
-	private $encoding_answer;// Изменять кодировку текста? 1 да 0 нет
-	private $encoding_name;//Имя кодировки в которую преобразовывать ответ если включена декадировка
-	private $encoding_name_answer; // базовая кадировка текста полученным от донора
-	private $check_answer; //Вкл/выкл проверку результата
-	private $string_work;//Класс для работы с строкой c_string_work для сжатия, проверки данных
-	private $mode_get_content;//Тип скачивания контента multi или single
-	private $dir_cookie;// Папка где храняться файлы cookie
+    /**
+     * Набор настроек по умолчанию для cURL
+     * @access private
+     * @var array
+     * Структура:
+     * $default_settings[CURLOPT_HEADER]= bool для включения заголовков в вывод
+     * $default_settings[CURLOPT_URL]= string url источника данных
+     * $default_settings[CURLOPT_TIMEOUT]= int максимальное время ожидания ответа от запроса
+     * $default_settings[CURLOPT_USERAGENT]= string useragent баузера
+     * $default_settings[CURLOPT_PROXY]= string прокси адрес через который будет проходить запрос
+     * $default_settings[CURLOPT_RETURNTRANSFER]= bool флаг для обозначения возвращения результата в переменную
+     * $default_settings[CURLOPT_REFERER]= string адрес страници с которой перешли на текущую
+     * $default_settings[CURLOPT_FOLLOWLOCATION]= bool следовать переадресации сервера или нет
+     * $default_settings[CURLOPT_POST]= bool врключение отправки post запроса на удаленный сервер
+     * $default_settings[CURLOPT_POSTFIELDS]= string|mixed данные post запроса
+     */
+    private $default_settings;
+    /**
+     * Пересление всех поддерживаемых настроек для cURL
+     * @var array
+     */
+    private $all_setting;// массив с перечислением всех настроек для cURL
+    /**
+     * Флаг для включения запросов через прокси сервера
+     * @var bool
+     */
+    private $use_proxy;
+    /**
+     * Адрес спрокси или класс для работы с прокси
+     * @var string|c_proxy
+     */
+    public $proxy;
+    /**
+     * Хранит разультаты запросов если режим singele, то string, если multi то array
+     * @var string|array
+     */
+    private $answer;
+    /**
+     * Дескриптор с текущими настройками и уникальным ключом
+     * @var array
+     * Структура:
+     * $descriptor['descriptor'] дескриптор  cURL
+     * $descriptor['option'][имя опции] = value параметры cURL
+     * $descriptor['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
+     */
+    private $descriptor;
+    /**
+     * Список дескрипторов с текущими настройками и уникальным ключом для работы в multi режиме
+     * @var array
+     * $descriptor_array[key]['descriptor'] дескриптор  cURL
+     * $descriptor_array[key]['option'][имя опции] = value параметры cURL
+     * $descriptor_array[key]['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
+     */
+    private $descriptor_array;
+    /**
+     * Количество потоков в режиме multi
+     * @var int
+     */
+    private $count_multi_curl;
+    /**
+     * Текущий номер повторного запроса для получения контента
+     * @var int
+     */
+    private $number_repeat;
+    /**
+     * Максимальное количество разрешенных повторных запросов для получения корректного ответа
+     * @var int
+     */
+    private $max_number_repeat; // максимальное количество повторных запросов на получение контента
+    /**
+     * Минимальный размер ответа в байтах
+     * @var int
+     */
+    private $min_size_answer;
+    /**
+     * Тип получаемых данных
+     * @var mixed
+     * [file] Файл
+     * [img] Изображение
+     * [text] Текст
+     * [html] html страницы
+     */
+    private $type_content;
+    /**
+     * Флаг на включение запроса из кеша поисковых машин если страница не доступна
+     * @var bool
+     */
+    private $in_cache;
+    /**
+     * Флаг на включение смены кодировки текста
+     * @var bool
+     */
+    private $encoding_answer;
+    /**
+     * Имя кодировки в которую преобразовывать текст ответа
+     * @var string
+     */
+    private $encoding_name;
+    /**
+     * Имя кодировки полученого текста
+     * @var string
+     */
+    private $encoding_name_answer;
+    /**
+     * Флаг на включение проверки ответа на корректность
+     * @var bool
+     */
+    private $check_answer;
+    /**
+     * Класс для изменения данных текста, проверки кодировки, сжатия данных
+     * @var c_string_work
+     */
+    private $string_work;
+    /**
+     * Режим скачивания контента
+     * @var string
+     * multi многопоточный режим
+     * string однопоточный режим
+     */
+    private $mode_get_content;
+    /**
+     * Папка в которую сохраняются файлы cookie
+     * @var string
+     */
+    private $dir_cookie;// Папка где храняться файлы cookie
 
 function __construct()
 {
@@ -70,7 +173,9 @@ function __construct()
 	$this->clear_cookie();
 
 }
-//тест на доступность ресурсов для работы класса
+    /**
+     * функция для проверки доступа к необходимым ресурсам системы
+     */
 public function function_check()
 {
 	if(!function_exists('curl_init')) echo "Error: CURL is not installed\n";
@@ -95,6 +200,10 @@ public function function_check()
 	if(!class_exists('c_string_work')) echo "Warning: c_string_work class is declared, word processing is not possible\n";
 }
 
+    /**
+     * Удаляет старые файлы, которые уже не используются
+     * @param int $storage_time время хранения прокси
+     */
 public function clear_cookie($storage_time=172800)
 {
 	$file_list = glob($this->get_dir_cookie()."*.cookie");
@@ -108,6 +217,9 @@ public function clear_cookie($storage_time=172800)
 	}
 }
 
+    /**
+     * @param string $new_dir_cookie
+     */
 public function set_dir_cookie($new_dir_cookie)
 {
 	$this->dir_cookie=$new_dir_cookie;
@@ -117,39 +229,62 @@ public function get_dir_cookie()
 	return $this->dir_cookie;
 }
 
+    /**
+     * @param int $option
+     * @param mixed $value
+     */
 public function set_default_setting($option,$value)
 {
 	$this->default_settings[$option]=$value;
 }
+
+    /**
+     * @param int $option
+     * @return mixed
+     */
 public function get_default_setting($option)
 {
 	return $this->default_settings[$option];
 }
+
+    /**
+     * @param array $value
+     * @return bool
+     */
 public function set_default_settings($value)
 {
 	if(is_array($value))
     {
         $this->default_settings=$value;
-        return 1;
+        return true;
     }
-	else return 0;
+	else return false;
 }
+
+    /**
+     * @return array
+     */
 public function get_default_settings()
 {
 	return $this->default_settings;
 }
 
-public function set_use_proxy($value=0)
+    /**
+     * Включает/выключает работу через прокси
+     * @param bool $value
+     */
+public function set_use_proxy($value=false)
 {
+    $value=(bool)$value;
 	switch($value)
 	{
-		case'1':
+		case true:
 		if(!isset($this->proxy) || !is_object($this->proxy))
 			{
 				$this->proxy=new c_proxy();
 			}
 			break;
-		case'0':
+		case false:
 			unset($this->proxy);
 			break;
 		default:
@@ -163,6 +298,9 @@ public function get_use_proxy()
 	return $this->use_proxy;
 }
 
+    /**
+     * @param int $value
+     */
 public function set_number_repeat($value=0)
 {
 	$this->number_repeat=$value;
@@ -172,6 +310,9 @@ public function get_number_repeat()
 	return $this->number_repeat;
 }
 
+    /**
+     * @param int $value
+     */
 public function set_max_number_repeat($value=10)
 {
 	$this->max_number_repeat=$value;
@@ -180,30 +321,46 @@ public function get_max_number_repeat()
 {
 	return $this->max_number_repeat;
 }
+
+    /**
+     * Проверяет возможность сделать повторный запрос
+     * @return bool
+     */
 private function repeat_get_content()
 {
 	if($this->get_number_repeat()<$this->get_max_number_repeat())
 	{
 		$this->next_repeat();
-		return 1;
+		return true;
 	}
 	else 
 	{
 		$this->end_repeat();
-		return 0;
+		return false;
 	}
 }
+
+    /**
+     * Регестрирует повторный запрос
+     */
 private function next_repeat()
 {
 	$num_repeat=$this->get_number_repeat();
 	$num_repeat++;
 	$this->set_number_repeat($num_repeat);
 }
+
+    /**
+     * Обнуляет счетчик повторных запросов
+     */
 private function end_repeat()
 {
 	$this->set_number_repeat(0);
 }
 
+    /**
+     * @param int $value
+     */
 public function set_min_size_answer($value=5000)
 {
 	$this->min_size_answer=$value;
@@ -213,6 +370,9 @@ public function get_min_size_answer()
 	return $this->min_size_answer;
 }
 
+    /**
+     * @param string $type_content file|img|text|html
+     */
 public function set_type_content($type_content="text")
 {
 	switch($type_content)
@@ -237,7 +397,10 @@ public function get_type_content()
 	return $this->type_content;
 }
 
-public function set_in_cache($value=0)
+    /**
+     * @param bool $value
+     */
+public function set_in_cache($value=false)
 {
 	$this->in_cache=$value;
 }
@@ -246,7 +409,10 @@ public function get_in_cache()
 	return $this->in_cache;
 }
 
-public function set_encoding_answer($value=0)
+    /**
+     * @param bool $value
+     */
+public function set_encoding_answer($value=false)
 {
 	$this->encoding_answer=$value;
 }
@@ -255,6 +421,9 @@ public function get_encoding_answer()
 	return $this->encoding_answer;
 }
 
+    /**
+     * @param string $value
+     */
 public function set_encoding_name($value="UTF-8")
 {
 	$this->encoding_name=$value;
@@ -264,6 +433,9 @@ public function get_encoding_name()
 	return $this->encoding_name;
 }
 
+    /**
+     * @param string $value
+     */
 public function set_encoding_name_answer($value)
 {
 	$this->encoding_name_answer=$value;
@@ -273,7 +445,10 @@ public function get_encoding_name_answer()
 	return $this->encoding_name_answer;
 }
 
-public function set_check_answer($value=1)
+    /**
+     * @param bool $value
+     */
+public function set_check_answer($value=true)
 {
 	$this->check_answer=$value;
 }
@@ -282,7 +457,10 @@ public function get_check_answer()
 	return $this->check_answer;
 }
 
-public function set_count_multi_curl($value=1)
+    /**
+     * @param int $value
+     */
+public function set_count_multi_curl($value=2)
 {
 	$this->close_get_content();
 	$this->count_multi_curl=$value;
@@ -293,6 +471,10 @@ public function get_count_multi_curl()
 	return $this->count_multi_curl;
 }
 
+    /**
+     * @param string $new_mode_get_content single|multi
+     * @return bool
+     */
 public function set_mode_get_content($new_mode_get_content='single')
 {
 	$this->close_get_content();
@@ -301,13 +483,15 @@ public function set_mode_get_content($new_mode_get_content='single')
 		case 'single':
 			$this->mode_get_content='single';
 			$this->init_get_content();
+            return true;
 			break;
 		case 'multi':
 			$this->mode_get_content='multi';
 			if($this->get_count_multi_curl()<1)$this->set_count_multi_curl(1);
-			break;
+			return true;
+            break;
 		default:
-			return 0;
+			return false;
 			break;
 	}
     return 1;
@@ -315,25 +499,6 @@ public function set_mode_get_content($new_mode_get_content='single')
 public function get_mode_get_content()
 {
 	return $this->mode_get_content;
-}
-
-public function set_proxy($proxy,$key=0)
-{
-	$this->set_use_proxy(1);
-	switch ($this->get_mode_get_content())
-	{
-		case 'single':
-			$descriptor=&$this->get_descriptor();
-			$this->proxy->add_proxy($proxy,$descriptor['descriptor_key']);
-			break;
-		case 'multi':
-			$descriptor_array=&$this->get_descriptor_array();
-			if(array_key_exists($key,$descriptor_array)) $this->proxy->add_proxy($proxy,$descriptor_array[$key]['descriptor_key']);
-			break;
-		default:
-			return 0;
-			break;
-	}
 }
 
 public function &get_descriptor()
@@ -349,6 +514,9 @@ public function &get_descriptor_array()
 	return $this->descriptor_array;
 }
 
+    /**
+     * Инициализирует дескрипторы cURL
+     */
 private function init_get_content()
 {
 	$descriptor=&$this->get_descriptor();
@@ -387,6 +555,10 @@ private function init_get_content()
 			break;
 	}
 }
+
+    /**
+     * Закрывает инициализированные дескрипторы cURL
+     */
 private function close_get_content()
 {
 	$descriptor=&$this->get_descriptor();
@@ -432,6 +604,11 @@ private function close_get_content()
 	}
 }
 
+    /**
+     * Выполнение заросов по $url с определением по какому методу осуществлять запрос
+     * @param string|array $url
+     * @return array|int|string
+     */
 public function get_content($url="")
 {
 	if($url && is_string($url)) $this->set_default_setting(CURLOPT_URL,$url);
@@ -502,6 +679,11 @@ public function get_content($url="")
 	return $this->get_answer();
 }
 
+    /**
+     * Совершает зарос в режиме single
+     * @param cURL $descriptor ссылка на дескриптор cURL
+     * @return string
+     */
 private function get_single_content(&$descriptor=NULL)
 {
 	if($descriptor==NULL) $descriptor=&$this->get_descriptor();
@@ -523,6 +705,12 @@ private function get_single_content(&$descriptor=NULL)
 	return $answer;
 }
 
+    /**
+     * Совершает запрос в режиме multi
+     * @param multi_cURL $descriptor multi дескриптор сURL
+     * @param cURL $descriptor_array набор дескрипторов cURL приналдежащих multi дескриптору cURL
+     * @return array
+     */
 private function get_multi_content(&$descriptor=NULL,&$descriptor_array=NULL)
 {
 	if($descriptor==NULL) $descriptor=&$this->get_descriptor();
@@ -560,6 +748,12 @@ private function get_multi_content(&$descriptor=NULL,&$descriptor_array=NULL)
 	return $good_answer; 
 }
 
+    /**
+     * Присваивает настройки cURL декскриптору
+     * @param cURL $descriptor дескриптор cURL
+     * @param array $option_array список настроек для cURL дексриптора
+     * @return bool
+     */
 public function set_options_to_descriptor(&$descriptor,$option_array=array())
 {
 	foreach ($this->all_setting as $key_setting)
@@ -580,11 +774,19 @@ public function set_options_to_descriptor(&$descriptor,$option_array=array())
                                     );
 	$this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEJAR,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
 	$this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEFILE,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
-	if(!$returnSetOpt=curl_setopt_array($descriptor['descriptor'],$descriptor['option']))
-	{
-		// :|
-	}
+	if($returnSetOpt=curl_setopt_array($descriptor['descriptor'],$descriptor['option'])) return true;
+    else return false; // :| ошибка в присваивании параметров
+
 }
+
+    /**
+     * Присваивает конкретную настройку для cURL дескриптора
+     * @param cURL $descriptor ссылка на cURL дескриптор
+     * @param int $option имя параметра для cURL дескриптора
+     * @param mixed $value значение опции для cURL дескриптора
+     * @param int $key ключ для дескриптора в режиме multi
+     * @return bool
+     */
 public function set_option_to_descriptor(&$descriptor,$option,$value=NULL,$key=NULL)//
 {
 	if($key!==NULL)
@@ -594,17 +796,24 @@ public function set_option_to_descriptor(&$descriptor,$option,$value=NULL,$key=N
 		{
 			if(is_null($value)) $descriptor[$key]['option'][$option]=$this->get_default_setting($option);
 			else $descriptor[$key]['option'][$option]=$value;
-			if($this->check_option($descriptor[$key],$option,$descriptor[$key]['option'][$option])) return 0;
+			if($this->check_option($descriptor[$key],$option,$descriptor[$key]['option'][$option])) return false;
 		}
 	}
 	else
 	{
 		if(is_null($value)) $descriptor['option'][$option]=$this->get_default_setting($option);
 		else $descriptor['option'][$option]=$value;
-		if($this->check_option($descriptor,$option,$descriptor['option'][$option])) return 0;
+		if($this->check_option($descriptor,$option,$descriptor['option'][$option])) return false;
 	}
 }
 
+    /**
+     * проверяет на корректность опции и включает/выключает зависимые опции в дескрипторе cURL
+     * @param cURL $descriptor дескриптор cURL
+     * @param int $option имя параметра
+     * @param mixed $value значение параметра
+     * @return bool
+     */
 private function check_option(&$descriptor,$option,$value=NULL)
 {
 	switch ($option)
@@ -613,14 +822,14 @@ private function check_option(&$descriptor,$option,$value=NULL)
 			if(!$value || !$descriptor['option'][CURLOPT_POSTFIELDS])
 			{
 				unset($descriptor['option'][$option]);
-				return 1;
+				return true;
 			}
 			break;
 		case CURLOPT_POSTFIELDS:
 			if(!$value)
 			{
 				unset($descriptor['option'][$option]);
-				return 1;
+				return true;
 			}
 			else
 			{
@@ -633,15 +842,21 @@ private function check_option(&$descriptor,$option,$value=NULL)
 			{
 				preg_match("#http://(?<url>.*)$#iUm", $descriptor['option'][$option], $match);
 				$descriptor['option'][$option]="http://webcache.googleusercontent.com/search?q=cache:".$match['url'];
-				return 1;
+				return true;
 			}
 			break;	
 		default:
-			return 0;
+			return false;
 			break;
 	}
 }
 
+    /**
+     * Выполнение запроса cURL
+     * @param cURL $descriptor дескриптор cURL или multi_cURL
+     * @param array $descriptor_array набор дескрипторов для режима multi
+     * @return mixed
+     */
 private function exec_get_content(&$descriptor=NULL,&$descriptor_array=NULL)
 {
 	switch ($this->get_mode_get_content())
@@ -672,7 +887,12 @@ private function exec_get_content(&$descriptor=NULL,&$descriptor_array=NULL)
 	}
 }
 
-public function get_answer($get_all_answer=1)
+    /**
+     * Возвращает данные полученые после запросов
+     * @param bool $get_all_answer для режима multi, возваращать все или самы большой по размеру
+     * @return array|string
+     */
+public function get_answer($get_all_answer=true)
 {
 	switch ($this->get_mode_get_content())
 	{
@@ -680,7 +900,7 @@ public function get_answer($get_all_answer=1)
 			return $this->answer;
 			break;
 		case 'multi':
-			if($get_all_answer==0)
+			if(!$get_all_answer)
 			{
 				if(is_array(current($this->answer)))
 				{
@@ -706,7 +926,11 @@ public function get_answer($get_all_answer=1)
 			break;
 	}
 }
-// Получить максимально большой ответ
+    /**
+     * Получить максимально большой ответ из набора
+     * @param $a набор ответов на заросы multi_cURL
+     * @return bool|string
+     */
 private function get_big_answer($a)
 {
 	if(!function_exists("sort_array_answer"))
@@ -718,32 +942,42 @@ private function get_big_answer($a)
             else return -1;
 		}
 	}
-	if(!is_array($a)) return 0;
+	if(!is_array($a)) return false;
 	usort($a, 'sort_array_answer');
 	return $a[0];
 }
 
+    /**
+     * Проверка ответа на корректность
+     * @param string $answer
+     * @return bool
+     */
 private function check_answer_valid($answer)
 {
-	if(!$this->get_check_answer()) return 1;
+	if(!$this->get_check_answer()) return true;
 	if($this->get_use_proxy() && $this->get_type_content()=="file")
 	{
 		$reg="/(<!DOCTYPE HTML|<html>|<head>|<title>|<body>|<h1>|<h2>|<h3>)/i";
-		if(preg_match($reg, $answer)) return 0;
+		if(preg_match($reg, $answer)) return false;
 	}
 	if(strlen($answer)>=$this->get_min_size_answer())
 	{
 		if($this->get_type_content()=="html")
 		{
-			if(preg_match("|<html[^>]*>.*</html>|iUm", $answer)) return 1;
-			else return 0;
+			if(preg_match("|<html[^>]*>.*</html>|iUm", $answer)) return true;
+			else return false;
 		}
-		else return 1;
+		else return true;
 	}
-	else return 0;
+	else return false;
 }
 
-private function prepare_content($answer)
+    /**
+     * Подготовка ответа к выдаче
+     * @param $answer
+     * @return string
+     */
+    private function prepare_content($answer)
 {
 	switch ($this->get_type_content())
 		{
@@ -761,7 +995,7 @@ private function prepare_content($answer)
 		}
 	return $answer;
 }
-
+/*TODO: Вынести эту функцию в c_string_work*/
 private function encoding_answer_text($text="")
 {
 	if($this->get_encoding_answer())
@@ -775,7 +1009,7 @@ private function encoding_answer_text($text="")
 		return $text;
 	}
 }
-
+    /*TODO: Вынести эту функцию в c_string_work*/
 private function check_encoding_answer($text="")
 {
 	$reg="/Content.Type.*text.html.*charset=([^\s\"']+)(?:\s|\"|'|;)/iU";
