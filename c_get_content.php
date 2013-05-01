@@ -178,26 +178,26 @@ function __construct()
      */
 public function function_check()
 {
-	if(!function_exists('curl_init')) echo "Error: CURL is not installed\n";
+	if(!function_exists('curl_init')) echo "Error: CURL is not installed</br>\n";
 	if(!is_dir($this->get_dir_cookie()))
 	{
-		echo "Warning: folder for the cookie does not exist\n";
-		echo "try to create\n";
-		if(!mkdir($this->get_dir_cookie())) echo "Warning: Can not create folder\n";
-		else echo "Success: cookie folder is created\n";
+		echo "Warning: folder for the cookie does not exist</br>\n";
+		echo "try to create</br>\n";
+		if(!mkdir($this->get_dir_cookie())) echo "Warning: Can not create folder</br>\n";
+		else echo "Success: cookie folder is created</br>\n";
 	}
 	else
 	{
 		if(!is_readable($this->get_dir_cookie()) || !is_writable($this->get_dir_cookie()))
 		{
-			echo "Warning: folder for the cookie does not have the necessary rights to use\n";
-			echo "trying to change\n";
-			if(!chmod($this->get_dir_cookie(),0777)) echo "Warning: I can not change the access rights\n";
-			else echo "Success: The rules have changed for the necessary\n";
+			echo "Warning: folder for the cookie does not have the necessary rights to use</br>\n";
+			echo "trying to change</br>\n";
+			if(!chmod($this->get_dir_cookie(),0777)) echo "Warning: I can not change the access rights</br>\n";
+			else echo "Success: The rules have changed for the necessary</br>\n";
 		}
 	}
-	if(!class_exists('c_proxy')) echo "Warning: c_proxy class is declared, can not work with proxy\n";
-	if(!class_exists('c_string_work')) echo "Warning: c_string_work class is declared, word processing is not possible\n";
+	if(!class_exists('c_proxy')) echo "Warning: c_proxy class is declared, can not work with proxy</br>\n";
+	if(!class_exists('c_string_work')) echo "Warning: c_string_work class is declared, word processing is not possible</br>\n";
 }
 
     /**
@@ -207,7 +207,7 @@ public function function_check()
 public function clear_cookie($storage_time=172800)
 {
 	$file_list = glob($this->get_dir_cookie()."*.cookie");
-	foreach ($file_list as $key => $value)
+	foreach ($file_list as $value)
 	{
 		preg_match("/\/(?<create_time>\d+)(?:\.|\s*)\d*\.cookie$/iU", $value,$match);
 		if((int)$match['create_time']<time()-$storage_time)
@@ -279,19 +279,15 @@ public function set_use_proxy($value=false)
 	switch($value)
 	{
 		case true:
-		if(!isset($this->proxy) || !is_object($this->proxy))
-			{
-				$this->proxy=new c_proxy();
-			}
+		if(!is_object($this->proxy) && !is_string($this->proxy)) $this->proxy=new c_proxy();
 			break;
 		case false:
 			unset($this->proxy);
 			break;
-		default:
-			unset($this->proxy);
-			break;
+        default: return false;
 	}
 	$this->use_proxy=$value;
+    return true;
 }
 public function get_use_proxy()
 {
@@ -372,6 +368,7 @@ public function get_min_size_answer()
 
     /**
      * @param string $type_content file|img|text|html
+     * @return bool
      */
 public function set_type_content($type_content="text")
 {
@@ -381,14 +378,22 @@ public function set_type_content($type_content="text")
 			$this->type_content='file';
 			$this->set_default_setting(CURLOPT_HEADER,0);
 			$this->set_encoding_answer(0);
+            return true;
 			break;
+        case 'img':
+            $this->type_content='img';
+            $this->set_default_setting(CURLOPT_HEADER,0);
+            $this->set_encoding_answer(0);
+            return true;
+            break;
 		case 'text':
 			$this->type_content='text';
+            return true;
 			break;
 		case 'html':
 			$this->type_content='html';
 			break;
-		default:
+		default: return false;
 			break;
 	}
 }
@@ -494,7 +499,6 @@ public function set_mode_get_content($new_mode_get_content='single')
 			return false;
 			break;
 	}
-    return 1;
 }
 public function get_mode_get_content()
 {
@@ -503,14 +507,10 @@ public function get_mode_get_content()
 
 public function &get_descriptor()
 {
-	//$descriptor= &$this->descriptor;
-	//return $descriptor;
 	return $this->descriptor;
 }
 public function &get_descriptor_array()
 {
-	//$descriptor= &$this->descriptor_array;
-	//return $descriptor;
 	return $this->descriptor_array;
 }
 
@@ -551,7 +551,7 @@ private function init_get_content()
 			}
 			break;
 		default:
-			# code...
+			# code
 			break;
 	}
 }
@@ -911,15 +911,9 @@ public function get_answer($get_all_answer=true)
 					}
 					return $a;
 				}
-				else
-				{
-					return $this->get_big_answer($this->answer);
-				}
+				else return $this->get_big_answer($this->answer);
 			}
-			else
-			{
-				return $this->answer;
-			}
+			else return $this->answer;
 			break;
 		default:
 			# code...
@@ -977,7 +971,7 @@ private function check_answer_valid($answer)
      * @param $answer
      * @return string
      */
-    private function prepare_content($answer)
+private function prepare_content($answer)
 {
 	switch ($this->get_type_content())
 		{

@@ -65,14 +65,6 @@ class c_proxy
      */
     protected $get_content;
     /**
-     * Название метода хранения информации о прокси и адреса прокси серверов
-     * В БД db
-     * В текстовых файлах file
-     * @access protected
-     * @var string
-     */
-    protected $mode_save_data;
-    /**
      * Имя текущего файла с адресами прокси и характеристиками
      * @access protected
      * @var string
@@ -90,12 +82,6 @@ class c_proxy
      * @var file_handle
      */
     protected $f_heandle_proxy_list;
-    /**
-     * Префикс для таблиц в БД хранящих данные о проски и их конфигурации
-     * @access protected
-     * @var string
-     */
-    protected $prefix_table_db;
     /**
      * Флаг для выставления опции проверки прокси черес специально зарезервированный сервер на работоспособность прокси
      * перед использованием
@@ -183,7 +169,6 @@ class c_proxy
 	$this->get_content->set_type_content('html');
 	$this->set_method_get_proxy("random");
 	$this->dir_proxy_file          ="proxy_files";
-	$this->prefix_table_db         ="proxy_list";
 	$this->check_url_proxy         ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
 	$this->check_url_proxy_array[] ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
 	$this->check_url_proxy_array[] ="http://free-lance.dyndns.info/proxy_checker/anonimCheck.php";
@@ -191,10 +176,8 @@ class c_proxy
 	$this->proxy_list              =array();
 	$this->need_check_proxy        =1;
 	$this->last_use_proxy          =0;
-	$this->mode_save_data          ='file';
 	$this->name_list               ='all';
 	$this->select_proxy_list($this->name_list);
-	$this->set_mode_save_data("file");
 	$this->set_remove_proxy(1);
 	if($update)$this->update_proxy_list($this->name_list);
 	//else $this->proxy_list=$this->get_proxy_list_file_without_lock();
@@ -525,30 +508,22 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
     /**
      * Устанавливает фильтр для необходимых прокси
      * @param string $new_name_type_proxy протокол через который работает прокси
-     * @return string имя протокола
+     * @return string|bool имя протокола
      */
 private function set_name_type_proxy($new_name_type_proxy="http")
 {
-	if(preg_match("#https#i", $new_name_type_proxy))
-	{
-		return "https";
-	}
-	elseif(preg_match("#http#i", $new_name_type_proxy))
-	{
-		return "http";
-	}
-	elseif(preg_match("#socks#i", $new_name_type_proxy))
-	{
-		return "socks";
-	}
-	else
-	{
-		return "http";
-	}
+    switch($new_name_type_proxy)
+    {
+        case 'http': return 'http';
+        case 'https': return 'https';
+        case 'socks': return 'socks';
+        default: return false;
+    }
 }
 
     /**
      * @param string $new_method_get_proxy тип получения прокси адреса
+     * @return bool
      */
 public function set_method_get_proxy($new_method_get_proxy="random")
 {
@@ -556,13 +531,14 @@ public function set_method_get_proxy($new_method_get_proxy="random")
 	{
 		case 'random':
 			$this->method_get_proxy='random';
+            return true;
 			break;
 		case 'rent':
 			$this->method_get_proxy='rent';
+            return true;
 			break;
-		
 		default:
-			# code...
+			return false;
 			break;
 	}
 }
@@ -589,31 +565,6 @@ public function get_url_proxy_list()
 {
 	return $this->url_proxy_list;
 }
-
-    /**
-     * Флаг метода хранения прокси
-     * @param string $new_mode_save_data тип хранения прокси file|db
-     * @return bool
-     */
-public function set_mode_save_data($new_mode_save_data)
-{
-	switch ($new_mode_save_data)
-	{
-		case 'file':
-			$this->mode_save_data="file";
-            return true;
-			break;
-		case 'db':
-			$this->mode_save_data="db";
-            return true;
-			break;
-		
-		default:
-			return false;
-			break;
-	}
-}
-
     /**
      * Открывает прокси лист
      * @param string $proxy_list имя прокси листа, по умолчанию текущий прокси лист
@@ -658,9 +609,9 @@ public function bloc_proxy_list()
 		if(flock($this->f_heandle_proxy_list,LOCK_EX))
 		{
 			$this->set_access_to_proxy_list(1);
-			break;
+			return true;
 		}
-		setLog(__FILE__,__LINE__,"файл занят");
+		// Прокси лист занят
 		sleep(1);
 		}while(true);
     return false;
@@ -694,11 +645,11 @@ public	function get_random_proxy()
 			}
 			else
 			{
-				return 0;
+				return false;
 			}
 		}
 	}
-	return "";
+	return false;
 }
 
     /**
@@ -741,7 +692,6 @@ public function get_proxy($rent_code="",$site_for_use="")
 			$this->last_use_proxy=$this->get_rented_proxy($rent_code,$site_for_use);
 			return $this->last_use_proxy;
 			break;
-		
 		default:
 			return false;
 			break;
@@ -790,10 +740,9 @@ public function get_rented_proxy($rent_code,$site_for_use,$key_address=false)
 		}
 		// все прокси заняты, записываем изменения и освобождаем файл. ждем когда освободится
 		$this->save_proxy_list($this->proxy_list);
-		//setLog(__FILE__,__LINE__," All Proxy busy");
 		sleep(60);
 	}
-	return 0;
+	return false;
 }
 
     /**
@@ -1044,26 +993,14 @@ public function remove_proxy_in_list($proxy)
     /**
      * @return array|bool
      */
-    public	function get_proxy_list()
+public	function get_proxy_list()
 {
 	if(isset($this->proxy_list) && count($this->proxy_list) && ($this->proxy_list['time']>(time()-3600)))	return $this->proxy_list;
-	switch ($this->mode_save_data)
+	if(!$proxy=$this->get_proxy_list_in_file())
 	{
-		case 'file':
-			if(!$proxy=$this->get_proxy_list_in_file())
-			{
-				return false;
-			}
-			return $this->proxy_list=$proxy;
-			break;
-		case 'db':
-			
-			break;
-		default:
-			# code...
-			break;
+		return false;
 	}
-	return $this->proxy_list;
+	return $this->proxy_list=$proxy;
 }
 public function get_last_use_proxy()
 {
@@ -1278,85 +1215,15 @@ private function check_proxy_array_to_function($proxy,$need_function)
 public function save_proxy_list($proxy_list=false)
 {
 	if(!is_array($proxy_list)) $proxy_list=$this->proxy_list;
-	/*if(!isset($proxy_list['content']))
-	{
-		$this->free_proxy_list();
-		return 0;
-	}*/
 	$proxy_list['time']=time();
 	$proxy_list['count']=count($proxy_list['content']);
 	$this->proxy_list=$proxy_list;
-	switch ($this->mode_save_data)
-	{
-		case 'file':
-			$json_proxy=json_encode($proxy_list);
-			$this->bloc_proxy_list();
-			file_put_contents($this->file_proxy_list, '');
-			rewind($this->f_heandle_proxy_list);
-			fwrite($this->f_heandle_proxy_list, $json_proxy);
-			$this->free_proxy_list();
-			break;
-		case 'db':
-		//пока не реализована
-		/*	if(!mysql_ping())
-			{
-				//echo "No connect DB";
-				return 0;
-			}
-			$query="CREATE TABLE IF NOT EXISTS `".$this->table_proxy_list_db."` (
-					  `id` INT NOT NULL AUTO_INCREMENT,
-					  `addressProxy` TEXT,
-					  `timeAdd` INT,
-					  `type_proxy` TEXT,
-					  PRIMARY KEY  (`id`)
-					);";
-			if(!mysql_query($query)) return 0;
-			$query="INSERT INTO '".$this->table_proxy_list_db."' (`addressProxy`, `timeAdd`, `type_proxy`) VALUE ";
-			!!if($count=count())!!))
-			{
-				for($i=0;$i<$count;$i++)
-				{
-					if($count==($i+1))
-					{
-						$query.="('".$proxy_list['proxy'][$i]."', ".$proxy_list['time'].", '".$this->type_proxy."') ";
-					}
-					else
-					{
-						$query.="('".$proxy_list['proxy'][$i]."', ".$proxy_list['time'].", '".$this->type_proxy."'), ";
-					}
-				}
-				if(!mysql_query($query)) return 0;
-			}
-			else
-			{
-				return 0;
-			}
-			*/
-			break;
-		default:
-			# code...
-			break;
-	}
-}
-
-    /**
-     * Считает количество прокси пришедшие с определенных источников
-     * @return array
-     */
-private function count_proxy_in_source()
-{
-	foreach ($this->proxy_list['content'] as $key => $value)
-	{
-		$source_proxy[$key]=$this->proxy_list['content'][$key]["source_proxy"];
-	}
-	unset($value);
-	$result=array();
-	foreach ($this->url_proxy_list as $key => $value)
-	{
-		$result[$key]=count(array_keys($source_proxy,$key)); 
-	}
-	unset($value);
-	return $result;
+	$json_proxy=json_encode($proxy_list);
+	$this->bloc_proxy_list();
+	file_put_contents($this->file_proxy_list, '');
+	rewind($this->f_heandle_proxy_list);
+	fwrite($this->f_heandle_proxy_list, $json_proxy);
+	$this->free_proxy_list();
 }
 
     /**
@@ -1378,9 +1245,9 @@ public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_wo
 	$this->open_proxy_list();
 	$proxy_list['content']=array();
 	$proxy_list['url']=$check_url;
-	if($check_word_array)$proxy_list['check_word']=$check_word_array;
+	if($check_word_array) $proxy_list['check_word']=$check_word_array;
 	else $proxy_list['check_word']=array("#.*#iUm");
-	if($need_function_array)$proxy_list['need_function']=$need_function_array;
+	if($need_function_array) $proxy_list['need_function']=$need_function_array;
 	else $proxy_list['need_function']=array();
 	$proxy_list['name_list']=$name_list;
 	$proxy_list['need_update']=1;
@@ -1422,7 +1289,7 @@ protected function restore_proxy_list_from_buk()
      * Удаляет прокси лист
      * @param $name_list имя прокси листа
      */
-    public function delete_proxy_list($name_list)
+public function delete_proxy_list($name_list)
 {
 	if(file_exists($this->get_proxy_storage().$name_list.".proxy"))
 	{
@@ -1461,7 +1328,6 @@ public function set_update_proxy_list($name_list,$value=true)
 private function get_unique_proxy_ip($proxy_array)
 {
 	foreach ($proxy_array['content'] as $key => $value)
-	//for($key=0;$key<3;$key++)
 	{ 
 		$ip_proxy[$key]=$proxy_array['content'][$key]["proxy"];
 		$source_proxy[$key]=$proxy_array['content'][$key]["source_proxy"];
@@ -1521,8 +1387,6 @@ public function update_proxy_list($name_list,$force=false)
 		$this->proxy_list['need_update']=$proxy_list['need_update'];
 	}
 	else $this->proxy_list['content']=$allProxy['content'];
-	//$this->save_proxy_list($this->proxy_list);
-	//$this->select_proxy_list($name_list);
 	$this->check_proxy_list($name_list);
 	$this->save_proxy_list($this->proxy_list);
 	return $this->proxy_list;
@@ -1583,7 +1447,6 @@ public function get_all_name_proxy_list()
 private function check_proxy_list($name_list="")
 {
 	if(!$name_list) $name_list=$this->name_list;
-	//$this->select_proxy_list($name_list);
 	if(count($this->proxy_list['check_word']))$this->check_proxy_to($name_list,'check_word');
 	if(count($this->proxy_list['need_function']))$this->check_proxy_to($name_list,'need_function');
 }
@@ -1596,14 +1459,11 @@ private function check_proxy_list($name_list="")
 private function check_proxy_to($name_list="",$method="check_word")
 {
 	if(!$name_list) $name_list=$this->name_list;
-	//$this->select_proxy_list($name_list);
-	$good_proxy=array();
-	$proxy=array();
 	reset($this->proxy_list['content']);
 	$part_array_size=100;
 	$chonk_array_proxy_list=array_chunk($this->proxy_list['content'], $part_array_size,true);
 	$tmp_proxy_list['content']=array();
-	foreach ($chonk_array_proxy_list as $keyArray => $part_array_proxy_list)
+	foreach ($chonk_array_proxy_list as $part_array_proxy_list)
 	{
 		$good_proxy=array();
 		foreach ($part_array_proxy_list as $key => $proxy_val)
@@ -1649,20 +1509,15 @@ private function check_proxy_to($name_list="",$method="check_word")
      */
 public function check_all_proxy()
 {
-	setLog(__FILE__,__LINE__," check All Proxy ");
 	$this->need_check_proxy=1;
 	$this->proxy_list=$this->download_proxy();
 	$this->proxy_list=$this->get_unique_proxy_ip($this->proxy_list);
 	//Подсчитаем количество прокси на каждый источник
-	$start_count_source=$this->count_proxy_in_source();
-	$count_proxy=count($this->proxy_list['content']);
-	$good_proxy=array();
-	$proxy=array();
 	reset($this->proxy_list['content']);
 	$part_array_size=100;
 	$chonk_array_proxy_list=array_chunk($this->proxy_list['content'], $part_array_size,true);
 	$tmp_proxy_list['content']=array();
-	foreach ($chonk_array_proxy_list as $keyArray => $part_array_proxy_list)
+	foreach ($chonk_array_proxy_list as $part_array_proxy_list)
 	{
 		$good_proxy=array();
 		foreach ($part_array_proxy_list as $key => $proxyVal)
@@ -1688,18 +1543,6 @@ public function check_all_proxy()
 	}
 	unset($part_array_proxy_list);
 	$this->proxy_list['content']=array_values($tmp_proxy_list['content']);
-	$end_count_source=$this->count_proxy_in_source();
-	setLog(__FILE__,__LINE__," start proxy count(".$count_proxy.") ");
-	foreach ($start_count_source as $key => $value)
-	{
-		setLog(__FILE__,__LINE__," start in $key = $value ");
-	}
-	unset($value);
-	setLog(__FILE__,__LINE__," good proxy count(".count($this->proxy_list['content']).") ");
-	foreach ($end_count_source as $key => $value)
-	{
-		setLog(__FILE__,__LINE__," good in $key = $value ");
-	}
 	unset($value);
 	$this->save_proxy_list($this->proxy_list);
 }
