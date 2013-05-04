@@ -28,7 +28,19 @@ function __construct($text="")
 {
 	$this->text=$text;
 }
-//
+
+    /**
+     * функция для проверки доступа к необходимым ресурсам системы
+     */
+public function function_check()
+{
+    echo "c_string_work->function_check {</br>\n";
+    $mess='';
+    if($mess) echo $mess." To work correctly, correct the above class c_string_work requirements</br>\n ";
+    else echo "c_string_work ready</br>\n";
+    echo "c_string_work->function_check }</br>\n";
+}
+
     /**
      * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
      * @param string $text разбиваемый текст

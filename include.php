@@ -11,4 +11,3 @@
 include_once "c_get_content.php";
 include_once "c_proxy.php";
 include_once "c_string_work.php";
-?>

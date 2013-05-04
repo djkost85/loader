@@ -149,7 +149,7 @@ function __construct()
                               CURLOPT_POST,
                               CURLOPT_POSTFIELDS
                               );
-	$this->set_dir_cookie(dirname(__FILE__)."/get_content_files/");
+	$this->set_dir_cookie("/get_content_files/");
 	$this->set_default_settings(array());
 	$this->set_default_setting(CURLOPT_HEADER,0);
 	$this->set_default_setting(CURLOPT_URL,"http://ya.ru");
@@ -159,18 +159,22 @@ function __construct()
 	$this->set_default_setting(CURLOPT_FOLLOWLOCATION,1);
 	$this->set_default_setting(CURLOPT_POSTFIELDS, "");
 	$this->set_default_setting(CURLOPT_POST,0);
-	$this->set_use_proxy(0);
+	$this->set_use_proxy(false);
 	$this->set_number_repeat(0);
 	$this->set_max_number_repeat(10);
 	$this->set_min_size_answer(5000);
 	$this->set_type_content("text");
-	$this->set_in_cache(0);
-	$this->set_encoding_answer(0);
+	$this->set_in_cache(false);
+	$this->set_encoding_answer(false);
 	$this->set_encoding_name("UTF-8");
-	$this->set_check_answer(1);
+	$this->set_check_answer(true);
 	$this->set_mode_get_content('single');
-	$this->string_work =new c_string_work();
-	$this->clear_cookie();
+}
+
+function __destrukt()
+{
+    $this->clear_cookie();
+    $this->close_get_content();
 
 }
     /**
@@ -178,26 +182,25 @@ function __construct()
      */
 public function function_check()
 {
-	if(!function_exists('curl_init')) echo "Error: CURL is not installed</br>\n";
+    echo "c_get_content->function_check {</br>\n";
+    $mess='';
+	if(!function_exists('curl_init')) $mess.="Error: CURL is not installed</br>\n";
 	if(!is_dir($this->get_dir_cookie()))
 	{
-		echo "Warning: folder for the cookie does not exist</br>\n";
-		echo "try to create</br>\n";
-		if(!mkdir($this->get_dir_cookie())) echo "Warning: Can not create folder</br>\n";
-		else echo "Success: cookie folder is created</br>\n";
+		$mess.="Warning: folder for the cookie does not exist</br>\n";
 	}
 	else
 	{
 		if(!is_readable($this->get_dir_cookie()) || !is_writable($this->get_dir_cookie()))
 		{
-			echo "Warning: folder for the cookie does not have the necessary rights to use</br>\n";
-			echo "trying to change</br>\n";
-			if(!chmod($this->get_dir_cookie(),0777)) echo "Warning: I can not change the access rights</br>\n";
-			else echo "Success: The rules have changed for the necessary</br>\n";
+            $mess.="Warning: folder for the cookie does not have the necessary rights to use</br>\n";
 		}
 	}
-	if(!class_exists('c_proxy')) echo "Warning: c_proxy class is declared, can not work with proxy</br>\n";
-	if(!class_exists('c_string_work')) echo "Warning: c_string_work class is declared, word processing is not possible</br>\n";
+	if(!class_exists('c_proxy')) $mess.="Warning: c_proxy class is declared, can not work with proxy</br>\n";
+	if(!class_exists('c_string_work')) $mess.="Warning: c_string_work class is declared, word processing is not possible</br>\n";
+    if($mess) echo $mess." To work correctly, correct the above class c_get_content requirements </br>\n";
+    else echo "c_get_content ready</br>\n";
+    echo "c_get_content->function_check }</br>\n";
 }
 
     /**
@@ -218,6 +221,7 @@ public function clear_cookie($storage_time=172800)
 }
 
     /**
+     * Адерс должен быть относительным папке где лежит исходник класса
      * @param string $new_dir_cookie
      */
 public function set_dir_cookie($new_dir_cookie)
@@ -226,7 +230,7 @@ public function set_dir_cookie($new_dir_cookie)
 }
 public function get_dir_cookie()
 {
-	return $this->dir_cookie;
+	return dirname(__FILE__).$this->dir_cookie;
 }
 
     /**
@@ -769,7 +773,7 @@ public function set_options_to_descriptor(&$descriptor,$option_array=array())
                                     CURLOPT_PROXY,
                                     $this->proxy->get_proxy(
                                                             $descriptor['descriptor_key'],
-                                                            $this->string_work->get_domain_name($descriptor['option'][CURLOPT_URL])
+                                                            c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL])
                                                           )
                                     );
 	$this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEJAR,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
@@ -982,7 +986,7 @@ private function prepare_content($answer)
 				break;
 			case 'html':
 				$answer=$this->encoding_answer_text($answer);
-				$answer=$this->string_work->clear_note($answer,array("/\s+/","/&nbsp;/i","/\n/i","/\r\n/i"));
+				$answer=c_string_work::clear_note($answer,array("/\s+/","/&nbsp;/i","/\n/i","/\r\n/i"));
 				break;
 			default:
 				break;
