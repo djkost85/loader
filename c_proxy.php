@@ -176,7 +176,7 @@ class c_proxy
 	$this->get_content->set_type_content('html');
 	$this->set_method_get_proxy("random");
 	$this->dir_proxy_file          ="proxy_files";
-	$this->check_url_proxy         ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
+	$this->check_url_proxy         ="http://bpteam.net/proxy_chek.php";
 	$this->check_url_proxy_array[] ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
 	$this->check_url_proxy_array[] ="http://free-lance.dyndns.info/proxy_checker/anonimCheck.php";
 	$this->check_url_proxy_array[] ="http://kingnothing.koding.com/proxy_checker/anonimCheck.php";
@@ -323,6 +323,9 @@ public function get_dir_proxy_file()
 public function get_server_ip()
 {
 	if(isset($this->server_ip)) return $this->server_ip;
+    if($_SERVER['SERVER_ADDR']) $this->server_ip=$_SERVER['SERVER_ADDR'];
+    else
+    {
 	$this->get_content->set_use_proxy(0);
 	$this->get_content->set_type_content('html');
 	$this->get_content->set_mode_get_content('single');
@@ -334,7 +337,9 @@ public function get_server_ip()
 		if(preg_match($reg, $answer,$match)) break;
 	}
 	if(!$match['ip']) return false;
-	return $this->server_ip=$match['ip'];
+    $this->server_ip=$match['ip'];
+    }
+	return $this->server_ip;
 }
 
     /**

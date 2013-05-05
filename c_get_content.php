@@ -146,6 +146,7 @@ function __construct()
                               CURLOPT_USERAGENT,
                               CURLOPT_RETURNTRANSFER,
                               CURLOPT_FOLLOWLOCATION,
+                              CURLOPT_REFERER,
                               CURLOPT_POST,
                               CURLOPT_POSTFIELDS
                               );
@@ -154,20 +155,21 @@ function __construct()
 	$this->set_default_setting(CURLOPT_HEADER,0);
 	$this->set_default_setting(CURLOPT_URL,"http://ya.ru");
 	$this->set_default_setting(CURLOPT_TIMEOUT,15);
-	$this->set_default_setting(CURLOPT_USERAGENT,"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.1 (KHTML, like Gecko) Chrome/21.0.1180.75 Safari/537.1");
+	$this->set_default_setting(CURLOPT_USERAGENT,"Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31");
 	$this->set_default_setting(CURLOPT_RETURNTRANSFER,1);
 	$this->set_default_setting(CURLOPT_FOLLOWLOCATION,1);
+    $this->set_default_setting(CURLOPT_REFERER,"");
 	$this->set_default_setting(CURLOPT_POSTFIELDS, "");
 	$this->set_default_setting(CURLOPT_POST,0);
 	$this->set_use_proxy(false);
 	$this->set_number_repeat(0);
-	$this->set_max_number_repeat(10);
-	$this->set_min_size_answer(5000);
+	$this->set_max_number_repeat(0);
+	$this->set_min_size_answer(0);
 	$this->set_type_content("text");
 	$this->set_in_cache(false);
 	$this->set_encoding_answer(false);
 	$this->set_encoding_name("UTF-8");
-	$this->set_check_answer(true);
+	$this->set_check_answer(false);
 	$this->set_mode_get_content('single');
 }
 
@@ -274,23 +276,25 @@ public function get_default_settings()
 }
 
     /**
-     * Включает/выключает работу через прокси
-     * @param bool $value
+     * Включает/выключает работу через прокси и может установить прокси который задаст пользователь
+     * @param bool|string $value
+     * @return bool
      */
 public function set_use_proxy($value=false)
 {
-    $value=(bool)$value;
-	switch($value)
+    switch((bool)$value)
 	{
 		case true:
-		if(!is_object($this->proxy) && !is_string($this->proxy)) $this->proxy=new c_proxy();
-			break;
+            if(is_string($value) && c_string_work::is_ip($value)) $this->proxy=$value;
+            elseif(!is_object($this->proxy)) $this->proxy=new c_proxy();
+			else return false;
+            break;
 		case false:
 			unset($this->proxy);
 			break;
         default: return false;
 	}
-	$this->use_proxy=$value;
+	$this->use_proxy=(bool)$value;
     return true;
 }
 public function get_use_proxy()
@@ -574,7 +578,7 @@ private function close_get_content()
 				if(isset($descriptor['descriptor']))
 				{
 					curl_close($descriptor['descriptor']);
-					if($this->get_use_proxy())
+					if($this->get_use_proxy() && is_object($this->proxy))
 					{
 						$this->proxy->remove_all_rent_from_code($descriptor['descriptor_key']);
 					}
@@ -590,7 +594,7 @@ private function close_get_content()
 					{
 						@curl_multi_remove_handle($descriptor['descriptor'],$descriptor_array[$key]['descriptor']);
 						curl_close($descriptor_array[$key]['descriptor']);
-						if($this->get_use_proxy())
+						if($this->get_use_proxy() && is_object($this->proxy))
 						{
 							$this->proxy->remove_all_rent_from_code($descriptor_array[$key]['descriptor_key']);
 						}
@@ -701,7 +705,7 @@ private function get_single_content(&$descriptor=NULL)
 			$this->end_repeat();
 			break;
 		}
-		elseif($this->get_use_proxy())
+		elseif($this->get_use_proxy() && is_object($this->proxy))
 		{
 			$this->proxy->remove_proxy_in_list($descriptor['option'][CURLOPT_PROXY]);
 		}
@@ -768,15 +772,21 @@ public function set_options_to_descriptor(&$descriptor,$option_array=array())
 	}
 	unset($key_setting);
 	if($this->get_use_proxy() && !isset($descriptor['option'][CURLOPT_PROXY]))
-    $this->set_option_to_descriptor(
-                                    $descriptor,
-                                    CURLOPT_PROXY,
-                                    $this->proxy->get_proxy(
-                                                            $descriptor['descriptor_key'],
-                                                            c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL])
-                                                          )
-                                    );
-	$this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEJAR,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
+    {
+        if(is_object($this->proxy))
+        {
+            $this->set_option_to_descriptor(
+                                            $descriptor,
+                                            CURLOPT_PROXY,
+                                            $this->proxy->get_proxy(
+                                                                    $descriptor['descriptor_key'],
+                                                                    c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL])
+                                                                  )
+                                            );
+        }
+        elseif(is_string($this->proxy))$this->set_option_to_descriptor($descriptor, CURLOPT_PROXY, $this->proxy);
+    }
+    $this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEJAR,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
 	$this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEFILE,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
 	if($returnSetOpt=curl_setopt_array($descriptor['descriptor'],$descriptor['option'])) return true;
     else return false; // :| ошибка в присваивании параметров
@@ -823,21 +833,18 @@ private function check_option(&$descriptor,$option,$value=NULL)
 	switch ($option)
 	{
 		case CURLOPT_POST:
-			if(!$value || !$descriptor['option'][CURLOPT_POSTFIELDS])
-			{
-				unset($descriptor['option'][$option]);
-				return true;
-			}
+			if((bool)$value) $descriptor['option'][$option]=(bool)$value;
 			break;
 		case CURLOPT_POSTFIELDS:
 			if(!$value)
 			{
 				unset($descriptor['option'][$option]);
+                $this->set_option_to_descriptor($descriptor,CURLOPT_POST,false);
 				return true;
 			}
 			else
 			{
-				$this->set_option_to_descriptor($descriptor,CURLOPT_POST,1);
+				$this->set_option_to_descriptor($descriptor,CURLOPT_POST,true);
 			}
 			break;
 		case CURLOPT_URL:

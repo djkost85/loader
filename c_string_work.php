@@ -243,4 +243,15 @@ public static function parse_url($url)
     return $array_url;
 }
 
+    /**
+     * Проверяет строку на соответствие шаблону ip адреса с портом
+     * @param $str
+     * @return bool
+     */
+public static function is_ip($str)
+{
+    if(preg_match("#^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$#i",$str)) return true;
+    else return false;
+}
+
 }
