@@ -36,6 +36,17 @@ public function function_check()
 {
     echo "c_string_work->function_check {</br>\n";
     $mess='';
+    if(!is_dir(dirname(__FILE__)."/strin_work_files"))
+    {
+        $mess.="Warning: folder for class files does not exist</br>\n";
+    }
+    else
+    {
+        if(!is_readable(dirname(__FILE__)."/strin_work_files"))
+        {
+            $mess.="Warning: folder for the cookie does not have the necessary rights to use</br>\n";
+        }
+    }
     if($mess) echo $mess." To work correctly, correct the above class c_string_work requirements</br>\n ";
     else echo "c_string_work ready</br>\n";
     echo "c_string_work->function_check }</br>\n";
@@ -252,6 +263,46 @@ public static function is_ip($str)
 {
     if(preg_match("#^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$#i",$str)) return true;
     else return false;
+}
+
+    /**
+     * Функция для определения кодировки русского текста
+     * @param string $str строка для определения кодировки
+     * @return string имя кодировки
+     * @author m00t
+     * @url https://github.com/m00t/detect_encoding
+     */
+public static function get_encoding_name($str)
+{
+    if(mb_detect_encoding($str,array('UTF-8'),true)=='UTF-8') return 'UTF-8';
+    $weights = array();
+    $specters = array();
+    $possible_encodings = array('windows-1251', 'koi8-r', 'iso8859-5');
+    foreach ($possible_encodings as $encoding)
+    {
+        $weights[$encoding] = 0;
+        $specters[$encoding] = require 'string_work_files/specters/'.$encoding.'.php';
+    }
+    if(preg_match_all("#(?<let>.{2})#",$str,$matches))
+    {
+        foreach($matches['let'] as $key)
+        {
+            foreach ($possible_encodings as $encoding)
+            {
+                if (isset($specters[$encoding][$key]))
+                {
+                    $weights[$encoding] += $specters[$encoding][$key];
+                }
+            }
+        }
+    }
+    $sum_weight = array_sum($weights);
+    foreach ($weights as $encoding => $weight)
+    {
+        $weights[$encoding] = $weight / $sum_weight;
+    }
+    arsort($weights,SORT_NUMERIC);
+    return key($weights);
 }
 
 }
