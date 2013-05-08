@@ -1,6 +1,4 @@
 <?php
-include_once "c_proxy.php";
-include_once "c_get_content.php";
 /**
  * Class c_string_work
  * Класс для обработки строки и извлечения необходимой информации используя набор фильтров
@@ -8,6 +6,7 @@ include_once "c_get_content.php";
  * @package get_content
  * @version 2.0
  */
+namespace get_content\c_string_work;
 class c_string_work
 {
     /**

@@ -1,6 +1,4 @@
 <?php
-include_once "c_get_content.php";
-include_once "c_string_work.php";
 /**
  * Class c_proxy
  * Класс для получения актуального списка прокси, проверки работоспособности прокси с определенными сайтами
@@ -11,6 +9,10 @@ include_once "c_string_work.php";
  * @package get_content
  * @version 2.0
  */
+namespace get_content\c_proxy;
+use get_content\c_get_content\c_get_content as c_get_content;
+use get_content\c_string_work\c_string_work as c_string_work;
+
 class c_proxy
 {
 
@@ -41,11 +43,17 @@ class c_proxy
      */
     protected $dir_proxy_file;
     /**
-     * Адреса для скачивания списков прокси
+     * Адрес папки где храняться файлы с proxy списками
+     * @access protected
+     * @var string
+     */
+    protected $dir_proxy_list_file;
+    /**
+     * Имена файлов модулей для скачивания списков прокси
      * @access protected
      * @var array
      */
-    protected $url_proxy_list;
+    protected $file_url_proxy_list;
     /**
      * Время актуальности прокси (в секундах) в профиле
      * @access protected
@@ -86,7 +94,7 @@ class c_proxy
     /**
      * Указатель на файл $file_proxy_list
      * @access protected
-     * @var file_handle
+     * @var $f_heandle_proxy_list
      */
     protected $f_heandle_proxy_list;
     /**
@@ -153,24 +161,23 @@ class c_proxy
      */
     protected $access_to_proxy_list;
 
- /**
-  * Конструктор инициализируте переменные значениями по умолчанию
-  * @param bool $update флаг при инициализации обновить принудительно список прокси или нет
-  * @return \c_proxy
-  */
+    /**
+     * Конструктор инициализируте переменные значениями по умолчанию
+     * @param bool $update флаг при инициализации обновить принудительно список прокси или нет
+     * @return \get_content\c_proxy\c_proxy
+     */
  function __construct($update=false)
 {
 	$this->storage_time            =86400;
 	$this->rent_time               =3600;
-	$this->url_proxy_list 		   =array(
-										    "cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
-										    "seprox.ru"=>"http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_"
-										 );
-	$this->get_content             = new c_get_content();
+    $this->get_content             = new c_get_content();
 	$this->get_content->set_type_content('html');
 	$this->set_method_get_proxy("random");
-	$this->dir_proxy_file          ="proxy_files/proxy_list";
-	$this->check_url_proxy         = require "proxy_files/check_url_list.php";
+    $this->dir_proxy_file          ="proxy_files";
+	$this->dir_proxy_list_file     ="proxy_list";
+    $this->dir_url_proxy_list      ="proxy_site_module";
+    $this->file_url_proxy_list 	   =glob($this->get_dir_url_proxy_list()."/*.php");
+    $this->check_url_proxy         =require $this->get_dir_proxy_file()."/check_url_list.php";
 	$this->proxy_list              =array();
 	$this->need_check_proxy        =true;
 	$this->last_use_proxy          ='';
@@ -198,19 +205,19 @@ public function function_chek()
 {
     echo "c_proxy->function_check {</br>\n";
     $mess='';
-    if(!is_dir($this->get_dir_proxy_file()))
+    if(!is_dir($this->get_dir_proxy_list_file()))
     {
         $mess.="Warning: folder for the proxy profile does not exist</br>\n";
     }
     else
     {
-        if(!is_readable($this->get_dir_proxy_file()) || !is_writable($this->get_dir_proxy_file()))
+        if(!is_readable($this->get_dir_proxy_list_file()) || !is_writable($this->get_dir_proxy_list_file()))
         {
             $mess.="Warning: folder for the proxy profile does not have the necessary rights to use</br>\n";
         }
-        elseif(is_file($this->get_dir_proxy_file()."/".$this->get_default_list_name().".proxy"))
+        elseif(is_file($this->get_dir_proxy_list_file()."/".$this->get_default_list_name().".proxy"))
         {
-            if(!is_readable($this->get_dir_proxy_file()."/".$this->get_default_list_name().".proxy") || !is_writable($this->get_dir_proxy_file()."/".$this->get_default_list_name().".proxy"))
+            if(!is_readable($this->get_dir_proxy_list_file()."/".$this->get_default_list_name().".proxy") || !is_writable($this->get_dir_proxy_list_file()."/".$this->get_default_list_name().".proxy"))
             {
                 $mess.="Warning: file for the default proxy list does not have the necessary rights to use</br>\n";
             }
@@ -298,13 +305,23 @@ public function get_remove_proxy()
 	return $this->remove_proxy;
 }
 
+
+public function get_dir_proxy_file()
+{
+    return dirname(__FILE__)."/".$this->dir_proxy_file;
+}
     /**
      * Получение абсолютного адреса к папке гда лежат файлы конфигурации прокси листов
      * @return string
      */
-public function get_dir_proxy_file()
+public function get_dir_proxy_list_file()
 {
-	return dirname(__FILE__)."/".$this->dir_proxy_file."/";
+	return $this->get_dir_proxy_file()."/".$this->dir_proxy_list_file;
+}
+
+public function get_dir_url_proxy_list()
+{
+    return $this->get_dir_proxy_file()."/".$this->dir_url_proxy_list;
 }
 
     /**
@@ -320,13 +337,10 @@ public function get_server_ip()
 	$this->get_content->set_use_proxy(0);
 	$this->get_content->set_type_content('html');
 	$this->get_content->set_mode_get_content('single');
-	for($i=0;$i<10;$i++)
-	{
-		$this->get_content->get_content("http://2ip.ru/");
-		$answer=$this->get_content->get_answer();
-		$reg="/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
-		if(preg_match($reg, $answer,$match)) break;
-	}
+	$this->get_content->get_content("http://2ip.ru/");
+	$answer=$this->get_content->get_answer();
+	$reg="/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
+	preg_match($reg, $answer,$match);
 	if(!$match['ip'] && c_string_work::is_ip($match['ip'])) return false;
     $this->server_ip=$match['ip'];
     }
@@ -376,186 +390,14 @@ public function get_proxy_checker($check_url_proxy="")
 public function download_proxy()
 {
 	$proxy['content']=array();
-	foreach ($this->url_proxy_list as $key_proxy_list => $value_proxy_list)
+	foreach ($this->file_url_proxy_list as $value_proxy_list)
 	{
-		$tmp_proxy=$this->download_proxy_site($key_proxy_list,$value_proxy_list);
+		$tmp_proxy=require $value_proxy_list; //$this->download_proxy_site($key_proxy_list,$value_proxy_list);
 		if(is_array($tmp_proxy) && count($tmp_proxy))
 		{
 			$proxy['content']=array_merge($proxy['content'],$tmp_proxy['content']);
 		}
 	}
-	return $proxy;
-}
-
-    /**
-     * Загружает из канкретного сайта списки прокси
-     * @param string $key_proxy_list название сайта источника прокси адресов
-     * @param string $value_proxy_list ссыка на страницу с прокси
-     * @return array прокси адресы
-     */
-public function download_proxy_site($key_proxy_list,$value_proxy_list)
-{
-	$get_content= new c_get_content();
-	$proxy=array();
-	switch($key_proxy_list)
-	{
-		case "cool-proxy.net":
-		//break;
-			$get_content->set_type_content("html");
-			if(!$page=$get_content->get_content($value_proxy_list."1"."/sort:working_average/direction:asc"))
-			{
-				$get_content->set_in_cache(1);
-				$page=$get_content->get_content($value_proxy_list."1"."/sort:working_average/direction:asc");
-				$get_content->set_in_cache(0);
-			}
-			$reg="#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<count_page>\d*)\"#iUm";
-			if(preg_match_all($reg, $page, $matches))
-			{
-				$page_array=$matches['count_page'];
-				rsort($page_array);
-				$count_page=$page_array[0];
-			}
-			else
-			{
-				$count_page=10;
-			}
-			for($i=1;$i<$count_page;$i++)
-			{
-				if(!$page=$get_content->get_content($value_proxy_list.$i."/sort:working_average/direction:asc"))
-				{
-					$get_content->set_in_cache(1);
-					$page=$get_content->get_content($value_proxy_list.$i."/sort:working_average/direction:asc");
-					$get_content->set_in_cache(0);
-				}
-				sleep(1);
-				$reg="#<td\s*style=\"text.align.left.\s*font.weight.bold.\">(.*)</td>\s*<td>(\d+)</td>#iUm";
-				if(preg_match_all($reg, $page, $matches))
-				{
-					for($j=0;$j<count($matches[1]);$j++)
-					{
-						$reg="/<span class=\"\d+\">(\d+)<\/span>/iU";
-						if(preg_match_all($reg, $matches[1][$j], $matches_proxy))
-						{
-							$reg="/\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:+\d+)\s*/i";
-							$is_ip=$matches_proxy[1][0].".".$matches_proxy[1][1].".".$matches_proxy[1][2].".".$matches_proxy[1][3].":".$matches[2][$j];
-							if(preg_match($reg,$is_ip))
-							{
-								$tmp_array['proxy']=trim($is_ip);
-								$tmp_array["source_proxy"]=$key_proxy_list;
-								$tmp_array["type_proxy"]=$this->set_name_type_proxy('HTTP');
-								$proxy['content'][]=$tmp_array;
-							}
-						}
-					}
-				}
-				else
-				{
-					break;
-				}
-			}
-			break;
-		case "proxyhub.ru":
-			$get_content->set_type_content("text");
-			$page=$get_content->get_content($value_proxy_list);
-			$reg="/\s*(?<proxy>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),(?<port>\d{1,5}),(?<type_proxy>HTTP|SOCKS5),\s*/iUm";
-			if(preg_match_all($reg, $page, $matches_proxy))
-			{
-				foreach ($matches_proxy['proxy'] as $key => $value)
-				{
-						$tmp_array['proxy']=$matches_proxy['proxy'][$key].":".$matches_proxy['port'][$key];
-						$tmp_array["source_proxy"]=$key_proxy_list;
-						$tmp_array["type_proxy"]=$this->set_name_type_proxy($matches_proxy['type_proxy'][$key]);
-						$proxy['content'][]=$tmp_array;
-				}
-			}
-			break;
-		case "seprox.ru":
-		//break;
-			$i=0;
-			$get_content->set_type_content("html");
-			if(!$page=$get_content->get_content($value_proxy_list.$i.".html"))
-			{
-				$get_content->set_in_cache(1);
-				$page=$get_content->get_content($value_proxy_list.$i.".html");
-				$get_content->set_in_cache(0);
-			}
-			if(!$page)
-			{
-				break;
-			}
-			if(preg_match("/<div class=\"countResult\">\s* Всего найдено.\s*(\d+)\s*<\/div>/iU", $page, $match)) $count_page=ceil($match[1]/15);
-			else $count_page=30;
-			do {
-				if(!preg_match_all("/<tr class=\"proxyStr\">\s*<td>\s*<script type=\"text\/javascript\">\s*(?<js>[^<]*)\s*<\/script>\s*<\/td>\s*<td>\s*(?<type_proxy>.*)\s*<\/td>/iUm", $page, $matches_secret_code))
-				{
-					break;
-				}
-				foreach ($matches_secret_code['js'] as $key_secret_code => $value_secret_code)
-				{
-					if(!preg_match("/Proxy=String.fromCharCode\(([^\)]*)\)/iU", $value_secret_code,$match_secret_array))
-					{
-						break;
-					}
-					$str_secret_code=$value_secret_code;
-					$l=explode(",",$match_secret_array[1]);
-					foreach ($l as $key => $value)
-					{
-						$litera[$key]=chr($value);
-					}
-					foreach ($litera as $key_litera => $value_litera)
-					{
-						$str_secret_code=preg_replace("/Proxy\[".$key_litera."\]/iU",$value_litera, $str_secret_code);
-					}
-					$str_secret_code=str_replace("([]+[]+{})[!+[]+!+[]]", "a", $str_secret_code);
-					$str_secret_code=str_replace("(![]+[])[+!+[]]", "b", $str_secret_code);
-					$str_secret_code=str_replace("([![]]+{})[+!+[]+[+[]]]", "c", $str_secret_code);
-					$str_secret_code=str_replace("([]+[]+[][[]])[!+[]+!+[]]", "d", $str_secret_code);
-					$str_secret_code=str_replace("(!![]+[])[!+[]+!+[]+!+[]]", "e", $str_secret_code);
-					$str_secret_code=str_replace("(![]+[])[+[]]", "f", $str_secret_code);
-					$str_secret_code=str_replace("([![]]+[][[]])[+!+[]+[+[]]]", "i", $str_secret_code);
-					$str_secret_code=str_replace("([]+[]+[][[]])[+!+[]]", "n", $str_secret_code);
-					$str_secret_code=str_replace("([]+[]+{})[+!+[]]", "o", $str_secret_code);
-					$str_secret_code=str_replace("(!![]+[])[+!+[]]", "r", $str_secret_code);
-					$str_secret_code=str_replace("(!![]+[])[+[]]", "t", $str_secret_code);
-					$str_secret_code=str_replace("(!![]+[])[!+[]+!+[]]", "u", $str_secret_code);
-					$str_secret_code=str_replace("(+{}+[]+[]+[]+[]+{})[+!+[]+[+[]]]", " ", $str_secret_code);
-					$str_secret_code=str_replace("+++", "***", $str_secret_code);
-					$str_secret_code=str_replace("+", "", $str_secret_code);
-					$str_secret_code=str_replace("***", "+", $str_secret_code);
-					$reg="/(?:\(|\+)(\w+)/";
-					preg_match_all($reg, $str_secret_code,$matches_secret_var);
-					$ip="";
-					foreach ($matches_secret_var[1] as $key_ip => $value_ip)
-					{
-						$reg="/$value_ip='([^']*)'/";
-						if(preg_match($reg, $str_secret_code, $match_ip)) $ip.=$match_ip[1];
-					}
-					$reg="/\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:+\d+)\s*/i";
-					$is_ip=$ip;
-					if(preg_match($reg,$is_ip))
-					{
-						$tmp_array['proxy']=trim($is_ip);
-						$tmp_array["source_proxy"]=$key_proxy_list;
-						$tmp_array["type_proxy"]=$this->set_name_type_proxy($matches_secret_code['type_proxy'][$key_secret_code]);
-						$proxy['content'][]=$tmp_array;
-					}
-				}
-				$i++;
-				if(!$page=$get_content->get_content($value_proxy_list.$i.".html"))
-				{
-					$get_content->set_in_cache(1);
-					$page=$get_content->get_content($value_proxy_list.$i.".html");
-					$get_content->set_in_cache(0);
-				}
-				if(!$page)
-				{
-					if($i<$count_page) continue;
-					else break;
-				}
-			} while($i<$count_page);
-			break;
-	}		
-	unset($get_content);
 	return $proxy;
 }
 
@@ -615,15 +457,14 @@ public function set_need_check_proxy($new_need_check_proxy=true)
 	$this->need_check_proxy=$new_need_check_proxy;
 }
 
-public function get_url_proxy_list()
+public function get_file_url_proxy_list()
 {
-	return $this->url_proxy_list;
+	return $this->file_url_proxy_list;
 }
     /**
      * Открывает прокси лист
-     * @param string $proxy_list имя прокси листа, по умолчанию текущий прокси лист
      */
-public function open_proxy_list($proxy_list='')
+public function open_proxy_list()
 {
 	$this->close_proxy_list();
 	$this->f_heandle_proxy_list=fopen($this->file_proxy_list,"c+");
@@ -675,10 +516,6 @@ public function bloc_proxy_list()
 		    }
         }
 		// Прокси лист занят
-        echo "Прокси лист занят";
-        ob_flush();
-        flush();/* TODO: Перед публикацией удалить */
-        ob_flush();
 		sleep(1);
 		}while(true);
     return false;
@@ -781,8 +618,9 @@ public function add_proxy($proxy,$type_proxy="http",$source_proxy="")
 		$tmp_array["type_proxy"]=$type_proxy;
 		$this->proxy_list['content'][]=$tmp_array;
 		$this->save_proxy_list($this->proxy_list);
+        return true;
 	}
-    else return false;
+    return false;
 }
 
     /**
@@ -907,6 +745,7 @@ protected function set_rented_proxy($rent_code,$site_for_use,$proxy="")
 		$tmp_data['renter_code']=(string)$rent_code;
 		$tmp_data['user_site']=(string)$site_for_use;
 		$this->proxy_list['content'][$result['key_content']]["renters"][]=$tmp_data;
+        return true;
 	}
 	else
 	{
@@ -914,7 +753,7 @@ protected function set_rented_proxy($rent_code,$site_for_use,$proxy="")
 		foreach ($this->proxy_list['content'] as $key_content => $value_content)
 		{
 			$proxy_use_this_site=0;
-			foreach($value_content["renters"] as $key_renters => $value_renters)
+			foreach($value_content["renters"] as $value_renters)
 			{
 				if($value_renters["user_site"]==$site_for_use)
 				{
@@ -938,8 +777,8 @@ protected function set_rented_proxy($rent_code,$site_for_use,$proxy="")
 			}
 		}
 		unset($value_content);
-		return false;
 	}
+    return false;
 }
 
     /**
@@ -1106,7 +945,7 @@ public function check_proxy($proxy)
             return $info_proxy;
         }
     }
-    else return false;
+    return false;
 }
 
     /**
@@ -1114,7 +953,7 @@ public function check_proxy($proxy)
      * @param array $array_proxy массив прокси адресов
      * @return array|bool
      */
-public function check_array_proxy($array_proxy)
+public function check_proxy_array($array_proxy)
 {
 	if(is_array($array_proxy))
 	{
@@ -1131,9 +970,10 @@ public function check_array_proxy($array_proxy)
         $url=$this->get_proxy_checker().'?ip='.$this->get_server_ip().'&proxy=yandex';
         $url_array=array();
         reset($array_proxy);
-        foreach ($this->get_content->get_descriptor_array() as $key => &$value)
+        $descriptor_array=&$this->get_content->get_descriptor_array();
+        foreach ($descriptor_array as $key => $value)
         {
-            $this->get_content->set_option_to_descriptor($value,CURLOPT_PROXY,current($array_proxy),$key);
+            $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,current($array_proxy),$key);
             next($array_proxy);
             $url_array[]=$url;
         }
@@ -1163,8 +1003,8 @@ public function check_array_proxy($array_proxy)
 		{
 			return false;
 		}
-
 	}
+    return false;
 }
 
     /**
@@ -1183,9 +1023,11 @@ private function check_proxy_array_to_site($array_proxy,$url,$check_word)
     $this->get_content->set_default_setting(CURLOPT_HEADER,false);
     $this->get_content->set_check_answer(false);
     reset($array_proxy);
-    foreach ($this->get_content->get_descriptor_array() as $key => &$value)
+    $descriptor_array=&$this->get_content->get_descriptor_array();
+    $url_array=array();
+    foreach ($descriptor_array as $key => &$value)
     {
-        $this->get_content->set_option_to_descriptor($value,CURLOPT_PROXY,current($array_proxy),$key);
+        $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,current($array_proxy),$key);
 		next($array_proxy);
         $url_array[]=$url;
 	}
@@ -1238,8 +1080,8 @@ public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_wo
 {
 	$this->close_proxy_list();
 	$this->name_list=$name_list;
-	if(file_exists($this->get_dir_proxy_file().$name_list.".proxy")) $this->delete_proxy_list($name_list);
-	$this->file_proxy_list=$this->get_dir_proxy_file().$this->name_list.".proxy";
+	if(file_exists($this->get_dir_proxy_list_file()."/".$name_list.".proxy")) $this->delete_proxy_list($name_list);
+	$this->file_proxy_list=$this->get_dir_proxy_list_file()."/".$this->name_list.".proxy";
 	$this->open_proxy_list();
 	$proxy_list['content']=array();
 	$proxy_list['url']=$check_url;
@@ -1250,7 +1092,6 @@ public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_wo
 	$this->create_proxy_list_buk($proxy_list);
 	$this->save_proxy_list($proxy_list);
 }
-/* TODO: Добавить время в имя файла копии для сохранения нескольких резервных копий */
     /**
      * Создает резервную копию текущего профиля
      * @param $proxy_list список прокси
@@ -1258,38 +1099,22 @@ public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_wo
 protected function create_proxy_list_buk($proxy_list)
 {
 	$json_proxy=json_encode($proxy_list);
-	$buk_file=$this->file_proxy_list.".buk";
+	$buk_file=$this->file_proxy_list.time().".buk";
 	$fh=fopen($buk_file,"c+");
 	file_put_contents($buk_file, '');
 	rewind($fh);
 	fwrite($fh, $json_proxy);
 	fclose($fh);
 }
-
-    /*TODO: Добавить востановление по дате и имени */
-    /**
-     * Востанавливает профиль из резервной копии
-     */
-protected function restore_proxy_list_from_buk()
-{
-	$buk_file=$this->file_proxy_list.".buk";
-	if(file_exists($buk_file))
-	{
-		$proxy_list=json_decode(file_get_contents($buk_file),true);
-		$this->save_proxy_list($proxy_list);
-	}
-}
-
-
     /**
      * Удаляет прокси лист
      * @param $name_list имя прокси листа
      */
 public function delete_proxy_list($name_list)
 {
-	if(file_exists($this->get_dir_proxy_file().$name_list.".proxy"))
+	if(file_exists($this->get_dir_proxy_list_file()."/".$name_list.".proxy"))
 	{
-		unlink($this->get_dir_proxy_file().$name_list.".proxy");
+		unlink($this->get_dir_proxy_list_file()."/".$name_list.".proxy");
 	}
 }
 
@@ -1323,6 +1148,9 @@ public function set_update_proxy_list($name_list,$value=true)
      */
 private function get_unique_proxy_ip($proxy_array)
 {
+    $ip_proxy=array();
+    $source_proxy=array();
+    $type_proxy=array();
 	foreach ($proxy_array['content'] as $key => $value)
 	{ 
 		$ip_proxy[$key]=$proxy_array['content'][$key]["proxy"];
@@ -1400,19 +1228,14 @@ public function select_proxy_list($name_list)
 	$this->name_list=$name_list;
 	if(array_search($name_list,$all_list)!==false)
 	{	
-		$this->file_proxy_list=$this->get_dir_proxy_file().$this->name_list.".proxy";
+		$this->file_proxy_list=$this->get_dir_proxy_list_file()."/".$this->name_list.".proxy";
 	}
 	else
 	{
-		$this->file_proxy_list=$this->get_dir_proxy_file().$this->name_list.".proxy";
+		$this->file_proxy_list=$this->get_dir_proxy_list_file()."/".$this->name_list.".proxy";
 		$this->create_proxy_list($name_list,"http://ya.ru",array("#yandex#iUm"));
 	}
 	$this->open_proxy_list();
-	$list_data=file_get_contents($this->file_proxy_list);
-	if(!$list_data || !json_decode($list_data))
-	{
-		$this->restore_proxy_list_from_buk();
-	}
 	$this->proxy_list=$this->get_proxy_list_file_without_lock();
 	$this->free_proxy_list();
 	return $this->proxy_list;
@@ -1424,9 +1247,9 @@ public function select_proxy_list($name_list)
      */
 public function get_all_name_proxy_list()
 {
-	$file_list=glob($this->get_dir_proxy_file()."*.proxy");
+	$file_list=glob($this->get_dir_proxy_list_file()."/"."*.proxy");
 	$proxy_list_array=array();
-	foreach ($file_list as $key => $value)
+	foreach ($file_list as $value)
 	{
 		if(preg_match("#/(?<name_list>[^/]+)\.proxy$#iUm", $value, $match))
 		{
@@ -1454,8 +1277,8 @@ private function check_proxy_list($name_list="")
      */
 private function check_proxy_to($name_list="",$method="check_word")
 {
-	if(!$name_list) $name_list=$this->name_list;
-	reset($this->proxy_list['content']);
+	if($name_list!=$this->name_list && !$name_list) $this->select_proxy_list($name_list);
+    reset($this->proxy_list['content']);
 	$part_array_size=100;
 	$chonk_array_proxy_list=array_chunk($this->proxy_list['content'], $part_array_size,true);
 	$tmp_proxy_list['content']=array();
@@ -1475,7 +1298,7 @@ private function check_proxy_to($name_list="",$method="check_word")
 				$good_proxy=$this->check_proxy_array_to_site($good_proxy,$this->proxy_list['url'],$this->proxy_list['check_word']);
 				break;
 			case 'need_function':
-				$good_proxy=$this->check_proxy_array_to_function($good_proxy,$this->proxy_list['need_function']);
+				$good_proxy=$this->check_proxy_array($good_proxy,$this->proxy_list['need_function']);
 				break;
 			default:
 				# code...

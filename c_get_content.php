@@ -1,6 +1,4 @@
 <?php
-include_once "c_proxy.php";
-include_once "c_string_work.php";
 /**
  * Class c_get_content
  * С помощью основных функций библиотеки cURL посылает http запросы для скачивания контента из сети
@@ -9,6 +7,9 @@ include_once "c_string_work.php";
  * @package get_content
  * @version 2.0
  */
+namespace get_content\c_get_content;
+use get_content\c_proxy\c_proxy as c_proxy;
+use get_content\c_string_work\c_string_work as c_string_work;
 class c_get_content
 {
     /**
@@ -144,6 +145,9 @@ class c_get_content
      */
     private $dir_cookie;// Папка где храняться файлы cookie
 
+    /**
+     * @return \get_content\c_get_content\c_get_content
+     */
 function __construct()
 {
 	$this->all_setting =array(
@@ -610,9 +614,9 @@ private function init_multi_get_content(&$descriptor, &$descriptor_array)
     $descriptor['descriptor']=curl_multi_init();
     if(is_array($descriptor_array))
     {
-        $descriptor_array=array_slice($descriptor_array, 0, $this->get_count_multi_curl());
+        $descriptor_array=array_slice($descriptor_array, 0, $this->get_count_multi_descriptor());
     }
-    for($i=0;$i<$this->get_count_multi_curl();$i++)
+    for($i=0;$i<$this->get_count_multi_descriptor();$i++)
     {
         if(!isset($descriptor_array[$i]['descriptor_key'])) $descriptor_array[$i]['descriptor_key']=microtime(1).mt_rand();
         if(!file_exists($this->get_dir_cookie().$descriptor_array[$i]['descriptor_key'].".cookie"))
