@@ -115,17 +115,11 @@ class c_proxy
      */
     protected $server_ip;
     /**
-     * Основной URL на странуцу проверки функций прокси сервера
-     * @access protected
-     * @var string
-     */
-    protected $check_url_proxy;
-    /**
      * Набор URL на странуцы проверки функций прокси сервера если не работает основной
      * @access protected
      * @var array
      */
-    protected $check_url_proxy_array;
+    protected $check_url_proxy;
     /**
      * Массив для хранения адресов для ячеек с информацией об аренде, для осуществления быстрого доступа к данным
      * @access protected
@@ -175,14 +169,11 @@ class c_proxy
 	$this->get_content             = new c_get_content();
 	$this->get_content->set_type_content('html');
 	$this->set_method_get_proxy("random");
-	$this->dir_proxy_file          ="proxy_files";
-	$this->check_url_proxy         ="http://bpteam.net/proxy_chek.php";
-	$this->check_url_proxy_array[] ="http://pchecker.vrozetke.com/proxy_checker/anonimCheck.php";
-	$this->check_url_proxy_array[] ="http://free-lance.dyndns.info/proxy_checker/anonimCheck.php";
-	$this->check_url_proxy_array[] ="http://kingnothing.koding.com/proxy_checker/anonimCheck.php";
+	$this->dir_proxy_file          ="proxy_files/proxy_list";
+	$this->check_url_proxy         = require "proxy_files/check_url_list.php";
 	$this->proxy_list              =array();
-	$this->need_check_proxy        =1;
-	$this->last_use_proxy          =0;
+	$this->need_check_proxy        =true;
+	$this->last_use_proxy          ='';
     $this->set_default_list('all');
 	$this->name_list               =$this->get_default_list_name();
 	$this->select_proxy_list($this->name_list);
@@ -323,7 +314,7 @@ public function get_dir_proxy_file()
 public function get_server_ip()
 {
 	if(isset($this->server_ip)) return $this->server_ip;
-    if($_SERVER['SERVER_ADDR']) $this->server_ip=$_SERVER['SERVER_ADDR'];
+    if(c_string_work::is_ip($_SERVER['SERVER_ADDR'])) $this->server_ip=$_SERVER['SERVER_ADDR'];
     else
     {
 	$this->get_content->set_use_proxy(0);
@@ -336,7 +327,7 @@ public function get_server_ip()
 		$reg="/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
 		if(preg_match($reg, $answer,$match)) break;
 	}
-	if(!$match['ip']) return false;
+	if(!$match['ip'] && c_string_work::is_ip($match['ip'])) return false;
     $this->server_ip=$match['ip'];
     }
 	return $this->server_ip;
@@ -352,28 +343,26 @@ public function set_need_proxy_cookie($new_need_proxy_cookie)
 
     /**
      * Поиск сервера из каталога для проверки функций прокси
-     * @param string $check_url_proxy_array  url сервера для проверки функций прокси, если не работает выберает другой из каталога
+     * @param string $check_url_proxy  url сервера для проверки функций прокси, если не работает выберает другой из каталога
      * @return string возвращает рабочий url для проверки прокси
      */
-public function get_proxy_checker($check_url_proxy_array="")
+public function get_proxy_checker($check_url_proxy="")
 {
-	if($check_url_proxy_array==="") $check_url_proxy_array=$this->check_url_proxy_array;
-	$get_content=new c_get_content();
-	$get_content->set_use_proxy(0);
-	$get_content->set_type_content('text');
-	$get_content->set_mode_get_content('multi');
-	$get_content->set_count_multi_curl(1);
-	$get_content->set_min_size_answer(0);
-	$get_content->get_content($check_url_proxy_array);
-	$answer=$get_content->get_answer();
+	if($check_url_proxy==="") $check_url_proxy=$this->check_url_proxy;
+	$this->get_content->set_use_proxy(false);
+	$this->get_content->set_type_content('text');
+    $this->get_content->set_default_setting(CURLOPT_HEADER,false);
+	$this->get_content->set_mode_get_content('multi');
+    $this->get_content->set_count_multi_curl(1);
+	$this->get_content->set_min_size_answer(5);
+    $answer=$this->get_content->get_content($check_url_proxy);
 	foreach($answer as $key => $value)
 	{
-		foreach($value as $subKey => $sub_value)
+		foreach($value as $sub_value)
 		{
-			if(preg_match("/yandex/i",$sub_value))
+			if(preg_match("/^[01]{5}$/i",$sub_value))
 			{
-				$this->check_url_proxy=$check_url_proxy_array[$key];
-				return $this->check_url_proxy;
+				return $this->check_url_proxy[$key];
 			}
 		}
 	}
@@ -469,23 +458,15 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 			$get_content->set_type_content("text");
 			$page=$get_content->get_content($value_proxy_list);
 			$reg="/\s*(?<proxy>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}),(?<port>\d{1,5}),(?<type_proxy>HTTP|SOCKS5),\s*/iUm";
-			//$iTMP=0;
 			if(preg_match_all($reg, $page, $matches_proxy))
 			{
 				foreach ($matches_proxy['proxy'] as $key => $value)
 				{
-					//$reg="/\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:+\d+)\s*/i";
-					//$is_ip=$value;
-					//if(preg_match($reg,$is_ip))
-					//{
-					//$iTMP++;
-					//if($iTMP>10) break;
 						$tmp_array['proxy']=$matches_proxy['proxy'][$key].":".$matches_proxy['port'][$key];
 						$tmp_array["source_proxy"]=$key_proxy_list;
 						$tmp_array["type_proxy"]=$this->set_name_type_proxy($matches_proxy['type_proxy'][$key]);
 						$proxy['content'][]=$tmp_array;
-					//}
-				}		
+				}
 			}
 			break;
 		case "seprox.ru":
@@ -549,8 +530,6 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 						$reg="/$value_ip='([^']*)'/";
 						if(preg_match($reg, $str_secret_code, $match_ip)) $ip.=$match_ip[1];
 					}
-					//setLog(__FILE__,__LINE__,"IP");
-					//setLog(__FILE__,__LINE__,$ip);
 					$reg="/\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:+\d+)\s*/i";
 					$is_ip=$ip;
 					if(preg_match($reg,$is_ip))
@@ -559,7 +538,7 @@ public function download_proxy_site($key_proxy_list,$value_proxy_list)
 						$tmp_array["source_proxy"]=$key_proxy_list;
 						$tmp_array["type_proxy"]=$this->set_name_type_proxy($matches_secret_code['type_proxy'][$key_secret_code]);
 						$proxy['content'][]=$tmp_array;
-					}//setLog(__FILE__,__LINE__,"Не канает этот IP ".$is_ip);
+					}
 				}
 				$i++;
 				if(!$page=$get_content->get_content($value_proxy_list.$i.".html"))
@@ -651,7 +630,7 @@ public function open_proxy_list($proxy_list='')
 }
 
     /**
-     *Закрывает текущий прокси лист
+     * Закрывает текущий прокси лист
      */
 public function close_proxy_list()
 {
@@ -698,7 +677,7 @@ public function bloc_proxy_list()
 		// Прокси лист занят
         echo "Прокси лист занят";
         ob_flush();
-        flush();
+        flush();/* TODO: Перед публикацией удалить */
         ob_flush();
 		sleep(1);
 		}while(true);
@@ -1094,97 +1073,86 @@ public function get_last_use_proxy()
 {
 	return $this->last_use_proxy;
 }
-/* TODO: Обязательный рефакторинг функции check_proxy */
     /**
-     * Проверяет прокси адрес
-     * @param string|array $proxy прокси адрес
-     * @param string $method ХЗ
-     * @param array $data ХЗ
+     * Проверяет прокси адрес на работоспособность и на поддерживаетмые функции
+     * @param string $proxy прокси адрес
      * @return array|int|string
      */
-public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.ru"))//function
+public function check_proxy($proxy)
 {
-	if(!$this->need_check_proxy) return $proxy;
-	if($method=='function')
+    if(!$this->need_check_proxy) return $proxy;
+    if(is_string($proxy) && c_string_work::is_ip($proxy))
+    {
+    	$this->get_content->set_mode_get_content('single');
+    	$this->get_content->set_use_proxy($proxy);
+        $this->get_content->set_min_size_answer(5);
+        $this->get_content->set_default_setting(CURLOPT_REFERER,"proxy-check.net");
+        $this->get_content->set_default_setting(CURLOPT_POST,true);
+        $this->get_content->set_default_setting(CURLOPT_POSTFIELDS,"proxy=yandex");
+        $this->get_content->set_type_content('text');
+        $this->get_content->set_default_setting(CURLOPT_HEADER,false);
+        $this->get_content->set_check_answer(false);
+        $answer=$this->get_content->get_content($this->get_proxy_checker().'?ip='.$this->get_server_ip().'&proxy=yandex');
+        $this->get_content->restore_default_settings();
+        if(preg_match('#^[01]{5}$#',$answer) && preg_match_all('#(?<fun_status>[01])#U',$answer,$matches))
+        {
+            $info_proxy['proxy']=$proxy;
+            $info_proxy['anonim']=$matches['fun_status'][0];
+            $info_proxy['referer']=$matches['fun_status'][1];
+            $info_proxy['post']=$matches['fun_status'][2];
+            $info_proxy['get']=$matches['fun_status'][3];
+            $info_proxy['cookie']=$matches['fun_status'][4];
+            $info_proxy['last_cheak']=time();
+            return $info_proxy;
+        }
+    }
+    else return false;
+}
+
+    /**
+     * Проверяет массив прокси адресов на работоспособность и на поддерживаетмые функции
+     * @param array $array_proxy массив прокси адресов
+     * @return array|bool
+     */
+public function check_array_proxy($array_proxy)
+{
+	if(is_array($array_proxy))
 	{
-		$this->get_server_ip();
-		if(!$url=$this->get_proxy_checker()) return false;
-	}
-	if(is_string($proxy))
-	{
-		if(preg_match("/\s*\d{1,3}.\d{1,3}.\d{1,3}.\d{1,3}(:+\d+)\s*/",$proxy))
-		{
-			$this->get_content->set_mode_get_content('single');
-			//$this->get_content->set_proxy($proxy);
-			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor(),CURLOPT_PROXY,$proxy);
-			$this->get_content->set_check_answer(0);
-			$get=array();
-//			if($this->need_anonim_proxy) $get[]="ip=".$this->server_ip;
-//			if($this->need_proxy_cookie) $get[]="cookie";
-			$query="";
-			for($i=0;$i<count($get);$i++)
-			{
-				if(($i+1)<count($get))
-				{
-					$query.=$get[$i]."&";
-				}
-				else
-				{
-					$query.=$get[$i];
-				}
-			}
-			$answer_content=$this->get_content->get_content($url);
-			if(preg_match("/yandex/i",$answer_content))
-			{
-				return $proxy;
-			}
-			else
-			{
-				return false;
-			}
-		}
-		else
-		{
-			return false;
-		}
-	}
-	if(is_array($proxy))
-	{
-		$good_proxy=array();
 		$this->get_content->set_mode_get_content('multi');
-		$this->get_content->set_count_multi_curl(count($proxy));
-		reset($proxy);
-		for($i=0;current($proxy)!==false;$i++)
+        $this->get_content->set_count_multi_curl(count($array_proxy));
+        $this->get_content->set_count_multi_stream(1);
+        $this->get_content->set_min_size_answer(5);
+        $this->get_content->set_default_setting(CURLOPT_REFERER,"proxy-check.net");
+        $this->get_content->set_default_setting(CURLOPT_POST,true);
+        $this->get_content->set_default_setting(CURLOPT_POSTFIELDS,"proxy=yandex");
+        $this->get_content->set_type_content('text');
+        $this->get_content->set_default_setting(CURLOPT_HEADER,false);
+        $this->get_content->set_check_answer(false);
+        $url=$this->get_proxy_checker().'?ip='.$this->get_server_ip().'&proxy=yandex';
+        $url_array=array();
+        reset($array_proxy);
+        foreach ($this->get_content->get_descriptor_array() as $key => &$value)
+        {
+            $this->get_content->set_option_to_descriptor($value,CURLOPT_PROXY,current($array_proxy),$key);
+            next($array_proxy);
+            $url_array[]=$url;
+        }
+        $answer_content=$this->get_content->get_content($url_array);
+        $this->get_content->restore_default_settings();
+        $good_proxy=array();
+        foreach ($answer_content as $key => $value)
 		{
-			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor_array(),CURLOPT_PROXY,current($proxy),$i);
-			//$this->get_content->set_proxy(current($proxy),$i);
-			next($proxy);
-		}
-		$this->get_content->set_check_answer(0);
-		$get=array();
-		//if($this->need_anonim_proxy) $get[]="ip=".$this->server_ip;
-		//if($this->need_proxy_cookie) $get[]="cookie";
-		$query="";
-		for($i=0;$i<count($get);$i++)
-		{
-			if(($i+1)<count($get))
-			{
-				$query.=$get[$i]."&";
-			}
-			else
-			{
-				$query.=$get[$i];
-			}
-		}
-		$answer_content=$this->get_content->get_content($this->check_url_proxy."?".$query);
-		reset($proxy);
-		foreach ($answer_content as $key => $value)
-		{
-			if(preg_match("/yandex/i",$value))
-			{
-				$good_proxy[key($proxy)]=current($proxy);
-			}
-			next($proxy);
+			if(preg_match('#^[01]{5}$#',$value) && preg_match_all('#(?<fun_status>[01])#U',$value,$matches))
+            {
+                $info_proxy['proxy']=$array_proxy[$key];
+                $info_proxy['anonim']=$matches['fun_status'][0];
+                $info_proxy['referer']=$matches['fun_status'][1];
+                $info_proxy['post']=$matches['fun_status'][2];
+                $info_proxy['get']=$matches['fun_status'][3];
+                $info_proxy['cookie']=$matches['fun_status'][4];
+                $info_proxy['last_cheak']=time();
+                $good_proxy[]=$info_proxy;
+            }
 		}
 		unset($value);
 		if(count($good_proxy))
@@ -1198,104 +1166,49 @@ public function check_proxy($proxy,$method="url",$data=array('url'=>"http://ya.r
 
 	}
 }
-    /* TODO: Обязательный рефакторинг функции check_proxy_array_to_site */
-private function check_proxy_array_to_site($proxy,$url,$check_word)
-{
-		$this->get_content->set_mode_get_content('multi');
-		$this->get_content->set_count_multi_curl(count($proxy));
-		reset($proxy);
-		for($i=0;current($proxy)!==false;$i++)
-		{
-			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor_array(),CURLOPT_PROXY,current($proxy),$i);
-			next($proxy);
-		}
-		$this->get_content->set_check_answer(0);
-		$answer_content=$this->get_content->get_content($url);
-		reset($proxy);
-		$good_proxy=array();
-		foreach ($answer_content as $key => $value)
-		{
-			$test_count=0;
-			$count_good_check=0;
-			foreach ($check_word as $value_check_word)
-			{
-				$test_count++;
-				if(preg_match($value_check_word,$value))
-				{
-					$count_good_check++;
-				}
-			}
-			unset($value_check_word);
-			if($count_good_check==$test_count)
-			{
-				$good_proxy[key($proxy)]=current($proxy);
-			}
-			next($proxy);
-		}
-		unset($value);
-		if(count($good_proxy))
-		{
-			return $good_proxy;
-		}
-		else
-		{
-			return 0;
-		}
-}
-    /* TODO: Обязательный рефакторинг функции check_proxy_array_to_function */
-private function check_proxy_array_to_function($proxy,$need_function)
-{
-		if(!$url=$this->get_proxy_checker()) return 0;
-		$this->get_content->set_mode_get_content('multi');
-		$this->get_content->set_count_multi_curl(count($proxy));
-		reset($proxy);
-		for($i=0;current($proxy)!==false;$i++)
-		{
-			$this->get_content->set_option_to_descriptor($this->get_content->get_descriptor_array(),CURLOPT_PROXY,current($proxy),$i);
-			//$this->c_get_content->set_proxy(current($proxy),$i);
-			next($proxy);
-		}
-		$this->get_content->set_check_answer(0);
-		$get=array();
-		if(array_search("anonim",$need_function))
-		{
-			if($this->get_server_ip()) $get[]="ip=".$this->server_ip;
-		}
-		if(array_search("cookie",$need_function)) $get[]="cookie";
-		$query="";
-		for($i=0;$i<count($get);$i++)
-		{
-			if(($i+1)<count($get))
-			{
-				$query.=$get[$i]."&";
-			}
-			else
-			{
-				$query.=$get[$i];
-			}
-		}
-		$answer_content=$this->get_content->get_content($url."?".$query);
-		reset($proxy);
-		$good_proxy=array();
-		foreach ($answer_content as $key => $value)
-		{
-			if(preg_match("/yandex/i",$value))
-			{
-				$good_proxy[key($proxy)]=current($proxy);
-			}
-			next($proxy);
-		}
-		unset($value);
-		if(count($good_proxy))
-		{
-			return $good_proxy;
-		}
-		else
-		{
-			return 0;
-		}
-}
 
+    /**
+     * Проверка доступности сайта через список прокси, отсеевает не рабочие прокси
+     * @param array $array_proxy тестовый список прокси
+     * @param string $url ссылка на страницу проверки
+     * @param array $check_word проверочные регулярные выражения
+     * @return array|bool
+     */
+private function check_proxy_array_to_site($array_proxy,$url,$check_word)
+{
+    $this->get_content->set_mode_get_content('multi');
+    $this->get_content->set_count_multi_curl(count($array_proxy));
+    $this->get_content->set_count_multi_stream(1);
+    $this->get_content->set_type_content('text');
+    $this->get_content->set_default_setting(CURLOPT_HEADER,false);
+    $this->get_content->set_check_answer(false);
+    reset($array_proxy);
+    foreach ($this->get_content->get_descriptor_array() as $key => &$value)
+    {
+        $this->get_content->set_option_to_descriptor($value,CURLOPT_PROXY,current($array_proxy),$key);
+		next($array_proxy);
+        $url_array[]=$url;
+	}
+	$answer_content=$this->get_content->get_content($url_array);
+	reset($array_proxy);
+	$good_proxy=array();
+	foreach ($answer_content as $value)
+	{
+		$test_count=0;
+		$count_good_check=0;
+		foreach ($check_word as $value_check_word)
+		{
+			$test_count++;
+			if(preg_match($value_check_word,$value)) $count_good_check++;
+		}
+		unset($value_check_word);
+		if($count_good_check==$test_count) $good_proxy[key($array_proxy)]=current($array_proxy);
+		next($array_proxy);
+	}
+	unset($value);
+	if(count($good_proxy)) return $good_proxy;
+	else return false;
+}
     /**
      * Сохраняет прокси список
      * @param array|bool $proxy_list сохраняемый список прокси
@@ -1631,4 +1544,3 @@ public function check_all_proxy()
 }
 
 }
-?>

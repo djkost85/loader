@@ -14,26 +14,6 @@
  */
 $str='';
 $plus='';
-/*
-// Информация для отадки скрипта
-echo "<br>__SERVER<br>";
-foreach ($_SERVER as $key => $value)
-{
-    echo $key."=>'".$value."'<br>";
-}
-echo "<br>__GET<br>";
-foreach ($_GET as $key => $value)
-{
-    echo $key."=>'".$value."'<br>";
-}
-echo "<br>__POST<br>";
-foreach ($_POST as $key => $value)
-{
-    echo $key."=>'".$value."'<br>";
-}
-
-exit;
-*/
 if(!isset($_GET['str']))
 {
     $anonim='1';
