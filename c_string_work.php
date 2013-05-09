@@ -283,19 +283,17 @@ public static function get_encoding_name($str)
         $weights[$encoding] = 0;
         $specters[$encoding] = require 'string_work_files/specters/'.$encoding.'.php';
     }
-    if(preg_match_all("#(?<let>.{2})#",$str,$matches))
+    foreach(str_split($str,2) as $key)
     {
-        foreach($matches['let'] as $key)
+        foreach ($possible_encodings as $encoding)
         {
-            foreach ($possible_encodings as $encoding)
+            if (isset($specters[$encoding][$key]))
             {
-                if (isset($specters[$encoding][$key]))
-                {
-                    $weights[$encoding] += $specters[$encoding][$key];
-                }
+                $weights[$encoding] += $specters[$encoding][$key];
             }
         }
     }
+    unset($key);
     $sum_weight = array_sum($weights);
     foreach ($weights as $encoding => $weight)
     {
