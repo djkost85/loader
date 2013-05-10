@@ -163,6 +163,9 @@ function __construct()
                               );
 	$this->set_dir_cookie("get_content_files/cookie");
 	$this->restore_default_settings();
+    $this->count_multi_stream=1;
+    $this->count_multi_curl=1;
+    $this->set_count_multi_descriptor();
 	$this->set_use_proxy(false);
 	$this->set_number_repeat(0);
 	$this->set_max_number_repeat(0);
@@ -277,6 +280,9 @@ public function get_default_settings()
 	return $this->default_settings;
 }
 
+    /**
+     * Востанавливает настройки по умолчанию для всех потоков где не изменены настройки дескрипторов
+     */
 public function restore_default_settings()
 {
     $this->set_default_settings(array(
@@ -348,7 +354,7 @@ public function get_max_number_repeat()
      */
 private function repeat_get_content()
 {
-	if($this->get_number_repeat()<$this->get_max_number_repeat())
+	if($this->get_number_repeat() < $this->get_max_number_repeat())
 	{
 		$this->next_repeat();
 		return true;
@@ -400,13 +406,13 @@ public function set_type_content($type_content="text")
 	{
 		case 'file':
 			$this->type_content='file';
-			$this->set_default_setting(CURLOPT_HEADER,0);
+			$this->set_default_setting(CURLOPT_HEADER,false);
 			$this->set_encoding_answer(0);
             return true;
 			break;
         case 'img':
             $this->type_content='img';
-            $this->set_default_setting(CURLOPT_HEADER,0);
+            $this->set_default_setting(CURLOPT_HEADER,false);
             $this->set_encoding_answer(0);
             return true;
             break;
@@ -521,6 +527,10 @@ public function get_count_multi_stream()
 {
     return $this->count_multi_stream;
 }
+
+    /**
+     * Задает число дескрипторов cURL для подлучение данных
+     */
 private function set_count_multi_descriptor()
 {
     $this->count_multi_descriptor=$this->get_count_multi_curl()*$this->get_count_multi_stream();
@@ -541,18 +551,16 @@ public function set_mode_get_content($new_mode_get_content='single')
 	{
 		case 'single':
 			$this->mode_get_content='single';
-			$this->init_get_content();
-            return true;
 			break;
 		case 'multi':
 			$this->mode_get_content='multi';
 			if($this->get_count_multi_curl()<1)$this->set_count_multi_curl(1);
-			return true;
             break;
 		default:
 			return false;
-			break;
 	}
+    $this->init_get_content();
+    return true;
 }
 public function get_mode_get_content()
 {
@@ -576,10 +584,10 @@ private function init_get_content()
 	switch ($this->get_mode_get_content())
 	{
 		case 'single':
-			$this->init_single_get_content($this->get_descriptor());
+			$this->init_single_get_content();
 			break;
 		case 'multi':
-			$this->init_multi_get_content($this->get_descriptor(), $this->get_descriptor_array());
+			$this->init_multi_get_content();
 			break;
 		default:
 			# code
@@ -589,11 +597,11 @@ private function init_get_content()
 
     /**
      * Инициализация дескриптора cURL в режиме single
-     * @param array &$descriptor Ссылка на дескриптор cURL
      * @return void
      */
-private function init_single_get_content(&$descriptor)
+private function init_single_get_content()
 {
+    $descriptor=&$this->get_descriptor();
     if(!isset($descriptor['descriptor_key'])) $descriptor['descriptor_key']=microtime(1).mt_rand();
     if(!file_exists($this->get_dir_cookie().$descriptor['descriptor_key'].".cookie"))
     {
@@ -605,14 +613,14 @@ private function init_single_get_content(&$descriptor)
 
     /**
      * Инициализация дескриптора cURL в режиме multi
-     * @param array &$descriptor Ссылка на мульти дескриптор cURL
-     * @param array &$descriptor_array ссылка на массив cURL дескрипторов
      * @return void
      */
-private function init_multi_get_content(&$descriptor, &$descriptor_array)
+private function init_multi_get_content()
 {
+    $descriptor=&$this->get_descriptor();
+    $descriptor_array=&$this->get_descriptor_array();
     $descriptor['descriptor']=curl_multi_init();
-    if(is_array($descriptor_array))
+    if(is_array($descriptor_array) && count($descriptor_array)>$this->get_count_multi_descriptor())
     {
         $descriptor_array=array_slice($descriptor_array, 0, $this->get_count_multi_descriptor());
     }
@@ -639,10 +647,10 @@ private function close_get_content()
 		switch ($this->get_mode_get_content())
 		{
 			case 'single':
-				$this->close_single_get_content($descriptor);
+				$this->close_single_get_content();
 				break;
 			case 'multi':
-				$this->close_multi_get_content($descriptor, $this->get_descriptor_array());
+				$this->close_multi_get_content();
 				break;
 			default:
 				break;
@@ -652,11 +660,11 @@ private function close_get_content()
 
     /**
      * Закрывает инициализированные cURL дескриптроры в режиме single
-     * @param array &$descriptor ссылка на cURL дескриптор
      * @return void
      */
-private function close_single_get_content(&$descriptor)
+private function close_single_get_content()
 {
+    $descriptor=&$this->get_descriptor();
     curl_close($descriptor['descriptor']);
     if($this->get_use_proxy() && is_object($this->proxy))
     {
@@ -667,33 +675,36 @@ private function close_single_get_content(&$descriptor)
 }
     /**
      * Закрывает инициализированные cURL дескриптроры в режиме multi
-     * @param array &$descriptor Ссылка на мульти дескриптор cURL
-     * @param array &$descriptor_array ссылка на массив cURL дескрипторов
      * @return void
      */
-private function close_multi_get_content(&$descriptor, &$descriptor_array)
+private function close_multi_get_content()
 {
-    foreach ($descriptor_array as $key => $value)
+    $descriptor=&$this->get_descriptor();
+    $descriptor_array=&$this->get_descriptor_array();
+    if(is_array($descriptor_array))
     {
-        if(isset($descriptor_array[$key]['descriptor']))
+        foreach ($descriptor_array as $key => $value)
         {
-            @curl_multi_remove_handle($descriptor['descriptor'],$descriptor_array[$key]['descriptor']);
-            curl_close($descriptor_array[$key]['descriptor']);
-            if($this->get_use_proxy() && is_object($this->proxy))
+            if(isset($descriptor_array[$key]['descriptor']))
             {
-                $this->proxy->remove_all_rent_from_code($descriptor_array[$key]['descriptor_key']);
+                @curl_multi_remove_handle($descriptor['descriptor'],$descriptor_array[$key]['descriptor']);
+                curl_close($descriptor_array[$key]['descriptor']);
+                if($this->get_use_proxy() && is_object($this->proxy))
+                {
+                    $this->proxy->remove_all_rent_from_code($descriptor_array[$key]['descriptor_key']);
+                }
+                unset($descriptor_array[$key]['descriptor']);
+                unset($descriptor_array[$key]['option']);
             }
-            unset($descriptor_array[$key]['descriptor']);
-            unset($descriptor_array[$key]['option']);
         }
+        unset($value);
     }
-    unset($value);
     @curl_multi_close($descriptor['descriptor']);
 }
     /**
      * Выполнение заросов по $url с определением по какому методу осуществлять запрос
      * @param string|array $url
-     * @return array|int|string
+     * @return array|string
      */
 public function get_content($url="")
 {
@@ -703,36 +714,36 @@ public function get_content($url="")
 	{
 			case 'single':
                 $this->set_default_setting(CURLOPT_URL,$url);
-				$this->get_single_content($this->get_descriptor());
+				$this->get_single_content();
 				break;
 			case 'multi':
 				$this->set_count_multi_curl(count($url));
-				$descriptor=&$this->get_descriptor();
                 $descriptor_array=&$this->get_descriptor_array();
+                $count_multi_stream=$this->get_count_multi_stream();
+                $j=0;
                 foreach ($url as $value_url)
 				{
-                    foreach ($descriptor_array as &$descriptor_value)
+                    for($i=0;$i<$count_multi_stream;$i++)
                     {
-                        if(isset($descriptor_value['descriptor']))
+                        if(isset($descriptor_array[$j]['descriptor']))
                         {
-                            $this->set_option_to_descriptor($descriptor_value,CURLOPT_URL,$value_url);
+                            $this->set_option_to_descriptor($descriptor_array[$j],CURLOPT_URL,$value_url);
                         }
+                        $j++;
                     }
 				}
-				$answer=$this->get_multi_content($descriptor,$descriptor_array);
+				$answer=$this->get_multi_content();
 				$tmp_answer=array();
 				$j=0;
 				foreach ($url as $key_url => $value_url)
 				{
-					for ($i=0;$i<$this->get_count_multi_stream();$i++)
+                    for ($i=0;$i<$count_multi_stream;$i++)
 					{
 						if(isset($answer[$j])) $tmp_answer[$key_url][$i]=$answer[$j];
 						$j++;
 					}
 				}
 				$this->answer=$tmp_answer;
-				$this->set_count_multi_curl(1);
-                $this->set_count_multi_stream(1);
 				break;
 			default:
 				break;
@@ -744,17 +755,16 @@ public function get_content($url="")
 
     /**
      * Совершает зарос в режиме single
-     * @param array $descriptor ссылка на дескриптор cURL
      * @return string
      */
-private function get_single_content(&$descriptor=NULL)
+private function get_single_content()
 {
-	if($descriptor==NULL) $descriptor=&$this->get_descriptor();
+	$descriptor=&$this->get_descriptor();
 	do{
 		$this->set_options_to_descriptor($descriptor);
-		$answer=$this->exec_get_content($descriptor);
+		$answer=$this->exec_single_get_content();
         $descriptor['info']=curl_getinfo($descriptor['descriptor']);
-		if(!$this->get_check_answer() && $this->check_answer_valid($descriptor['info']))
+		if(!$this->get_check_answer() || $this->check_answer_valid($descriptor['info']))
 		{
 			$this->answer=$answer;
 			$this->end_repeat();
@@ -771,23 +781,20 @@ private function get_single_content(&$descriptor=NULL)
 
     /**
      * Совершает запрос в режиме multi
-     * @param array $descriptor multi дескриптор сURL
-     * @param array $descriptor_array набор дескрипторов cURL приналдежащих multi дескриптору cURL
      * @return array
      */
-private function get_multi_content(&$descriptor=NULL,&$descriptor_array=NULL)
+private function get_multi_content()
 {
-	if($descriptor==NULL) $descriptor=&$this->get_descriptor();
-	if($descriptor_array==NULL) $descriptor_array=&$this->get_descriptor_array();
+	$descriptor_array=&$this->get_descriptor_array();
 	do{
 		foreach($descriptor_array as $key => $value) $this->set_options_to_descriptor($descriptor_array[$key]);
 		unset($value);
-		$answer=$this->exec_get_content($descriptor,$descriptor_array);
+		$answer=$this->exec_multi_get_content();
 		$good_answer=array();
 		foreach ($answer as $key => $value)
 		{
 			$descriptor_array[$key]['info']=curl_getinfo($descriptor_array[$key]['descriptor']);
-			if(!isset($good_answer[$key]) && !$this->get_check_answer() && $this->check_answer_valid($descriptor_array[$key]['info']))
+			if(!isset($good_answer[$key]) && (!$this->get_check_answer() || $this->check_answer_valid($descriptor_array[$key]['info'])))
                 $good_answer[$key]=$value;
 			elseif($this->get_use_proxy() && is_object($this->proxy))
 				{
@@ -801,8 +808,7 @@ private function get_multi_content(&$descriptor=NULL,&$descriptor_array=NULL)
 		}
 	}while($this->repeat_get_content());
     foreach($good_answer as &$value) $value=$this->prepare_content($value);
-	$this->answer=$good_answer;
-	return $this->get_answer();
+	return $good_answer;
 }
 
     /**
@@ -910,19 +916,17 @@ private function check_option(&$descriptor,$option,$value=NULL)
 
     /**
      * Выполнение запроса cURL
-     * @param array $descriptor дескриптор cURL или multi_cURL
-     * @param array $descriptor_array набор дескрипторов для режима multi
      * @return mixed
      */
-private function exec_get_content(&$descriptor,&$descriptor_array=NULL)
+private function exec_get_content()
 {
 	switch ($this->get_mode_get_content())
 	{
 		case 'single':
-            return $this->exec_single_get_content($descriptor);
+            return $this->exec_single_get_content();
 			break;
 		case 'multi':
-            return $this->exec_multi_get_content($descriptor, $descriptor_array);
+            return $this->exec_multi_get_content();
 			break;
 		default:
 			break;
@@ -933,23 +937,23 @@ private function exec_get_content(&$descriptor,&$descriptor_array=NULL)
 
     /**
      * Выполнение запроса cURL в режиме single
-     * @param array $descriptor дескриптор cURL
      * @return string
      */
-private function exec_single_get_content(&$descriptor)
+private function exec_single_get_content()
 {
+    $descriptor=&$this->get_descriptor();
     $this->answer=curl_exec($descriptor['descriptor']);
     return $this->answer;
 }
 
     /**
      * Выполнение запроса cURL в режиме multi
-     * @param array $descriptor дескриптор multi_cURL
-     * @param array $descriptor_array набор дескрипторов cURL
      * @return array
      */
-private function exec_multi_get_content(&$descriptor,&$descriptor_array)
+private function exec_multi_get_content()
 {
+    $descriptor=&$this->get_descriptor();
+    $descriptor_array=&$this->get_descriptor_array();
     do{
         curl_multi_exec($descriptor['descriptor'],$running);
         usleep(100);
@@ -996,18 +1000,18 @@ public function get_answer($get_all_answer=false)
      */
 private function get_big_answer($a)
 {
-	if(!function_exists("sort_array_answer"))
-	{
-		function sort_array_answer($a, $b)
-		{
-			if (strlen($a) < strlen($b)) return 1;
-            elseif (strlen($a) == strlen($b)) return 0;
-            else return -1;
-		}
-	}
-	if(!is_array($a)) return false;
-	usort($a, 'sort_array_answer');
-	return $a[0];
+    $big_a=0;
+    $big_key=0;
+    foreach ($a as $key => $value)
+    {
+        $this_a=strlen($value);
+        if($this_a>$big_a)
+        {
+            $big_a=$this_a;
+            $big_key=$key;
+        }
+    }
+    return $a[$big_key];
 }
 
     /**
@@ -1050,11 +1054,11 @@ private function mime_type($mime,$type)
             return true;
             break;
         case 'img':
-            if(preg_match('#^image/(gif|p?jpeg|png|svg\+xml|tiff|vnd\.microsoft\.icon|vnd\.wap\.wbmp)$#i',$mime)) return true;
+            if(preg_match('#image/(gif|p?jpeg|png|svg\+xml|tiff|vnd\.microsoft\.icon|vnd\.wap\.wbmp)#i',$mime)) return true;
             else return false;
             break;
         case 'html':
-            if(preg_match('#^text/html$#i',$mime)) return true;
+            if(preg_match('#text/html#i',$mime)) return true;
             else return false;
             break;
     }
