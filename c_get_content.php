@@ -787,13 +787,14 @@ private function get_multi_content(&$descriptor=NULL,&$descriptor_array=NULL)
 		foreach ($answer as $key => $value)
 		{
 			$descriptor_array[$key]['info']=curl_getinfo($descriptor_array[$key]['descriptor']);
-			if(!$this->get_check_answer() && $this->check_answer_valid($descriptor_array[$key]['info'])) $good_answer[$key]=$value;
+			if(!isset($good_answer[$key]) && !$this->get_check_answer() && $this->check_answer_valid($descriptor_array[$key]['info']))
+                $good_answer[$key]=$value;
 			elseif($this->get_use_proxy() && is_object($this->proxy))
 				{
 					$this->proxy->remove_proxy_in_list($descriptor_array[$key]['option'][CURLOPT_PROXY]);
 				}
 		}
-		if(count($good_answer))
+		if(count($good_answer)==count($descriptor_array))
 		{
 			$this->end_repeat();
 			break;
