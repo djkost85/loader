@@ -28,7 +28,7 @@ class c_proxy
      * proxy_list["time"] время последнего обновления
      * proxy_list["count"] количество подходящих прокси
      * proxy_list["url"] URL сайта на котором проверяется прокси
-     * proxy_list[""check_word""][индекс] Проверочное слово которое должно быть в ответе с сервера- это регулярное выражение
+     * proxy_list["check_word"][индекс] Проверочное слово которое должно быть в ответе с сервера- это регулярное выражение
      * proxy_list["need_function"][индекс] Необходимые функции которые должен поддерживать прокси
      * proxy_list["name_list"] Имя лисат этому имени будет соответствовать имя файла
      * @access protected
@@ -919,25 +919,25 @@ public function check_proxy($proxy)
      * @param array $array_proxy массив прокси адресов
      * @return array|bool
      */
-public function check_proxy_array($array_proxy)
+private function check_proxy_array($array_proxy)
 {
 	if(is_array($array_proxy))
 	{
         $good_proxy=array();
         $url=$this->get_proxy_checker().'?ip='.$this->get_server_ip().'&proxy=yandex';
+        $this->get_content->set_mode_get_content('multi');
+        $this->get_content->set_count_multi_stream(1);
+        $this->get_content->set_min_size_answer(5);
+        $this->get_content->set_max_number_repeat(0);
+        $this->get_content->set_default_setting(CURLOPT_REFERER,"proxy-check.net");
+        $this->get_content->set_default_setting(CURLOPT_POST,true);
+        $this->get_content->set_default_setting(CURLOPT_POSTFIELDS,"proxy=yandex");
+        $this->get_content->set_type_content('text');
+        $this->get_content->set_default_setting(CURLOPT_HEADER,false);
+        $this->get_content->set_check_answer(false);
         foreach(array_chunk($array_proxy,100) as $value_array_proxy)
         {
-		    $this->get_content->set_mode_get_content('multi');
             $this->get_content->set_count_multi_curl(count($value_array_proxy));
-            $this->get_content->set_count_multi_stream(1);
-            $this->get_content->set_min_size_answer(5);
-            $this->get_content->set_max_number_repeat(0);
-            $this->get_content->set_default_setting(CURLOPT_REFERER,"proxy-check.net");
-            $this->get_content->set_default_setting(CURLOPT_POST,true);
-            $this->get_content->set_default_setting(CURLOPT_POSTFIELDS,"proxy=yandex");
-            $this->get_content->set_type_content('text');
-            $this->get_content->set_default_setting(CURLOPT_HEADER,false);
-            $this->get_content->set_check_answer(false);
             $url_array=array();
             reset($value_array_proxy);
             $descriptor_array=&$this->get_content->get_descriptor_array();
@@ -948,7 +948,6 @@ public function check_proxy_array($array_proxy)
                 $url_array[]=$url;
             }
             $answer_content=$this->get_content->get_content($url_array);
-            $this->get_content->restore_default_settings();
             foreach ($answer_content as $key => $value)
 		    {
 		    	if(preg_match('#^[01]{5}$#',$value) && preg_match_all('#(?<fun_status>[01])#U',$value,$matches))
@@ -965,6 +964,7 @@ public function check_proxy_array($array_proxy)
 		    }
 		    unset($value);
         }
+        $this->get_content->restore_default_settings();
         if(count($good_proxy)) return $good_proxy;
 	}
     return false;
@@ -979,38 +979,43 @@ public function check_proxy_array($array_proxy)
      */
 private function check_proxy_array_to_site($array_proxy,$url,$check_word)
 {
+    $good_proxy=array();
     $this->get_content->set_mode_get_content('multi');
-    $this->get_content->set_count_multi_curl(count($array_proxy));
     $this->get_content->set_count_multi_stream(1);
     $this->get_content->set_type_content('text');
     $this->get_content->set_default_setting(CURLOPT_HEADER,false);
+    $this->get_content->set_default_setting(CURLOPT_POST,false);
     $this->get_content->set_check_answer(false);
-    reset($array_proxy);
-    $descriptor_array=&$this->get_content->get_descriptor_array();
-    $url_array=array();
-    foreach ($descriptor_array as $key => &$value)
+    foreach (array_chunk($array_proxy,100) as $value_proxy)
     {
-        $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,$array_proxy[key($array_proxy)]['proxy'],$key);
-		next($array_proxy);
-        $url_array[]=$url;
-	}
-	$answer_content=$this->get_content->get_content($url_array);
-	reset($array_proxy);
-	$good_proxy=array();
-	foreach ($answer_content as $value)
-	{
-		$test_count=0;
-		$count_good_check=0;
-		foreach ($check_word as $value_check_word)
-		{
-			$test_count++;
-			if(preg_match($value_check_word,$value)) $count_good_check++;
-		}
-		unset($value_check_word);
-		if($count_good_check==$test_count) $good_proxy[key($array_proxy)]=$array_proxy[key($array_proxy)]['proxy'];
-		next($array_proxy);
-	}
-	unset($value);
+        $this->get_content->set_count_multi_curl(count($value_proxy));
+        reset($value_proxy);
+        $descriptor_array=&$this->get_content->get_descriptor_array();
+        $url_array=array();
+        foreach ($descriptor_array as $key => $value)
+        {
+            $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,$value_proxy[key($value_proxy)]['proxy']);
+	    	next($value_proxy);
+            $url_array[]=$url;
+	    }
+	    $answer_content=$this->get_content->get_content($url_array);
+	    reset($value_proxy);
+	    foreach ($answer_content as $value)
+	    {
+	    	$test_count=0;
+	    	$count_good_check=0;
+	    	foreach ($check_word as $value_check_word)
+	    	{
+	    		$test_count++;
+	    		if(preg_match($value_check_word,$value)) $count_good_check++;
+	    	}
+	    	unset($value_check_word);
+	    	if($count_good_check==$test_count) $good_proxy[]=$value_proxy[key($value_proxy)];
+	    	next($value_proxy);
+	    }
+	    unset($value);
+    }
+    $this->get_content->restore_default_settings();
 	if(count($good_proxy)) return $good_proxy;
 	else return false;
 }
@@ -1062,8 +1067,9 @@ public function save_proxy_list($proxy_list=false)
      * @param string $check_url проверочный URL
      * @param array $check_word_array Проверочные регулярные выражения
      * @param array $need_function_array Перечень поддерживаемых функций
+     * @param bool $need_update
      */
-public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_word_array=array("#yandex#iUm"),$need_function_array=array())
+public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_word_array=array("#yandex#iUm"),$need_function_array=array(),$need_update=false)
 {
 	$this->close_proxy_list();
 	$this->name_list=$name_list;
@@ -1075,7 +1081,7 @@ public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_wo
 	$proxy_list['check_word']=$check_word_array;
     $proxy_list['need_function']=$need_function_array;
 	$proxy_list['name_list']=$name_list;
-	$proxy_list['need_update']=true;
+	$proxy_list['need_update']=$need_update;
 	$this->create_proxy_list_buk($proxy_list);
 	$this->save_proxy_list($proxy_list);
 }
@@ -1099,6 +1105,7 @@ protected function create_proxy_list_buk($proxy_list)
      */
 public function delete_proxy_list($name_list)
 {
+    if($name_list==$this->name_list) $this->close_proxy_list();
 	if(file_exists($this->get_dir_proxy_list_file()."/".$name_list.".proxy"))
 	{
 		unlink($this->get_dir_proxy_list_file()."/".$name_list.".proxy");
@@ -1182,7 +1189,7 @@ public function update_proxy_list($name_list,$force=false)
 		return $this->proxy_list;
 	}
     $this->proxy_list['content']=$this->get_proxy_by_function($allProxy['content'],$this->proxy_list['need_function']);
-    $this->proxy_list['content']=$this->check_proxy_array_to_site($this->proxy_list['content'],$this->proxy_list['url'],$this->proxy_list['check_words']);
+    $this->proxy_list['content']=$this->check_proxy_array_to_site($this->proxy_list['content'],$this->proxy_list['url'],$this->proxy_list['check_word']);
 	$this->save_proxy_list($this->proxy_list);
 	return $this->proxy_list;
 }
