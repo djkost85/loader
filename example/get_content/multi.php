@@ -6,6 +6,7 @@
  * Time: 13:48
  * Project: get_content
  * @author: Evgeny Pynykh bpteam22@gmail.com
+ * Получение данных с нескольких url в режиме multi
  */
 use get_content\c_get_content\c_get_content as c_get_content;
 //use get_content\c_proxy\c_proxy as c_proxy;

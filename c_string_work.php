@@ -103,26 +103,24 @@ public function encrypt_tag($text="",$reg="/(<[^<>]*>)/iUsm")
 		for($i=0;$i<$count;$i++)
 		{
 			$str=$matches[0][$i];
-			$this->cript_tag_array['hash'][$i]=md5($str);
+			$this->cript_tag_array['hash'][$i]=" ".microtime(1).mt_rand()." ";
 			$this->cript_tag_array['tag'][$i]=$str;
-			$text=str_replace($this->cript_tag_array['tag'][$i], $this->cript_tag_array['hash'][$i], $text);
+			$text=preg_replace("#".preg_quote($this->cript_tag_array['tag'][$i],'#')."#ms", $this->cript_tag_array['hash'][$i], $text);
 		}
 		return $this->text=$text;
 }
     /**
      * Заменяет хеш на HTML код после обработки через функцию encrypt_tag
      * @param string $text текст с хешами
-     * @param array $cript_tag_array массив с ключами
      * @return string
      */
-public function decrypt_tag($text="",$cript_tag_array=array())
+public function decrypt_tag($text="")
 {
-	if(count($cript_tag_array))$cript_tag_array=$this->cript_tag_array;
 	if(!$text)$text=$this->text;
-	for($i=0;$i<count($cript_tag_array['hash']);$i++)
-	{
-		$text=str_replace($cript_tag_array['hash'][$i], $cript_tag_array['tag'][$i], $text);
-	}
+    foreach ($this->cript_tag_array['hash'] as $key => $value)
+    {
+        $text=preg_replace("#".preg_quote($this->cript_tag_array['hash'][$key],'#')."#ms", $this->cript_tag_array['tag'][$key], $text);
+    }
 	return $this->text=$text;
 }
 

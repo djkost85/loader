@@ -462,7 +462,7 @@ public function get_encoding_answer()
      */
 public function set_encoding_name($value="UTF-8")
 {
-	$this->encoding_name=$value;
+	$this->encoding_name=$this->check_name_encoding($value);
 }
 public function get_encoding_name()
 {
@@ -474,13 +474,40 @@ public function get_encoding_name()
      */
 public function set_encoding_name_answer($value)
 {
-	$this->encoding_name_answer=$value;
+	$this->encoding_name_answer=$this->check_name_encoding($value);
 }
 public function get_encoding_name_answer()
 {
 	return $this->encoding_name_answer;
 }
 
+    /**
+     * Возвращает форматированое имя поддерживаемой кодировки
+     * @param $value название кодировки
+     * @return bool|string
+     */
+    private function check_name_encoding($value)
+{
+    switch(true)
+    {
+        case preg_match('#1251#',$value):
+            $value='windows-1251';
+            break;
+        case preg_match('#utf-?8#i',$value):
+            $value='UTF-8';
+            break;
+        case preg_match('#koi8-r#i',$value):
+            $value='koi8-r';
+            break;
+        case preg_match('#iso8859-?5#i',$value):
+            $value='iso8859-5';
+            break;
+        default:
+            $value=false;
+            break;
+    }
+    return $value;
+}
     /**
      * @param bool $value
      */
@@ -775,8 +802,8 @@ private function get_single_content()
 			$this->proxy->remove_proxy_in_list($descriptor['option'][CURLOPT_PROXY]);
 		}
 	}while($this->repeat_get_content());
-    $answer=$this->prepare_content($answer);
-	return $answer;
+    $this->answer=$this->prepare_content($answer);
+	return $this->get_answer();
 }
 
     /**
@@ -1174,7 +1201,13 @@ private function prepare_content($answer)
      */
 private function encoding_answer_text($text="")
 {
-	if($this->get_encoding_answer()) return iconv($this->get_encoding_name(), c_string_work::get_encoding_name($text), $text);
+	if($this->get_encoding_answer())
+    {
+        $to=$this->get_encoding_name();
+        $from=c_string_work::get_encoding_name($text);
+        if($from!=$to) $text=iconv($from, $to, $text);
+        return $text;
+    }
 	else return $text;
 }
 
