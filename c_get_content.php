@@ -313,6 +313,7 @@ public function set_use_proxy($value=false)
             break;
 		case false:
 			unset($this->proxy);
+            $this->proxy=NULL;
 			break;
         default: return false;
 	}
@@ -870,7 +871,7 @@ public function set_options_to_descriptor(&$descriptor,$option_array=array())
     }
     $this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEJAR,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
 	$this->set_option_to_descriptor($descriptor,CURLOPT_COOKIEFILE,$this->get_dir_cookie().$descriptor['descriptor_key'].".cookie");
-	if($returnSetOpt=curl_setopt_array($descriptor['descriptor'],$descriptor['option'])) return true;
+	if(curl_setopt_array($descriptor['descriptor'],$descriptor['option'])) return true;
     else return false; // :| ошибка в присваивании параметров
 
 }

@@ -511,17 +511,14 @@ public	function get_random_proxy()
 		$proxy=array();
 		for($j=0;$j<10;$j++)
 		{
-			$proxy[$j]=trim($proxy_list['content'][array_rand($proxy_list['content'])]["proxy"]);
+			$proxy[$j]['proxy']=trim($proxy_list['content'][array_rand($proxy_list['content'])]["proxy"]);
 		}
 		if($good_proxy=$this->check_proxy_array($proxy))
 		{
 			if(is_array($good_proxy))
 			{
-				return current($good_proxy);
-			}
-			elseif($good_proxy)
-			{
-				return $good_proxy;
+                $tmp_proxy=current($good_proxy);
+				return $tmp_proxy['proxy'];
 			}
 			else
 			{
@@ -538,14 +535,19 @@ public	function get_random_proxy()
      */
 public function get_proxy_list_in_file()
 {
+    $json_proxy='';
     while(true)
     {
         rewind($this->f_heandle_proxy_list);
+        clearstatcache(true,$this->file_proxy_list);
         $json_proxy=fread($this->f_heandle_proxy_list,filesize($this->file_proxy_list));
-        if(strlen($json_proxy)==filesize($this->file_proxy_list)) break;
+        if(strlen($json_proxy)==filesize($this->file_proxy_list))
+        {
+            $this->proxy_list=json_decode($json_proxy,true);
+            if(isset($this->proxy_list) && isset($this->proxy_list['content']) && count($this->proxy_list['content'])>0) break;
+        }
         else sleep(1);
     }
-	$this->proxy_list=json_decode($json_proxy,true);
 	return $this->proxy_list;
 }
 
@@ -636,7 +638,9 @@ public function search_rental_address($rent_code,$site_for_use,$key_address=fals
 	// если задан адрес в где лежит информация об аренде, проверяем информацию
 	if($key_address)
 	{
-		if($this->proxy_list['content'][$key_address['key_content']]["renters"][$key_address['key_renters']]["renter_code"]==$rent_code && $this->proxy_list['content'][$key_address['key_content']]["renters"][$key_address['key_renters']]["user_site"]==$site_for_use)
+		if( isset($this->proxy_list['content'][$key_address['key_content']]["renters"][$key_address['key_renters']]["renter_code"])
+            && $this->proxy_list['content'][$key_address['key_content']]["renters"][$key_address['key_renters']]["renter_code"]==$rent_code
+            && $this->proxy_list['content'][$key_address['key_content']]["renters"][$key_address['key_renters']]["user_site"]==$site_for_use)
 		{
 			$end_term_rent=time()-$this->rent_time;
 			// проверяем время аренды прокси
@@ -652,6 +656,7 @@ public function search_rental_address($rent_code,$site_for_use,$key_address=fals
     // Если нет , то ищем в ручную
     foreach ($this->proxy_list['content'] as $key_content => $value_content)
     {
+        if(!isset($value_content["renters"])) continue;
         foreach($value_content["renters"] as $key_renters => $value_renters)
         {
             if($value_renters["renter_code"]==$rent_code)
@@ -722,15 +727,18 @@ protected function set_rented_proxy($rent_code,$site_for_use,$proxy="")
 		foreach ($this->proxy_list['content'] as $key_content => $value_content)
 		{
 			$proxy_use_this_site=0;
-			foreach($value_content["renters"] as $value_renters)
-			{
-				if($value_renters["user_site"]==$site_for_use)
-				{
-					$proxy_use_this_site=1;
-					break;
-				}
-			}
-			unset($value_renters);
+            if(isset($value_content["renters"]))
+            {
+			    foreach($value_content["renters"] as $value_renters)
+			    {
+			    	if($value_renters["user_site"]==$site_for_use)
+			    	{
+			    		$proxy_use_this_site=1;
+			    		break;
+			    	}
+			    }
+			    unset($value_renters);
+            }
 			//Если через этот прокси не опрашивается сайт $site_for_use, то привяжем поток к этому прокси
 			if(!$proxy_use_this_site)
 			{
@@ -764,19 +772,23 @@ public function remove_all_rent_from_code($rent_code)
         $this->free_proxy_list();
         return false;
     }
-	foreach ($this->proxy_list['content'] as $key_content => $value_content)
-	{
-		foreach($value_content["renters"] as $key_renters => $value_renters)
-		{
-			if($value_renters["renter_code"]==$rent_code)
-			{
-				$this->remove_rent($key_content,$key_renters,1);
-			}
-		}
-		unset($value_renters);
-	}
-	unset($value_content);
-	$this->save_proxy_list($this->proxy_list);
+    if(isset($this->proxy_list['content']) && is_array($this->proxy_list['content']))
+    {
+	    foreach ($this->proxy_list['content'] as $key_content => $value_content)
+	    {
+            if(!isset($value_content["renters"]) || !is_array($value_content["renters"])) continue;
+	    	foreach($value_content["renters"] as $key_renters => $value_renters)
+	    	{
+	    		if($value_renters["renter_code"]==$rent_code)
+	    		{
+	    			$this->remove_rent($key_content,$key_renters,1);
+	    		}
+	    	}
+	    	unset($value_renters);
+	    }
+	    unset($value_content);
+	    $this->save_proxy_list($this->proxy_list);
+    }
     return true;
 }
 
@@ -787,17 +799,21 @@ public function remove_all_rent()
 {
     $this->bloc_proxy_list();
     $this->proxy_list=$this->get_proxy_list_in_file();
-	foreach ($this->proxy_list['content'] as $key_content => $value_content)
-	{
-		foreach($value_content["renters"] as $key_renters => $value_renters)
-		{
-			if($value_renters["renter_code"])
-			{
-				$this->remove_rent($key_content,$key_renters,1);
-			}
-		}
-		unset($value_renters);
-	}
+    if(isset($this->proxy_list['content']) && is_array($this->proxy_list['content']))
+    {
+        foreach ($this->proxy_list['content'] as $key_content => $value_content)
+        {
+            if(!isset($value_content["renters"]) || !is_array($value_content["renters"])) continue;
+            foreach($value_content["renters"] as $key_renters => $value_renters)
+            {
+                if($value_renters["renter_code"])
+                {
+                    $this->remove_rent($key_content,$key_renters,1);
+                }
+            }
+            unset($value_renters);
+        }
+    }
 	unset($value_content);
 	$this->save_proxy_list($this->proxy_list);
 }
@@ -932,6 +948,7 @@ private function check_proxy_array($array_proxy)
 {
 	if(is_array($array_proxy))
 	{
+        if(!$this->need_check_proxy) return $array_proxy;
         $good_proxy=array();
         $url=$this->get_proxy_checker().'?ip='.$this->get_server_ip().'&proxy=yandex';
         $this->get_content->set_mode_get_content('multi');
@@ -988,6 +1005,7 @@ private function check_proxy_array($array_proxy)
      */
 private function check_proxy_array_to_site($array_proxy,$url,$check_word)
 {
+    if(!is_array($array_proxy)) return false;
     $good_proxy=array();
     $this->get_content->set_mode_get_content('multi');
     $this->get_content->set_count_multi_stream(1);
@@ -1037,6 +1055,7 @@ private function check_proxy_array_to_site($array_proxy,$url,$check_word)
      */
 private function get_proxy_by_function($proxy_list,$fun_array)
 {
+    if(!is_array($proxy_list)) return false;
     $need_fun=array("anonim"=>"0","referer"=>"0","post"=>"0","get"=>"0","cookie"=>"0");
     foreach ($fun_array as $value) $need_fun[$value]=1;
     $good_proxy=array();
@@ -1165,7 +1184,7 @@ private function get_unique_proxy_ip($proxy_array)
 
     /**
      * Обновляет прокси лист
-     * @param $name_list имя прокси листа
+     * @param string $name_list имя прокси листа
      * @param bool $force Принудительное обновление
      * @return array обновленный список прокси
      */
@@ -1173,8 +1192,7 @@ public function update_proxy_list($name_list,$force=false)
 {
 	if($name_list==$this->get_default_list_name())
     {
-        $this->update_default_proxy_list();
-        return $this->proxy_list;
+        return $this->select_proxy_list($this->get_default_list_name());
     }
 	else
 	{
@@ -1206,7 +1224,7 @@ public function update_proxy_list($name_list,$force=false)
     /**
      * Обновляет основной список прокси в котором хранятся адреса всех прокси
      * Из него берут информацию другие профили
-     * @param $force принудительное обновление
+     * @param bool $force принудительное обновление
      * @return array
      */
 public function update_default_proxy_list($force=false)
@@ -1237,6 +1255,18 @@ public function update_default_proxy_list($force=false)
     return $this->proxy_list;
 }
 
+    /**
+     * Обновление всех прокси листов кроме основного
+     * @param $force принудительное обновление
+     */
+public function update_all_proxy_list($force=false)
+{
+    $this->update_default_proxy_list($force);
+    foreach ($this->get_all_name_proxy_list() as $value)
+    {
+        $this->update_proxy_list($value,$force);
+    }
+}
     /**
      * Изменяет настройки прокси листа
      * @param $name_list

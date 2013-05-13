@@ -7,7 +7,8 @@
  * Project: get_content
  * @author: Evgeny Pynykh bpteam22@gmail.com
  *
- * Файл для проверки работоспособности прокси и его функций.
+ * Файл для проверки работоспособности прокси и его функций. распологаете в удобном месте у себя или на другом сервере
+ * Прописываете адрес к нему в check_url_list.php
  * Возвращает строку из единиц и нулей. Единица функция работает, ноль не поддерживается.
  * Описание последовательности:
  * Анонимность|REFERER|POST|GET|COOKIE
@@ -30,7 +31,6 @@ if(!isset($_GET['str']))
     $plus.="&str=".$str;
     if(!isset($_GET['cookie']))
     {
-        if($_GET['proxy']=="yandex") $plus.="&proxy=yandex";
         if(setcookie("test", "set")) header ("Location: ".$_SERVER['PHP_SELF']."?cookie=set".$plus);
         exit;
     }
