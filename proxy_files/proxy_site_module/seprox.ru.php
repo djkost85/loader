@@ -11,7 +11,7 @@
 namespace seprox;
 use get_content\c_get_content\c_get_content as c_get_content;
 use get_content\c_string_work\c_string_work as c_string_work;
-
+return array();
 $url_source="http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_";
 $name_source="seprox.ru";
 $get_seprox_content= new c_get_content();
