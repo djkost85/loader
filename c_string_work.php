@@ -162,7 +162,7 @@ public static function between_tag($text="",$start_tag='<div class="xxx">',$with
 	if(!preg_match('#<(?<tag>\w+)[^>]*>#im', $start_tag,$tag)) return "";
 	if(preg_match('#<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>#im', $start_tag))
 	{
-		preg_match_all("#(?<parametr>[\w-]+=[\"\']+[^\'\"]+[\"\']+)#im", $start_tag, $matches);
+		preg_match_all("#(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))#im", $start_tag, $matches);
 		$reg="#<".preg_quote($tag["tag"])."\s*";
         foreach ($matches['parametr'] as $value) $reg.="[^>]*".preg_quote($value)."[^>]*";
 		$reg.=">#im";
