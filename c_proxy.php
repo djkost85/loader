@@ -1296,9 +1296,8 @@ public function config_proxy_list($name_list,$check_url="http://bpteam.net",$che
 public function select_proxy_list($name_list)
 {
 	$this->close_proxy_list();
-	$all_list=$this->get_all_name_proxy_list();
 	$this->name_list=$name_list;
-	if(array_search($name_list,$all_list)!==false)
+	if($this->proxy_list_exist($name_list))
 	{	
 		$this->file_proxy_list=$this->get_dir_proxy_list_file()."/".$this->name_list.".proxy";
 	}
@@ -1332,4 +1331,18 @@ public function get_all_name_proxy_list()
 	return $proxy_list_array;
 }
 
+    /**
+     * Проверяет существует ли прокси лист
+     * @param string $name_list имя прокси листа
+     * @return bool
+     */
+public function proxy_list_exist($name_list)
+{
+    $all_list=$this->get_all_name_proxy_list();
+    if(array_search($name_list,$all_list)!==false)
+    {
+        return true;
+    }
+    else return false;
+}
 }
