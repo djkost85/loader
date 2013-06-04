@@ -535,7 +535,6 @@ public	function get_random_proxy()
      */
 public function get_proxy_list_in_file()
 {
-    $json_proxy='';
     while(true)
     {
         rewind($this->f_heandle_proxy_list);
