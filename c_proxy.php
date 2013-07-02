@@ -182,6 +182,7 @@ class c_proxy
 	$this->last_use_proxy          ='';
     $this->set_default_list('all');
 	$this->name_list               =$this->get_default_list_name();
+    if(!file_exists($this->get_dir_proxy_list_file()."/".$this->name_list.".proxy")) $this->create_proxy_list($this->name_list);
 	$this->select_proxy_list($this->name_list);
 	$this->set_remove_proxy(false);
 }
@@ -319,7 +320,7 @@ public function get_server_ip()
 	$answer=$this->get_content->get_answer();
 	$reg="/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
 	preg_match($reg, $answer,$match);
-	if(!$match['ip'] && c_string_work::is_ip($match['ip'])) return false;
+	if(!$match['ip'] && !c_string_work::is_ip($match['ip'])) return false;
     $this->server_ip=$match['ip'];
     }
 	return $this->server_ip;
@@ -543,7 +544,7 @@ public function get_proxy_list_in_file()
         if(strlen($json_proxy)==filesize($this->file_proxy_list))
         {
             $this->proxy_list=json_decode($json_proxy,true);
-            if(isset($this->proxy_list) && isset($this->proxy_list['content']) && count($this->proxy_list['content'])>0) break;
+            if(isset($this->proxy_list)) break;
         }
         else sleep(1);
     }
@@ -1096,7 +1097,7 @@ public function save_proxy_list($proxy_list=false)
      * @param array $need_function_array Перечень поддерживаемых функций
      * @param bool $need_update
      */
-public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_word_array=array("#yandex#iUm"),$need_function_array=array(),$need_update=false)
+public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_word_array=array("#yandex#iUm"),$need_function_array=array(),$need_update=true)
 {
 	$this->close_proxy_list();
 	$this->name_list=$name_list;

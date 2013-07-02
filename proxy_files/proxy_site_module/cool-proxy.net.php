@@ -27,27 +27,22 @@ else return array();
 unset($matches);
 $proxy_cool_proxy=array();
 do{
-    if(preg_match_all('#<td\s*style=\"text.align.left.\s*font.weight.bold.\">(.*)</td>\s*<td>(\d+)</td>#iUms', $content, $matches))
+    if($count_proxy=preg_match_all('#<td\s*style=\"text.align.left.\s*font.weight.bold.\"><script type="text/javascript">document\.write\(Base64\.decode\("(?<ip_base64>.*)"\)\)</script></td>\s*<td>(?<port>\d+)</td>#iUms', $content, $matches))
     {
-        $count_proxy=count($matches[1]);
         for($j=0;$j<$count_proxy;$j++)
         {
-            $reg="/<span class=\"\d+\">(\d+)<\/span>/iU";
-            if(preg_match_all($reg, $matches[1][$j], $matches_proxy))
+            $is_ip=base64_decode($matches['ip_base64'][$j]).":".$matches['port'][$j];
+            if(c_string_work::is_ip($is_ip))
             {
-                $is_ip=$matches_proxy[1][0].".".$matches_proxy[1][1].".".$matches_proxy[1][2].".".$matches_proxy[1][3].":".$matches[2][$j];
-                if(c_string_work::is_ip($is_ip))
-                {
-                    $tmp_array['proxy']=trim($is_ip);
-                    $tmp_array["source_proxy"]=$name_source;
-                    $tmp_array["type_proxy"]='http';
-                    $proxy_cool_proxy['content'][]=$tmp_array;
-                }
+                $tmp_array['proxy']=trim($is_ip);
+                $tmp_array["source_proxy"]=$name_source;
+                $tmp_array["type_proxy"]='http';
+                $proxy_cool_proxy['content'][]=$tmp_array;
             }
         }
     }
     $i++;
     sleep(3);
-    if(!$content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc")) continue;
+    $content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc");
 }while($i<=$count_page);
 return $proxy_cool_proxy;

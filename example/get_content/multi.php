@@ -23,6 +23,7 @@ $url[]="http://google.com";
 $url[]="http://bpteam.net";
 $get_content->get_content($url);
 $answer=$get_content->get_answer();
+var_dump($answer);
 /*
  * $answer[0] содержимое http://ya.ru
  * $answer[1] содержимое http://vk.com

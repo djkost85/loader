@@ -14,6 +14,7 @@ use get_content\c_string_work\c_string_work as c_string_work;
 //return array();
 $url_source="http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_";
 $name_source="seprox.ru";
+//return array();
 $get_seprox_content= new c_get_content();
 $get_seprox_content->set_type_content("html");
 $pagenation=0;

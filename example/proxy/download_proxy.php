@@ -10,6 +10,6 @@
  */
 use get_content\c_proxy\c_proxy as c_proxy;
 set_time_limit(1200);
-require_once "../../include.php";
+require_once dirname(__FILE__)."../../include.php";
 $proxy= new c_proxy();
 $proxy->update_default_proxy_list(true);//Принудительное обновление основного списка прокси адресов
