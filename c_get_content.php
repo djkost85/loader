@@ -27,6 +27,7 @@ class c_get_content
      * $default_settings[CURLOPT_FOLLOWLOCATION]= bool следовать переадресации сервера или нет
      * $default_settings[CURLOPT_POST]= bool врключение отправки post запроса на удаленный сервер
      * $default_settings[CURLOPT_POSTFIELDS]= string|mixed данные post запроса
+     * $default_settings[CURLOPT_FRESH_CONNECT] = bool TRUE для принудительного использования нового соединения вместо закэшированного.
      */
     private $default_settings;
     /**
@@ -159,7 +160,8 @@ function __construct()
                               CURLOPT_FOLLOWLOCATION,
                               CURLOPT_REFERER,
                               CURLOPT_POST,
-                              CURLOPT_POSTFIELDS
+                              CURLOPT_POSTFIELDS,
+                              CURLOPT_FRESH_CONNECT
                               );
 	$this->set_dir_cookie("get_content_files/cookie");
 	$this->restore_default_settings();
@@ -168,7 +170,7 @@ function __construct()
     $this->set_count_multi_descriptor();
 	$this->set_use_proxy(false);
 	$this->set_number_repeat(0);
-	$this->set_max_number_repeat(0);
+	$this->set_max_number_repeat(5);
 	$this->set_min_size_answer(100);
 	$this->set_type_content("text");
 	$this->set_in_cache(false);
@@ -294,7 +296,8 @@ public function restore_default_settings()
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_REFERER => '',
         CURLOPT_POSTFIELDS => '',
-        CURLOPT_POST => false
+        CURLOPT_POST => false,
+        CURLOPT_FRESH_CONNECT => true
     ));
 }
     /**
@@ -736,63 +739,43 @@ private function close_multi_get_content()
      */
 public function get_content($url="")
 {
-	if(is_string($url) && $this->get_mode_get_content()!='single') $this->set_mode_get_content('single');
+    if(is_string($url) && $this->get_mode_get_content()!='single') $url=array($url);
 	if(is_array($url) && $this->get_mode_get_content()!='multi') $this->set_mode_get_content('multi');
+    $this->close_get_content();
+    $this->init_get_content();
 	switch ($this->get_mode_get_content())
 	{
 			case 'single':
-                $this->set_default_setting(CURLOPT_URL,$url);
-				$this->get_single_content();
+				$this->get_single_content($url);
 				break;
 			case 'multi':
-				$this->set_count_multi_curl(count($url));
-                $descriptor_array=&$this->get_descriptor_array();
-                $count_multi_stream=$this->get_count_multi_stream();
-                $j=0;
-                foreach ($url as $value_url)
-				{
-                    for($i=0;$i<$count_multi_stream;$i++)
-                    {
-                        if(isset($descriptor_array[$j]['descriptor']))
-                        {
-                            $this->set_option_to_descriptor($descriptor_array[$j],CURLOPT_URL,$value_url);
-                        }
-                        $j++;
-                    }
-				}
-				$answer=$this->get_multi_content();
-				$tmp_answer=array();
-				$j=0;
-				foreach ($url as $key_url => $value_url)
-				{
-                    for ($i=0;$i<$count_multi_stream;$i++)
-					{
-						if(isset($answer[$j])) $tmp_answer[$key_url][$i]=$answer[$j];
-						$j++;
-					}
-				}
-				$this->answer=$tmp_answer;
+                $this->answer=$this->get_multi_content($url);
 				break;
 			default:
 				break;
 	}
-	$this->close_get_content();
-	$this->init_get_content();
 	return $this->get_answer();
 }
 
     /**
      * Совершает зарос в режиме single
+     * @param $url
      * @return string
      */
-private function get_single_content()
+private function get_single_content($url)
 {
 	$descriptor=&$this->get_descriptor();
 	do{
+        if($this->get_number_repeat()>0)//Из-за не ясного игнорирования параметра CURLOPT_FRESH_CONNECT вынужден пересоздавать cURL
+        {
+            $this->close_get_content();
+            $this->init_get_content();
+        }
+        $this->set_default_setting(CURLOPT_URL,$url);
 		$this->set_options_to_descriptor($descriptor);
 		$answer=$this->exec_single_get_content();
         $descriptor['info']=curl_getinfo($descriptor['descriptor']);
-		if(!$this->get_check_answer() || $this->check_answer_valid($descriptor['info']))
+		if(!$this->get_check_answer() || $this->check_answer_valid($answer,$descriptor['info']))
 		{
 			$this->answer=$answer;
 			$this->end_repeat();
@@ -809,12 +792,35 @@ private function get_single_content()
 
     /**
      * Совершает запрос в режиме multi
+     * @param $url
      * @return array
      */
-private function get_multi_content()
+private function get_multi_content($url)
 {
-	$descriptor_array=&$this->get_descriptor_array();
+    $copy_url=$url;//Копируем для создания связи по ключам после удаления из основного массива
 	do{
+        if($this->get_number_repeat()>0)//Из-за не ясного игнорирования параметра CURLOPT_FRESH_CONNECT вынужден пересоздавать cURL
+        {
+            $this->close_get_content();
+            $this->init_get_content();
+        }
+        $this->set_count_multi_curl(count($url));
+        $descriptor_array=&$this->get_descriptor_array();
+        $count_multi_stream=$this->get_count_multi_stream();
+        $j=0;
+        $url_descriptors=array();
+        foreach ($url as $key_url => $value_url)
+        {
+            for($i=0;$i<$count_multi_stream;$i++)
+            {
+                $url_descriptors[$j]=$key_url;//Для связи ключа url и вычисления ключа хорошего ответа
+                if(isset($descriptor_array[$j]['descriptor']))
+                {
+                    $this->set_option_to_descriptor($descriptor_array[$j],CURLOPT_URL,$value_url);
+                }
+                $j++;
+            }
+        }
 		foreach($descriptor_array as $key => $value) $this->set_options_to_descriptor($descriptor_array[$key]);
 		unset($value);
 		$answer=$this->exec_multi_get_content();
@@ -822,21 +828,36 @@ private function get_multi_content()
 		foreach ($answer as $key => $value)
 		{
 			$descriptor_array[$key]['info']=curl_getinfo($descriptor_array[$key]['descriptor']);
-			if(!isset($good_answer[$key]) && (!$this->get_check_answer() || $this->check_answer_valid($descriptor_array[$key]['info'])))
-                $good_answer[$key]=$value;
+            $key_good_answer=($url_descriptors[$key]*$count_multi_stream)+$key%$count_multi_stream;
+            if(!isset($good_answer[$key_good_answer]) && (!$this->get_check_answer() || $this->check_answer_valid($value,$descriptor_array[$key]['info'])))
+            {
+
+                if(isset($url[$url_descriptors[$key]]))unset($url[$url_descriptors[$key]]);
+                $good_answer[$key_good_answer]=$value;
+            }
 			elseif($this->get_use_proxy() && is_object($this->proxy))
-				{
-					$this->proxy->remove_proxy_in_list($descriptor_array[$key]['option'][CURLOPT_PROXY]);
-				}
+			{
+				$this->proxy->remove_proxy_in_list($descriptor_array[$key]['option'][CURLOPT_PROXY]);
+			}
 		}
-		if(count($good_answer)==count($descriptor_array))
+		if(count($url)==0)
 		{
 			$this->end_repeat();
 			break;
 		}
 	}while($this->repeat_get_content());
     foreach($good_answer as &$value) $value=$this->prepare_content($value);
-	return $good_answer;
+    $tmp_answer=array();
+    $j=0;
+    foreach ($copy_url as $key_url => $value_url)
+    {
+        for ($i=0;$i<$count_multi_stream;$i++)
+        {
+            if(isset($good_answer[$j])) $tmp_answer[$key_url][$i]=$good_answer[$j];
+            $j++;
+        }
+    }
+	return $tmp_answer;
 }
 
     /**
@@ -1044,10 +1065,11 @@ private function get_big_answer($a)
 
     /**
      * Проверка ответа на корректность
+     * @param $answer Текс ответа
      * @param array $curl_data массив информации о запросе при помощи функции curl_getinfo()
      * @return bool
      */
-private function check_answer_valid($curl_data)
+private function check_answer_valid($answer,$curl_data)
 {
     if(!$this->http_code($curl_data['http_code'])) return false;
     if($curl_data['size_download']<$curl_data['download_content_length'] || $curl_data['size_download']<$this->get_min_size_answer()) return false;
@@ -1060,7 +1082,7 @@ private function check_answer_valid($curl_data)
             if($this->mime_type($curl_data['content_type'],'img')) return true;
             break;
         case 'html':
-            if($this->mime_type($curl_data['content_type'],'html')) return true;
+            if($this->mime_type($curl_data['content_type'],'html') && preg_match('#<\s*/\s*html[^<>]*>#ims',$answer)) return true;
             break;
         default:
             break;

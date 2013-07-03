@@ -183,7 +183,7 @@ public static function between_tag($text="",$start_tag='<div class="xxx">',$with
 	$text=substr($text,strpos($text,$start_tag));
     $count_open_tag=0;
 	$pos_end=0;
-    $count_tag=2*preg_match_all('#'.preg_quote($open_tag,'#').'#ims',$text);
+    $count_tag=2*preg_match_all('#'.preg_quote($open_tag,'#').'#ims',$text,$matches);
 	for($i=0;$i<$count_tag;$i++)
 	{
 		$pos_open_tag=strpos($text,$open_tag,$pos_end);

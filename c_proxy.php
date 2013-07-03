@@ -166,7 +166,7 @@ class c_proxy
      */
  function __construct()
 {
-	$this->storage_time            =86400;
+	$this->storage_time            =7200;
 	$this->rent_time               =3600;
     $this->get_content             = new c_get_content();
 	$this->get_content->set_type_content('html');
@@ -310,7 +310,7 @@ public function get_dir_url_proxy_list()
 public function get_server_ip()
 {
 	if(isset($this->server_ip)) return $this->server_ip;
-    if(c_string_work::is_ip($_SERVER['SERVER_ADDR'])) $this->server_ip=$_SERVER['SERVER_ADDR'];
+    if(isset($_SERVER['SERVER_ADDR']) && c_string_work::is_ip($_SERVER['SERVER_ADDR'])) $this->server_ip=$_SERVER['SERVER_ADDR'];
     else
     {
 	$this->get_content->set_use_proxy(0);
