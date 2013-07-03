@@ -798,6 +798,7 @@ private function get_single_content($url)
 private function get_multi_content($url)
 {
     $copy_url=$url;//Копируем для создания связи по ключам после удаления из основного массива
+    $good_answer=array();
 	do{
         if($this->get_number_repeat()>0)//Из-за не ясного игнорирования параметра CURLOPT_FRESH_CONNECT вынужден пересоздавать cURL
         {
@@ -824,7 +825,6 @@ private function get_multi_content($url)
 		foreach($descriptor_array as $key => $value) $this->set_options_to_descriptor($descriptor_array[$key]);
 		unset($value);
 		$answer=$this->exec_multi_get_content();
-		$good_answer=array();
 		foreach ($answer as $key => $value)
 		{
 			$descriptor_array[$key]['info']=curl_getinfo($descriptor_array[$key]['descriptor']);
