@@ -170,6 +170,7 @@ class c_proxy
 	$this->rent_time               =3600;
     $this->get_content             = new c_get_content();
 	$this->get_content->set_type_content('html');
+    $this->get_content->set_encoding_answer(true);
 	$this->set_method_get_proxy("random");
     $this->dir_proxy_file          ="proxy_files";
 	$this->dir_proxy_list_file     ="proxy_list";

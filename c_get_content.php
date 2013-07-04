@@ -170,7 +170,7 @@ function __construct()
     $this->set_count_multi_descriptor();
 	$this->set_use_proxy(false);
 	$this->set_number_repeat(0);
-	$this->set_max_number_repeat(5);
+	$this->set_max_number_repeat(10);
 	$this->set_min_size_answer(100);
 	$this->set_type_content("text");
 	$this->set_in_cache(false);
@@ -879,14 +879,9 @@ public function set_options_to_descriptor(&$descriptor,$option_array=array())
     {
         if(is_object($this->proxy))
         {
-            $this->set_option_to_descriptor(
-                                            $descriptor,
-                                            CURLOPT_PROXY,
-                                            $this->proxy->get_proxy(
-                                                                    $descriptor['descriptor_key'],
-                                                                    c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL])
-                                                                  )
-                                            );
+            if(is_string($proxy_ip=$this->proxy->get_proxy($descriptor['descriptor_key'],c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL]))))
+            $this->set_option_to_descriptor($descriptor,CURLOPT_PROXY,$proxy_ip);
+            else $descriptor['option'][CURLOPT_URL]='';
         }
         elseif(is_string($this->proxy))$this->set_option_to_descriptor($descriptor, CURLOPT_PROXY, $this->proxy);
     }
