@@ -28,6 +28,7 @@ class c_get_content
      * $default_settings[CURLOPT_POST]= bool врключение отправки post запроса на удаленный сервер
      * $default_settings[CURLOPT_POSTFIELDS]= string|mixed данные post запроса
      * $default_settings[CURLOPT_FRESH_CONNECT] = bool TRUE для принудительного использования нового соединения вместо закэшированного.
+     * $default_settings[CURLOPT_HTTPHEADER] array Отправка http заголовков
      */
     private $default_settings;
     /**
@@ -161,7 +162,8 @@ function __construct()
                               CURLOPT_REFERER,
                               CURLOPT_POST,
                               CURLOPT_POSTFIELDS,
-                              CURLOPT_FRESH_CONNECT
+                              CURLOPT_FRESH_CONNECT,
+                              CURLOPT_HTTPHEADER
                               );
 	$this->set_dir_cookie("get_content_files/cookie");
 	$this->restore_default_settings();
@@ -297,7 +299,8 @@ public function restore_default_settings()
         CURLOPT_REFERER => '',
         CURLOPT_POSTFIELDS => '',
         CURLOPT_POST => false,
-        CURLOPT_FRESH_CONNECT => true
+        CURLOPT_FRESH_CONNECT => true,
+        CURLOPT_HTTPHEADER => array()
     ));
 }
     /**

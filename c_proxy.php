@@ -378,6 +378,18 @@ public function download_proxy()
 	return $proxy;
 }
 
+public function test_download_proxy($module_name)
+{
+    foreach ($this->file_url_proxy_list as $value_proxy_list)
+    {
+        if(preg_match('#'.preg_quote($module_name,'#').'#ims',$value_proxy_list))
+        {
+            $tmp_proxy=require $value_proxy_list;
+            return $tmp_proxy;
+        }
+    }
+}
+
     /**
      * Устанавливает фильтр для необходимых прокси
      * @param string $new_name_type_proxy протокол через который работает прокси
@@ -979,13 +991,15 @@ private function check_proxy_array($array_proxy)
 		    {
 		    	if(preg_match('#^[01]{5}$#',$value) && preg_match_all('#(?<fun_status>[01])#U',$value,$matches))
                 {
-                    $info_proxy['proxy']     =$value_array_proxy[$key]['proxy'];
-                    $info_proxy['anonim']    =$matches['fun_status'][0];
-                    $info_proxy['referer']   =$matches['fun_status'][1];
-                    $info_proxy['post']      =$matches['fun_status'][2];
-                    $info_proxy['get']       =$matches['fun_status'][3];
-                    $info_proxy['cookie']    =$matches['fun_status'][4];
-                    $info_proxy['last_cheak']=time();
+                    $info_proxy['proxy']       =$value_array_proxy[$key]['proxy'];
+                    $info_proxy['source_proxy']=$value_array_proxy[$key]['source_proxy'];
+                    $info_proxy['type_proxy']  =$value_array_proxy[$key]['type_proxy'];
+                    $info_proxy['anonim']      =$matches['fun_status'][0];
+                    $info_proxy['referer']     =$matches['fun_status'][1];
+                    $info_proxy['post']        =$matches['fun_status'][2];
+                    $info_proxy['get']         =$matches['fun_status'][3];
+                    $info_proxy['cookie']      =$matches['fun_status'][4];
+                    $info_proxy['last_cheak']  =time();
                     $good_proxy[]=$info_proxy;
                 }
 		    }
