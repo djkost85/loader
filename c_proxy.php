@@ -978,12 +978,12 @@ private function check_proxy_array($array_proxy)
         {
             $this->get_content->set_count_multi_curl(count($value_array_proxy));
             $url_array=array();
-            reset($value_array_proxy);
+            //reset($value_array_proxy);
             $descriptor_array=&$this->get_content->get_descriptor_array();
             foreach ($descriptor_array as $key => $value)
             {
-                $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,$value_array_proxy[key($value_array_proxy)]['proxy']);
-                next($value_array_proxy);
+                $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,$value_array_proxy[$key]['proxy']);
+                //next($value_array_proxy);
                 $url_array[]=$url;
             }
             $answer_content=$this->get_content->get_content($url_array);

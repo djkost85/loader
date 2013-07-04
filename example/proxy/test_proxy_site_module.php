@@ -11,5 +11,5 @@ use get_content\c_proxy\c_proxy as c_proxy;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
 $proxy= new c_proxy();
-$data=$proxy->test_download_proxy('twofreeproxy');
+$data=$proxy->test_download_proxy('cool');
 var_dump($data);

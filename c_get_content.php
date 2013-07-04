@@ -744,19 +744,19 @@ public function get_content($url="")
 {
     if(is_string($url) && $this->get_mode_get_content()!='single') $url=array($url);
 	if(is_array($url) && $this->get_mode_get_content()!='multi') $this->set_mode_get_content('multi');
-    $this->close_get_content();
-    $this->init_get_content();
 	switch ($this->get_mode_get_content())
 	{
 			case 'single':
 				$this->get_single_content($url);
 				break;
 			case 'multi':
-                $this->answer=$this->get_multi_content($url);
+                $this->get_multi_content($url);
 				break;
 			default:
 				break;
 	}
+    $this->close_get_content();
+    $this->init_get_content();
 	return $this->get_answer();
 }
 
@@ -769,11 +769,6 @@ private function get_single_content($url)
 {
 	$descriptor=&$this->get_descriptor();
 	do{
-        if($this->get_number_repeat()>0)//Из-за не ясного игнорирования параметра CURLOPT_FRESH_CONNECT вынужден пересоздавать cURL
-        {
-            $this->close_get_content();
-            $this->init_get_content();
-        }
         $this->set_default_setting(CURLOPT_URL,$url);
 		$this->set_options_to_descriptor($descriptor);
 		$answer=$this->exec_single_get_content();
@@ -803,11 +798,6 @@ private function get_multi_content($url)
     $copy_url=$url;//Копируем для создания связи по ключам после удаления из основного массива
     $good_answer=array();
 	do{
-        if($this->get_number_repeat()>0)//Из-за не ясного игнорирования параметра CURLOPT_FRESH_CONNECT вынужден пересоздавать cURL
-        {
-            $this->close_get_content();
-            $this->init_get_content();
-        }
         $this->set_count_multi_curl(count($url));
         $descriptor_array=&$this->get_descriptor_array();
         $count_multi_stream=$this->get_count_multi_stream();
@@ -860,7 +850,7 @@ private function get_multi_content($url)
             $j++;
         }
     }
-	return $tmp_answer;
+	return $this->answer=$tmp_answer;
 }
 
     /**
@@ -903,9 +893,9 @@ public function set_options_to_descriptor(&$descriptor,$option_array=array())
      * @param int $key ключ для дескриптора в режиме multi
      * @return bool
      */
-public function set_option_to_descriptor(&$descriptor,$option,$value=NULL,$key=NULL)//
+public function set_option_to_descriptor(&$descriptor,$option,$value=-2,$key=-2)//
 {
-	if($key!==NULL)
+	if($key!=-2)
 	{
 		if(array_key_exists($key, $descriptor))
 		{
@@ -916,7 +906,7 @@ public function set_option_to_descriptor(&$descriptor,$option,$value=NULL,$key=N
 	}
 	else
 	{
-		if(is_null($value)) $descriptor['option'][$option]=$this->get_default_setting($option);
+		if($value==-2) $descriptor['option'][$option]=$this->get_default_setting($option);
 		else $descriptor['option'][$option]=$value;
 		if($this->check_option($descriptor,$option,$descriptor['option'][$option])) return true;
 	}
