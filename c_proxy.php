@@ -519,11 +519,17 @@ public	function get_random_proxy()
 {
 	$proxy_list=$this->get_proxy_list_in_file();
 	$this->free_proxy_list();
-	$count_proxy=count($proxy_list['content']);
-	for($i=0;$i<$count_proxy/10;$i+=10)
+    $count_check=10;
+    $count_proxy=count($proxy_list['content']);
+    if(is_array($proxy_list['content']))
+    {
+        if($count_proxy<$count_check) $count_check=$count_proxy;
+    }
+    else return false;
+	for($i=0;$i<$count_proxy;$i+=$count_check)
 	{
 		$proxy=array();
-		for($j=0;$j<10;$j++)
+		for($j=0;$j<$count_check;$j++)
 		{
 			$proxy[$j]['proxy']=trim($proxy_list['content'][array_rand($proxy_list['content'])]["proxy"]);
 		}
@@ -940,7 +946,7 @@ public function check_proxy($proxy)
         if(preg_match('#^[01]{5}$#',$answer) && preg_match_all('#(?<fun_status>[01])#U',$answer,$matches))
         {
             $info_proxy['proxy']=$proxy;
-            $info_proxy['anonim']=$matches['fun_status'][0];
+            $info_proxy['anonym']=$matches['fun_status'][0];
             $info_proxy['referer']=$matches['fun_status'][1];
             $info_proxy['post']=$matches['fun_status'][2];
             $info_proxy['get']=$matches['fun_status'][3];
@@ -978,12 +984,10 @@ private function check_proxy_array($array_proxy)
         {
             $this->get_content->set_count_multi_curl(count($value_array_proxy));
             $url_array=array();
-            //reset($value_array_proxy);
             $descriptor_array=&$this->get_content->get_descriptor_array();
             foreach ($descriptor_array as $key => $value)
             {
                 $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,$value_array_proxy[$key]['proxy']);
-                //next($value_array_proxy);
                 $url_array[]=$url;
             }
             $answer_content=$this->get_content->get_content($url_array);
@@ -994,7 +998,7 @@ private function check_proxy_array($array_proxy)
                     $info_proxy['proxy']       =$value_array_proxy[$key]['proxy'];
                     $info_proxy['source_proxy']=$value_array_proxy[$key]['source_proxy'];
                     $info_proxy['type_proxy']  =$value_array_proxy[$key]['type_proxy'];
-                    $info_proxy['anonim']      =$matches['fun_status'][0];
+                    $info_proxy['anonym']      =$matches['fun_status'][0];
                     $info_proxy['referer']     =$matches['fun_status'][1];
                     $info_proxy['post']        =$matches['fun_status'][2];
                     $info_proxy['get']         =$matches['fun_status'][3];
@@ -1031,18 +1035,15 @@ private function check_proxy_array_to_site($array_proxy,$url,$check_word)
     foreach (array_chunk($array_proxy,100) as $value_proxy)
     {
         $this->get_content->set_count_multi_curl(count($value_proxy));
-        reset($value_proxy);
         $descriptor_array=&$this->get_content->get_descriptor_array();
         $url_array=array();
         foreach ($descriptor_array as $key => $value)
         {
-            $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,$value_proxy[key($value_proxy)]['proxy']);
-	    	next($value_proxy);
+            $this->get_content->set_option_to_descriptor($descriptor_array[$key],CURLOPT_PROXY,$value_proxy[$key]['proxy']);
             $url_array[]=$url;
 	    }
 	    $answer_content=$this->get_content->get_content($url_array);
-	    reset($value_proxy);
-	    foreach ($answer_content as $value)
+	    foreach ($answer_content as $key => $value)
 	    {
 	    	$test_count=0;
 	    	$count_good_check=0;
@@ -1052,8 +1053,7 @@ private function check_proxy_array_to_site($array_proxy,$url,$check_word)
 	    		if(preg_match($value_check_word,$value)) $count_good_check++;
 	    	}
 	    	unset($value_check_word);
-	    	if($count_good_check==$test_count) $good_proxy[]=$value_proxy[key($value_proxy)];
-	    	next($value_proxy);
+	    	if($count_good_check==$test_count) $good_proxy[]=$value_proxy[$key];
 	    }
 	    unset($value);
     }
@@ -1065,18 +1065,18 @@ private function check_proxy_array_to_site($array_proxy,$url,$check_word)
     /**
      * Возвращает адреса прокси поддерживающие выбранные функции
      * @param array $proxy_list Список прокси
-     * @param array $fun_array перечень необходимых функций anonim|referer|post|get|cookie
+     * @param array $fun_array перечень необходимых функций anonym|referer|post|get|cookie
      * @return array|bool
      */
 private function get_proxy_by_function($proxy_list,$fun_array)
 {
     if(!is_array($proxy_list)) return false;
-    $need_fun=array("anonim"=>"0","referer"=>"0","post"=>"0","get"=>"0","cookie"=>"0");
+    $need_fun=array("anonym"=>"0","referer"=>"0","post"=>"0","get"=>"0","cookie"=>"0");
     foreach ($fun_array as $value) $need_fun[$value]=1;
     $good_proxy=array();
     foreach ($proxy_list as $value)
     {
-           if($value['anonim'] >=$need_fun['anonim']
+           if($value['anonym'] >=$need_fun['anonym']
            && $value['referer']>=$need_fun['referer']
            && $value['post']   >=$need_fun['post']
            && $value['get']    >=$need_fun['get']

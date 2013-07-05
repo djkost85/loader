@@ -17,11 +17,11 @@ $str='';
 $plus='';
 if(!isset($_GET['str']))
 {
-    $anonim='1';
-    if(preg_match("#".preg_quote($_GET['ip'],"#")."#ims",$_SERVER['HTTP_X_FORWARDED_FOR'])) $anonim='0';
-    elseif($_SERVER['REMOTE_ADDR']==$_GET['ip']) $anonim='0';
-    elseif($_SERVER['HTTP_X_REAL_IP']==$_GET['ip']) $anonim='0';
-    $str.=$anonim;
+    $anonym='1';
+    if(preg_match("#".preg_quote($_GET['ip'],"#")."#ims",$_SERVER['HTTP_X_FORWARDED_FOR'])) $anonym='0';
+    elseif($_SERVER['REMOTE_ADDR']==$_GET['ip']) $anonym='0';
+    elseif($_SERVER['HTTP_X_REAL_IP']==$_GET['ip']) $anonym='0';
+    $str.=$anonym;
     if($_SERVER['HTTP_REFERER']=="proxy-check.net") $str.='1';
     else $str.='0';
     if($_POST['proxy']=='yandex') $str.='1';

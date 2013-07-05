@@ -295,6 +295,7 @@ public static function get_encoding_name($str)
     $sum_weight = array_sum($weights);
     foreach ($weights as $encoding => $weight)
     {
+        if(!$sum_weight) $weights[$encoding]=0;
         $weights[$encoding] = $weight / $sum_weight;
     }
     arsort($weights,SORT_NUMERIC);

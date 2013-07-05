@@ -29,6 +29,7 @@ class c_get_content
      * $default_settings[CURLOPT_POSTFIELDS]= string|mixed данные post запроса
      * $default_settings[CURLOPT_FRESH_CONNECT] = bool TRUE для принудительного использования нового соединения вместо закэшированного.
      * $default_settings[CURLOPT_HTTPHEADER] array Отправка http заголовков
+     * $default_settings[CURLOPT_FORBID_REUSE] TRUE для принудительного закрытия соединения после завершения его обработки так, чтобы его нельзя было использовать повторно.
      */
     private $default_settings;
     /**
@@ -163,6 +164,7 @@ function __construct()
                               CURLOPT_POST,
                               CURLOPT_POSTFIELDS,
                               CURLOPT_FRESH_CONNECT,
+                              CURLOPT_FORBID_REUSE,
                               CURLOPT_HTTPHEADER
                               );
 	$this->set_dir_cookie("get_content_files/cookie");
@@ -300,6 +302,7 @@ public function restore_default_settings()
         CURLOPT_POSTFIELDS => '',
         CURLOPT_POST => false,
         CURLOPT_FRESH_CONNECT => true,
+        CURLOPT_FORBID_REUSE => true,
         CURLOPT_HTTPHEADER => array()
     ));
 }
@@ -672,8 +675,9 @@ private function init_multi_get_content()
 }
     /**
      * Закрывает инициализированные дескрипторы cURL
+     * @param bool $reinit Переменная для обхода стирания параметров в опциях дескриптора для повторного запроса. Причина: не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
      */
-private function close_get_content()
+private function close_get_content($reinit=false)
 {
 	$descriptor=&$this->get_descriptor();
 	if(isset($descriptor['descriptor']))
@@ -681,10 +685,10 @@ private function close_get_content()
 		switch ($this->get_mode_get_content())
 		{
 			case 'single':
-				$this->close_single_get_content();
+				$this->close_single_get_content($reinit);
 				break;
 			case 'multi':
-				$this->close_multi_get_content();
+				$this->close_multi_get_content($reinit);
 				break;
 			default:
 				break;
@@ -694,9 +698,10 @@ private function close_get_content()
 
     /**
      * Закрывает инициализированные cURL дескриптроры в режиме single
+     * @param $reinit Переменная для обхода стирания параметров в опциях дескриптора для повторного запроса. Причина: не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
      * @return void
      */
-private function close_single_get_content()
+private function close_single_get_content($reinit)
 {
     $descriptor=&$this->get_descriptor();
     curl_close($descriptor['descriptor']);
@@ -705,13 +710,15 @@ private function close_single_get_content()
         $this->proxy->remove_all_rent_from_code($descriptor['descriptor_key']);
     }
     unset($descriptor['descriptor']);
-    unset($descriptor['option']);
+    if($reinit) unset($descriptor['option']);
 }
+
     /**
      * Закрывает инициализированные cURL дескриптроры в режиме multi
+     * @param $reinit Переменная для обхода стирания параметров в опциях дескриптора для повторного запроса. Причина: не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
      * @return void
      */
-private function close_multi_get_content()
+private function close_multi_get_content($reinit)
 {
     $descriptor=&$this->get_descriptor();
     $descriptor_array=&$this->get_descriptor_array();
@@ -728,12 +735,32 @@ private function close_multi_get_content()
                     $this->proxy->remove_all_rent_from_code($descriptor_array[$key]['descriptor_key']);
                 }
                 unset($descriptor_array[$key]['descriptor']);
-                unset($descriptor_array[$key]['option']);
+                if($reinit) unset($descriptor_array[$key]['option']);
             }
         }
         unset($value);
     }
     @curl_multi_close($descriptor['descriptor']);
+}
+
+    /**
+     * Повторная инициализация дескрипторов cURL, функция создана по причине не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
+     */
+private function reinit_get_content()
+{
+    switch ($this->get_mode_get_content())
+    {
+        case 'single':
+            $this->close_single_get_content(true);
+            $this->init_single_get_content();
+            break;
+        case 'multi':
+            $this->close_multi_get_content(true);
+            $this->init_multi_get_content();
+            break;
+        default:
+            break;
+    }
 }
     /**
      * Выполнение заросов по $url с определением по какому методу осуществлять запрос
@@ -769,6 +796,7 @@ private function get_single_content($url)
 {
 	$descriptor=&$this->get_descriptor();
 	do{
+        if($this->get_number_repeat()>0) $this->reinit_get_content();
         $this->set_default_setting(CURLOPT_URL,$url);
 		$this->set_options_to_descriptor($descriptor);
 		$answer=$this->exec_single_get_content();
@@ -798,6 +826,7 @@ private function get_multi_content($url)
     $copy_url=$url;//Копируем для создания связи по ключам после удаления из основного массива
     $good_answer=array();
 	do{
+        if($this->get_number_repeat()>0) $this->reinit_get_content();
         $this->set_count_multi_curl(count($url));
         $descriptor_array=&$this->get_descriptor_array();
         $count_multi_stream=$this->get_count_multi_stream();
@@ -872,7 +901,7 @@ public function set_options_to_descriptor(&$descriptor,$option_array=array())
     {
         if(is_object($this->proxy))
         {
-            if(is_string($proxy_ip=$this->proxy->get_proxy($descriptor['descriptor_key'],c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL]))))
+            if(is_string($proxy_ip=$this->proxy->get_proxy($descriptor['descriptor_key'],c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL]))) && c_string_work::is_ip($proxy_ip))
             $this->set_option_to_descriptor($descriptor,CURLOPT_PROXY,$proxy_ip);
             else $descriptor['option'][CURLOPT_URL]='';
         }
@@ -899,7 +928,7 @@ public function set_option_to_descriptor(&$descriptor,$option,$value=-2,$key=-2)
 	{
 		if(array_key_exists($key, $descriptor))
 		{
-			if(is_null($value)) $descriptor[$key]['option'][$option]=$this->get_default_setting($option);
+			if($value==-2) $descriptor[$key]['option'][$option]=$this->get_default_setting($option);
 			else $descriptor[$key]['option'][$option]=$value;
 			if($this->check_option($descriptor[$key],$option,$descriptor[$key]['option'][$option])) return false;
 		}
@@ -925,7 +954,7 @@ private function check_option(&$descriptor,$option,$value=NULL)
 	switch ($option)
 	{
 		case CURLOPT_POST:
-			if((bool)$value) $descriptor['option'][$option]=(bool)$value;
+			if($value!=NULL) $descriptor['option'][$option]=(bool)$value;
 			break;
 		case CURLOPT_POSTFIELDS:
 			if(!$value)
@@ -944,7 +973,10 @@ private function check_option(&$descriptor,$option,$value=NULL)
 				$descriptor['option'][$option]="http://webcache.googleusercontent.com/search?q=cache:".$match['url'];
 				return true;
 			}
-			break;	
+			break;
+        case CURLOPT_HTTPHEADER:
+            if(!is_array($value) || !count($value))  unset($descriptor['option'][$option]);
+            break;
 		default:
 			break;
 	}
@@ -1060,7 +1092,7 @@ private function get_big_answer($a)
 private function check_answer_valid($answer,$curl_data)
 {
     if(!$this->http_code($curl_data['http_code'])) return false;
-    if($curl_data['size_download']<$curl_data['download_content_length'] || $curl_data['size_download']<$this->get_min_size_answer()) return false;
+    if(($curl_data['size_download']<$curl_data['download_content_length'] && $curl_data['download_content_length']!=-1) || $curl_data['size_download']<$this->get_min_size_answer()) return false;
     switch($this->get_type_content())
     {
         case 'file':
@@ -1070,7 +1102,7 @@ private function check_answer_valid($answer,$curl_data)
             if($this->mime_type($curl_data['content_type'],'img')) return true;
             break;
         case 'html':
-            if($this->mime_type($curl_data['content_type'],'html') && preg_match('#<\s*/\s*html[^<>]*>#ims',$answer)) return true;
+            if($this->mime_type($curl_data['content_type'],'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims',$answer)) return true;
             break;
         default:
             break;
