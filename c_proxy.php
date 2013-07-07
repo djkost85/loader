@@ -565,7 +565,7 @@ public function get_proxy_list_in_file()
             $this->proxy_list=json_decode($json_proxy,true);
             if(isset($this->proxy_list)) break;
         }
-        else sleep(1);
+        else sleep(1);// Прокси лист занят
     }
 	return $this->proxy_list;
 }
