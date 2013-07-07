@@ -149,6 +149,12 @@ class c_get_content
     private $dir_cookie;// Папка где храняться файлы cookie
 
     /**
+     * Количество одновременных запросов
+     * @var int
+     */
+    private $count_requests;
+
+    /**
      * @return \get_content\c_get_content\c_get_content
      */
 function __construct()
@@ -246,6 +252,14 @@ public function get_dir_cookie()
 	return dirname(__FILE__)."/".$this->dir_cookie."/";
 }
 
+public function set_count_requests($val)
+{
+    $this->count_requests=$val;
+}
+public function get_count_requests()
+{
+    return $this->count_requests;
+}
     /**
      * @param int $option
      * @param mixed $value
