@@ -9,7 +9,7 @@
  * Удаление из списка всех аренд
  */
 use get_content\c_proxy\c_proxy as c_proxy;
-require_once dirname(__FILE__)."../../include.php";
+require_once dirname(__FILE__)."/../../include.php";
 $c_proxy = new c_proxy();
 $c_proxy->select_proxy_list('bpteam');
 $c_proxy->remove_all_rent();

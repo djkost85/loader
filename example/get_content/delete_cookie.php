@@ -9,6 +9,6 @@
  * Удаление файлов с cookie которым больше часа
  */
 use get_content\c_get_content\c_get_content as c_get_content;
-require_once "../../include.php";
+require_once dirname(__FILE__)."/../../include.php";
 $get_content=new c_get_content();
 $get_content->clear_cookie(3600);

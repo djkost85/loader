@@ -9,7 +9,7 @@
  * Тест работы функции определения кодировки (Только для кирилицы)
  */
 use get_content\c_string_work\c_string_work as c_string_work;
-require_once "../../include.php";
+require_once dirname(__FILE__)."/../../include.php";
 $cp1251=file_get_contents('cp1251.txt');
 $utf8=file_get_contents('utf-8.txt');
 $name=c_string_work::get_encoding_name($cp1251); // $name=windows-1251

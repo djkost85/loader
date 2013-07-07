@@ -9,7 +9,7 @@
  * Тест функций кодирования HTML тегов
  */
 use get_content\c_string_work\c_string_work as c_string_work;
-require_once "../../include.php";
+require_once dirname(__FILE__)."/../../include.php";
 $html=file_get_contents('test.htm');
 $sw= new c_string_work($html);
 $sw->encrypt_tag();

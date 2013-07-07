@@ -11,7 +11,7 @@
 use get_content\c_get_content\c_get_content as c_get_content;
 //use get_content\c_proxy\c_proxy as c_proxy;
 //use get_content\c_string_work\c_string_work as c_string_work;
-require_once "../../include.php";
+require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(600);
 $get_content = new c_get_content();
 $get_content->set_mode_get_content('single');// Режим single
