@@ -776,22 +776,24 @@ private function reinit_get_content()
             break;
     }
 }
+
     /**
      * Выполнение заросов по $url с определением по какому методу осуществлять запрос
      * @param string|array $url
+     * @param string $reg регулярное выражение для дополнительной проверки ответа
      * @return array|string
      */
-public function get_content($url="")
+public function get_content($url="",$reg='##')
 {
     if(is_string($url) && $this->get_mode_get_content()!='single') $url=array($url);
 	if(is_array($url) && $this->get_mode_get_content()!='multi') $this->set_mode_get_content('multi');
 	switch ($this->get_mode_get_content())
 	{
 			case 'single':
-				$this->get_single_content($url);
+				$this->get_single_content($url,$reg);
 				break;
 			case 'multi':
-                $this->get_multi_content($url);
+                $this->get_multi_content($url,$reg);
 				break;
 			default:
 				break;
@@ -804,9 +806,10 @@ public function get_content($url="")
     /**
      * Совершает зарос в режиме single
      * @param $url
+     * @param string $reg регулярное выражение для дополнительной проверки ответа
      * @return string
      */
-private function get_single_content($url)
+private function get_single_content($url,$reg='')
 {
 	$descriptor=&$this->get_descriptor();
 	do{
@@ -815,7 +818,9 @@ private function get_single_content($url)
 		$this->set_options_to_descriptor($descriptor);
 		$answer=$this->exec_single_get_content();
         $descriptor['info']=curl_getinfo($descriptor['descriptor']);
-		if(!$this->get_check_answer() || $this->check_answer_valid($answer,$descriptor['info']))
+        if($reg && preg_match($reg,$answer)) $reg_answer=true;
+        else $reg_answer=false;
+		if((!$this->get_check_answer() || $this->check_answer_valid($answer,$descriptor['info'])) && $reg_answer)
 		{
 			$this->answer=$answer;
 			$this->end_repeat();
@@ -833,9 +838,10 @@ private function get_single_content($url)
     /**
      * Совершает запрос в режиме multi
      * @param $url
+     * @param string $reg регулярное выражение для дополнительной проверки ответа
      * @return array
      */
-private function get_multi_content($url)
+private function get_multi_content($url,$reg='')
 {
     $copy_url=$url;//Копируем для создания связи по ключам после удаления из основного массива
     $good_answer=array();
@@ -865,7 +871,9 @@ private function get_multi_content($url)
 		{
 			$descriptor_array[$key]['info']=curl_getinfo($descriptor_array[$key]['descriptor']);
             $key_good_answer=($url_descriptors[$key]*$count_multi_stream)+$key%$count_multi_stream;
-            if(!isset($good_answer[$key_good_answer]) && (!$this->get_check_answer() || $this->check_answer_valid($value,$descriptor_array[$key]['info'])))
+            if($reg && preg_match($reg,$value)) $reg_answer=true;
+            else $reg_answer=false;
+            if(!isset($good_answer[$key_good_answer]) && (!$this->get_check_answer() || $this->check_answer_valid($value,$descriptor_array[$key]['info'])) && $reg_answer)
             {
 
                 if(isset($url[$url_descriptors[$key]]))unset($url[$url_descriptors[$key]]);
