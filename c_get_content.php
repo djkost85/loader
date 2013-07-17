@@ -724,7 +724,7 @@ private function close_single_get_content($reinit)
         $this->proxy->remove_all_rent_from_code($descriptor['descriptor_key']);
     }
     unset($descriptor['descriptor']);
-    if($reinit) unset($descriptor['option']);
+    if(!$reinit) unset($descriptor['option']);
 }
 
     /**
@@ -749,7 +749,7 @@ private function close_multi_get_content($reinit)
                     $this->proxy->remove_all_rent_from_code($descriptor_array[$key]['descriptor_key']);
                 }
                 unset($descriptor_array[$key]['descriptor']);
-                if($reinit) unset($descriptor_array[$key]['option']);
+                if(!$reinit) unset($descriptor_array[$key]['option']);
             }
         }
         unset($value);
