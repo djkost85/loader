@@ -6,7 +6,7 @@
  * Time: 15:00
  * Project: get_content
  * @author: Evgeny Pynykh bpteam22@gmail.com
- * @info Передать в Get параметр t имя тестируемого модуля
+ * @info Передать в Get параметр t имя тестируемого модуля.
  */
 use get_content\c_proxy\c_proxy as c_proxy;
 require_once dirname(__FILE__)."/../../include.php";
