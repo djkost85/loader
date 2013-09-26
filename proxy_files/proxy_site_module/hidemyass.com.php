@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
-namespace hideme;
+namespace hidemyass;
 use get_content\c_get_content\c_get_content as c_get_content;
 use get_content\c_string_work\c_string_work as c_string_work;
 //return array();
