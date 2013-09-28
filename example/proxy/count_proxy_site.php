@@ -12,7 +12,8 @@ use get_content\c_proxy\c_proxy as c_proxy;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
 $proxy = new c_proxy();
-$proxy->select_proxy_list('all');
+$name = isset($_GET['l']) ? $_GET['l'] : 'all';
+$proxy->select_proxy_list($name);
 $list = $proxy->get_proxy_list();
 $data = array();
 $data['cookie']=0;
@@ -33,3 +34,5 @@ foreach ($list['content'] as $proxy) {
 foreach ($data as $source_proxy => $count) {
     echo '<p>'.$source_proxy.':'.$count.'</p>';
 }
+
+echo "<p>last update : ".date("H:i:s d-m-Y",$list['time'])."</p>";

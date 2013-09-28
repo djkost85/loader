@@ -1112,7 +1112,7 @@ public function save_proxy_list($proxy_list=false)
      * @param array $need_function_array Перечень поддерживаемых функций
      * @param bool $need_update
      */
-public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_word_array=array("#yandex#iUm"),$need_function_array=array(),$need_update=true)
+public function create_proxy_list($name_list,$check_url="http://ya.ru",$check_word_array=array("#yandex#iUm"),$need_function_array=array(),$need_update=false)
 {
 	$this->close_proxy_list();
 	$this->name_list=$name_list;

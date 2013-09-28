@@ -264,7 +264,7 @@ public static function is_ip($str)
 }
 
     /**
-     * Функция для определения кодировки русского текста
+     * Функция для определения однобайтовой кодировки русского текста
      * @param string $str строка для определения кодировки
      * @return string имя кодировки
      * @author m00t
@@ -296,7 +296,7 @@ public static function get_encoding_name($str)
     foreach ($weights as $encoding => $weight)
     {
         if(!$sum_weight) $weights[$encoding]=0;
-        $weights[$encoding] = $weight / $sum_weight;
+        $weights[$encoding] = $sum_weight ? $weight / $sum_weight : 0;
     }
     arsort($weights,SORT_NUMERIC);
     return key($weights);
