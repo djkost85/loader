@@ -27,4 +27,5 @@ foreach ($matches_poststar['ip'] as $value_poststar)
     $tmp_array["type_proxy"]='http';
     $proxy_poststar_proxy['content'][]=$tmp_array;
 }
+unset($get_poststar_content, $answer_poststar);
 return $proxy_poststar_proxy;

@@ -19,8 +19,7 @@ for($i=1;$i<=10;$i++){
     $get_notan_content->set_type_content("html");
     $answer_notan=$get_notan_content->get_content($url_source);
     if(!$answer_notan) return $proxy_notan_proxy;
-    if(!$answer_notan=c_string_work::between_tag($answer_notan,'<table border="0" cellspacing="1" width="100%">')) return $proxy_notan_proxy;
-    if(!preg_match_all('%<td\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</td>%imsu',$answer_notan,$matches_notan)) return $proxy_notan_proxy;
+    if(!preg_match_all('%<TD\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</TD>%ims',$answer_notan,$matches_notan)) return $proxy_notan_proxy;
     foreach ($matches_notan['ip'] as $value_notan)
     {
         $tmp_array['proxy']=trim($value_notan);
@@ -28,6 +27,7 @@ for($i=1;$i<=10;$i++){
         $tmp_array["type_proxy"]='http';
         $proxy_notan_proxy['content'][]=$tmp_array;
     }
+    sleep(rand(1,3));
 }
-
+unset($name_source, $get_notan_content, $answer_notan, $matches_notan);
 return $proxy_notan_proxy;

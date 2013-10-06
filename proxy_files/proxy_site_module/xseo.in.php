@@ -29,4 +29,5 @@ foreach ($matches_xseo['ip'] as $value_xseo)
     $tmp_array["type_proxy"]='http';
     $proxy_xseo_proxy['content'][]=$tmp_array;
 }
+unset($get_xseo_content, $answer_xseo);
 return $proxy_xseo_proxy;

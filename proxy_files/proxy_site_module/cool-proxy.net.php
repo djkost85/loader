@@ -11,7 +11,6 @@
 namespace cool_proxy;
 use get_content\c_get_content\c_get_content as c_get_content;
 use get_content\c_string_work\c_string_work as c_string_work;
-//return array();
 $url_source="http://www.cool-proxy.net/proxies/http_proxy_list/page:";
 $name_source="cool-proxy.net";
 $get_cool_proxy_content= new c_get_content();
@@ -42,7 +41,8 @@ do{
         }
     }
     $i++;
-    sleep(3);
+    sleep(rand(1,3));
     $content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc");
 }while($i<=$count_page);
+unset($url_source, $name_source, $get_cool_proxy_content, $content, $count_proxy);
 return $proxy_cool_proxy;

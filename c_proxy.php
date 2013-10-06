@@ -166,7 +166,7 @@ class c_proxy
      */
  function __construct()
 {
-	$this->storage_time            =7200;
+	$this->storage_time            =72000;
 	$this->rent_time               =3600;
     $this->get_content             = new c_get_content();
 	$this->get_content->set_type_content('html');

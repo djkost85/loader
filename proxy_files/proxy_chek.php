@@ -15,12 +15,20 @@
  */
 $str='';
 $plus='';
+$headLogFile=dirname(__FILE__).'/head.log';
 if(!isset($_GET['str']))
 {
     $anonym='1';
-    if(preg_match("#".preg_quote($_GET['ip'],"#")."#ims",$_SERVER['HTTP_X_FORWARDED_FOR'])) $anonym='0';
-    elseif($_SERVER['REMOTE_ADDR']==$_GET['ip']) $anonym='0';
-    elseif($_SERVER['HTTP_X_REAL_IP']==$_GET['ip']) $anonym='0';
+    $ipHostHead = array('REMOTE_ADDR','HTTP_X_FORWARDED_FOR','HTTP_X_REAL_IP');
+    foreach ($_SERVER as $key => $value) {
+        if(in_array($key,$ipHostHead) && preg_match("%".preg_quote($_GET['ip'],"%")."%ims",$value)){
+            $anonym = 0;
+        } elseif(preg_match("%".preg_quote($_GET['ip'],"%")."%ims",$value) && is_writable($headLogFile)){
+            $fh = fopen($headLogFile,'+a');
+            fwrite($fh,$key."\t".$_GET['ip']."\t->\t".$value."\n");
+            fclose($fh);
+        }
+    }
     $str.=$anonym;
     if($_SERVER['HTTP_REFERER']=="proxy-check.net") $str.='1';
     else $str.='0';

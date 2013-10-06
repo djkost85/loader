@@ -308,7 +308,7 @@ public function restore_default_settings()
     $this->set_default_settings(array(
         CURLOPT_HEADER => false,
         CURLOPT_URL => "http://ya.ru",
-        CURLOPT_TIMEOUT => 15,
+        CURLOPT_TIMEOUT => 25,
         CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31",
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_FOLLOWLOCATION => true,
@@ -654,9 +654,10 @@ private function init_single_get_content()
 {
     $descriptor=&$this->get_descriptor();
     if(!isset($descriptor['descriptor_key'])) $descriptor['descriptor_key']=microtime(1).mt_rand();
-    if(!file_exists($this->get_dir_cookie().$descriptor['descriptor_key'].".cookie"))
+    $file_name = $this->get_dir_cookie().$descriptor['descriptor_key'].".cookie";
+    if(!is_writable($file_name))
     {
-        $fh=fopen($this->get_dir_cookie().$descriptor['descriptor_key'].".cookie","w");
+        $fh=fopen($file_name,"w");
         fclose($fh);
     }
     $descriptor['descriptor']=curl_init();

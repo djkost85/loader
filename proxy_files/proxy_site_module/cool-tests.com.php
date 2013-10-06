@@ -9,7 +9,6 @@
  */
 namespace spys;
 use get_content\c_get_content\c_get_content as c_get_content;
-use get_content\c_string_work\c_string_work as c_string_work;
 //return array();
 $url_source="http://www.cool-tests.com/all-working-proxies.php";
 $name_source="cool-tests.com";
@@ -30,4 +29,5 @@ foreach ($matches_cool_tests['ip'] as $value_cool_tests)
     $tmp_array["type_proxy"]='http';
     $proxy_cool_tests_proxy['content'][]=$tmp_array;
 }
+unset($url_source, $name_source, $get_cool_tests_content, $answer_cool_tests, $matches_cool_tests, $value_cool_tests);
 return $proxy_cool_tests_proxy;

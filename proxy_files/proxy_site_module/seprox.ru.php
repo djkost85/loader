@@ -68,7 +68,7 @@ do {
         }
     }
     $pagenation++;
-    sleep(3);
+    sleep(rand(1,3));
     if(!$content=$get_seprox_content->get_content($url_source.$pagenation.".html")) continue;
 }while($pagenation<$count_page);
 unset($javascript_encode);

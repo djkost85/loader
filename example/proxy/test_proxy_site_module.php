@@ -14,4 +14,5 @@ set_time_limit(3600);
 $proxy= new c_proxy();
 $test_module = isset($_GET['t']) ? $_GET['t'] : 'cool';
 $data=$proxy->test_download_proxy($test_module);
+echo 'count:'.count($data['content']);
 var_dump($data);
