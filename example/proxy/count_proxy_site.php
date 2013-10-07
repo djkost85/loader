@@ -24,15 +24,21 @@ $data['anonym']=0;
 
 foreach ($list['content'] as $proxy) {
     if(!isset($data[$proxy['source_proxy']])) $data[$proxy['source_proxy']]=0;
-    $data[$proxy['source_proxy']]++;
+	++$data[$proxy['source_proxy']];
     $data['cookie'] += $proxy['cookie'];
     $data['get'] += $proxy['get'];
     $data['post'] += $proxy['post'];
     $data['referer'] += $proxy['referer'];
     $data['anonym'] += $proxy['anonym'];
+	if(!isset($country[$proxy['country']])) $country[$proxy['country']] = 0;
+	++$country[$proxy['country']];
 }
 foreach ($data as $source_proxy => $count) {
     echo '<p>'.$source_proxy.':'.$count.'</p>';
+}
+echo "<p>Country:</p>";
+foreach ($country as $name => $count) {
+		echo '<p>'.$name.':'.$count.'</p>';
 }
 
 echo "<p>last update : ".date("H:i:s d-m-Y",$list['time'])."</p>";
