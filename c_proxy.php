@@ -160,6 +160,12 @@ class c_proxy
      */
     protected $access_to_proxy_list;
 
+	/**
+	 * Список поддерживаемых функций прокси
+	 * @var array
+	 */
+	protected $proxy_function;
+
     /**
      * Конструктор инициализируте переменные значениями по умолчанию
      * @return \get_content\c_proxy\c_proxy
@@ -175,6 +181,14 @@ class c_proxy
     $this->dir_proxy_file          ="proxy_files";
 	$this->dir_proxy_list_file     ="proxy_list";
     $this->dir_url_proxy_list      ="proxy_site_module";
+	$this->proxy_function = array(
+			'anonym',
+			'referer',
+			'post',
+			'get',
+			'cookie',
+			'country'
+	);
     $this->f_heandle_proxy_list    =NULL;
     $this->file_url_proxy_list 	   =glob($this->get_dir_url_proxy_list()."/*.php");
     $this->check_url_proxy         =require $this->get_dir_proxy_file()."/check_url_list.php";
@@ -942,8 +956,9 @@ public function check_proxy($proxy)
         $this->get_content->set_default_setting(CURLOPT_HEADER,false);
         $this->get_content->set_check_answer(false);
         $answer=$this->get_content->get_content($this->get_proxy_checker().'?ip='.$this->get_server_ip().'&proxy=yandex');
+		$descriptor = $this->get_content->get_descriptor();
         $this->get_content->restore_default_settings();
-		$info_proxy = $this->gen_proxy_info($proxy, $answer);
+		$info_proxy = $this->gen_proxy_info($proxy, $answer, $descriptor['info']);
 		if($info_proxy){
 			    $good_proxy[] = $info_proxy;
 		}
@@ -986,7 +1001,7 @@ private function check_proxy_array($array_proxy)
             $answer_content=$this->get_content->get_content($url_array);
             foreach ($answer_content as $key => $value)
 		    {
-				$info_proxy = $this->gen_proxy_info($value_array_proxy[$key], $value);
+				$info_proxy = $this->gen_proxy_info($value_array_proxy[$key], $value, $descriptor_array[$key]['info']);
 				if($info_proxy){
 						$good_proxy[] = $info_proxy;
 				}
@@ -1055,18 +1070,30 @@ private function check_proxy_array_to_site($array_proxy,$url,$check_word)
 private function get_proxy_by_function($proxy_list,$fun_array)
 {
     if(!is_array($proxy_list)) return false;
-    $need_fun=array("anonym"=>"0","referer"=>"0","post"=>"0","get"=>"0","cookie"=>"0");
-    foreach ($fun_array as $value) $need_fun[$value]=1;
     $good_proxy=array();
-    foreach ($proxy_list as $value)
+    foreach ($proxy_list as $challenger)
     {
-           if($value['anonym'] >=$need_fun['anonym']
-           && $value['referer']>=$need_fun['referer']
-           && $value['post']   >=$need_fun['post']
-           && $value['get']    >=$need_fun['get']
-           && $value['cookie'] >=$need_fun['cookie']
-             )
-              $good_proxy[]= $value;
+			$approach = false;
+			foreach ($fun_array as $name_function => $value_function) {
+					if(in_array($name_function, $this->proxy_function) && $challenger[$name_function]>=$value_function){
+							if($name_function == 'country'){
+									if($value_function === $challenger[$name_function]){
+											$approach = true;
+									} else {
+											$approach = false;
+											break;
+									}
+							} else {
+									$approach = true;
+							}
+					} else {
+							$approach = false;
+							break;
+					}
+			}
+			if($approach){
+				$good_proxy[]= $challenger;
+			}
     }
     if(count($good_proxy)) return $good_proxy;
     return false;
@@ -1076,9 +1103,10 @@ private function get_proxy_by_function($proxy_list,$fun_array)
 		 * Генерация информации о прокси для хранения в листе активных прокси
 		 * @param array|string $proxy
 		 * @param string       $answer
+		 * @param null|array   $curl_info
 		 * @return array|bool
 		 */
-private function gen_proxy_info($proxy,$answer)
+private function gen_proxy_info($proxy,$answer,$curl_info = null)
 {
 	if(preg_match('#^[01]{5}$#',$answer) && preg_match_all('#(?<fun_status>[01])#U',$answer,$matches))
 	{
@@ -1091,17 +1119,24 @@ private function gen_proxy_info($proxy,$answer)
 					$info_proxy['source_proxy']=$proxy['source_proxy'];
 					$info_proxy['type_proxy']  =$proxy['type_proxy'];
 			}
-			$info_proxy['anonym']     =$matches['fun_status'][0];
-			$info_proxy['referer']    =$matches['fun_status'][1];
-			$info_proxy['post']       =$matches['fun_status'][2];
-			$info_proxy['get']        =$matches['fun_status'][3];
-			$info_proxy['cookie']     =$matches['fun_status'][4];
-			$info_proxy['last_cheak'] =time();
+			$info_proxy['anonym']     =(int)$matches['fun_status'][0];
+			$info_proxy['referer']    =(int)$matches['fun_status'][1];
+			$info_proxy['post']       =(int)$matches['fun_status'][2];
+			$info_proxy['get']        =(int)$matches['fun_status'][3];
+			$info_proxy['cookie']     =(int)$matches['fun_status'][4];
+			$info_proxy['last_check'] =time();
 			if(preg_match('%(?<ip>\d+\.\d+\.\d+.\d+)\:\d+%ims', $info_proxy['proxy'], $match)){
 					$country_name = @geoip_country_name_by_name($match['ip']);
-					$info_proxy['country'] = $country_name ? $country_name : '';
+					$info_proxy['country'] = $country_name ? $country_name : 'no country';
 			} else {
-					$info_proxy['country'] = '';
+					$info_proxy['country'] = 'no country';
+			}
+			if($curl_info){
+					$info_proxy['starttransfer'] = $curl_info['starttransfer_time'];
+					$info_proxy['upload'] = $curl_info['speed_upload'];
+					$info_proxy['download'] = $curl_info['speed_download'];
+			} else {
+
 			}
 			return $info_proxy;
 	} else {

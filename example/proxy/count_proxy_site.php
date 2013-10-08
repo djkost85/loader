@@ -15,30 +15,30 @@ $proxy = new c_proxy();
 $name = isset($_GET['l']) ? $_GET['l'] : 'all';
 $proxy->select_proxy_list($name);
 $list = $proxy->get_proxy_list();
-$data = array();
-$data['cookie']=0;
-$data['get']=0;
-$data['post']=0;
-$data['referer']=0;
-$data['anonym']=0;
 
 foreach ($list['content'] as $proxy) {
-    if(!isset($data[$proxy['source_proxy']])) $data[$proxy['source_proxy']]=0;
-	++$data[$proxy['source_proxy']];
-    $data['cookie'] += $proxy['cookie'];
-    $data['get'] += $proxy['get'];
-    $data['post'] += $proxy['post'];
-    $data['referer'] += $proxy['referer'];
-    $data['anonym'] += $proxy['anonym'];
-	if(!isset($country[$proxy['country']])) $country[$proxy['country']] = 0;
-	++$country[$proxy['country']];
+    $source[$proxy['source_proxy']][] = $proxy['proxy'];
+    if($proxy['cookie']) $data['cookie'][] = $proxy['proxy'];
+	if($proxy['get']) $data['get'][] = $proxy['proxy'];
+	if($proxy['post']) $data['post'][] = $proxy['proxy'];
+	if($proxy['referer']) $data['referer'][] = $proxy['proxy'];
+	if($proxy['anonym']) $data['anonym'][] = $proxy['proxy'];
+	$country[$proxy['country']][] = $proxy['proxy'];
 }
-foreach ($data as $source_proxy => $count) {
-    echo '<p>'.$source_proxy.':'.$count.'</p>';
+echo '<p>------------FUNCTION----------</p>';
+arsort($data);
+foreach ($data as $source_proxy => $proxyes) {
+    echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
 }
-echo "<p>Country:</p>";
-foreach ($country as $name => $count) {
-		echo '<p>'.$name.':'.$count.'</p>';
+echo '<p>------------SOURCE----------</p>';
+arsort($source);
+foreach ($source as $source_proxy => $proxyes) {
+		echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
+}
+echo '<p>------------COUNTRY----------</p>';
+arsort($country);
+foreach ($country as $source_proxy => $proxyes) {
+		echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
 }
 
 echo "<p>last update : ".date("H:i:s d-m-Y",$list['time'])."</p>";

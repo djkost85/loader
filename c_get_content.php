@@ -36,7 +36,7 @@ class c_get_content
      * Пересление всех поддерживаемых настроек для cURL
      * @var array
      */
-    private $all_setting;// массив с перечислением всех настроек для cURL
+    private $all_setting;
     /**
      * Флаг для включения запросов через прокси сервера
      * @var bool
@@ -146,7 +146,7 @@ class c_get_content
      * Папка в которую сохраняются файлы cookie
      * @var string
      */
-    private $dir_cookie;// Папка где храняться файлы cookie
+    private $dir_cookie;
 
     /**
      * Количество одновременных запросов
@@ -173,7 +173,7 @@ function __construct()
                               CURLOPT_FORBID_REUSE,
                               CURLOPT_HTTPHEADER
                               );
-	$this->set_dir_cookie("get_content_files/cookie");
+	$this->set_dir_cookie("./get_content_files/cookie");
 	$this->restore_default_settings();
     $this->count_multi_stream=1;
     $this->count_multi_curl=1;
