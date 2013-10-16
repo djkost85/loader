@@ -24,52 +24,52 @@ if(preg_match("/<div\s*class=\"countResult\">\s*Всего\s*найдено.\s*(
 else return false;
 // JavaScript приколы с приведением типов. Расшифровка:
 $javascript_encode = array(
-    "a"=>"(![]+[])[+!+[]]",
-    "b"=>"([]+[]+{})[!+[]+!+[]]",
-    "c"=>"([![]]+{})[+!+[]+[+[]]]",
-    "d"=>"([]+[]+[][[]])[!+[]+!+[]]",
-    "e"=>"(!![]+[])[!+[]+!+[]+!+[]]",
-    "f"=>"(![]+[])[+[]]",
-    "i"=>"([![]]+[][[]])[+!+[]+[+[]]]",
-    "n"=>"([]+[]+[][[]])[+!+[]]",
-    "o"=>"([]+[]+{})[+!+[]]",
-    "r"=>"(!![]+[])[+!+[]]",
-    "t"=>"(!![]+[])[+[]]",
-    "u"=>"(!![]+[])[!+[]+!+[]]",
-    " "=>"(+{}+[]+[]+[]+[]+{})[+!+[]+[+[]]]",
-    "***"=>"+++",
-    ""=>"+",
-    "+"=>"***"
+	"a"=>"(![]+[])[+!+[]]",
+	"b"=>"([]+[]+{})[!+[]+!+[]]",
+	"c"=>"([![]]+{})[+!+[]+[+[]]]",
+	"d"=>"([]+[]+[][[]])[!+[]+!+[]]",
+	"e"=>"(!![]+[])[!+[]+!+[]+!+[]]",
+	"f"=>"(![]+[])[+[]]",
+	"i"=>"([![]]+[][[]])[+!+[]+[+[]]]",
+	"n"=>"([]+[]+[][[]])[+!+[]]",
+	"o"=>"([]+[]+{})[+!+[]]",
+	"r"=>"(!![]+[])[+!+[]]",
+	"t"=>"(!![]+[])[+[]]",
+	"u"=>"(!![]+[])[!+[]+!+[]]",
+	" "=>"(+{}+[]+[]+[]+[]+{})[+!+[]+[+[]]]",
+	"***"=>"+++",
+	""=>"+",
+	"+"=>"***"
 );
 $proxy_seprox=array();
 do {
-    $reg_ex='#<tr\s*class="proxyStr">\s*<td>\s*<script\s*type="text/javascript">\s*(?<js>[^<]*)\s*</script>\s*</td>\s*<td>\s*(?<type_proxy>.*)\s*</td>#iUms';
-    if(!preg_match_all($reg_ex, $content, $matches_secret_code)) break;
-    foreach ($matches_secret_code['js'] as $key_secret_code => $str_secret_code)
-    {
-        if(!preg_match('#Proxy=String.fromCharCode\((?<js_code>[^\)]*)\)#iUs', $str_secret_code,$match_secret_array)) break;
-        $lit=explode(",",$match_secret_array['js_code']);
-        $litera=array();
-        foreach ($lit as $key => $value) $litera[$key]=chr($value);
-        foreach ($litera as $key_litera => $value_litera)
-            $str_secret_code=preg_replace('#Proxy\['.$key_litera.'\]#iUs',$value_litera, $str_secret_code);
-        foreach ($javascript_encode as $key_javascript => $value_javascript)
-            $str_secret_code=preg_replace('#'.preg_quote($value_javascript,'#').'#',$key_javascript,$str_secret_code);
-        preg_match_all('#(?:\(|\+)(?<ip>\w+)#s', $str_secret_code,$matches_secret_var);
-        $ip="";
-        foreach ($matches_secret_var['ip'] as $key_ip => $value_ip)
-            if(preg_match('#'.$value_ip.'=\'(?<ip>[^\']*)\'#s', $str_secret_code, $match_ip)) $ip.=$match_ip['ip'];
-        if(c_string_work::is_ip($ip))
-        {
-            $tmp_array['proxy']=trim($ip);
-            $tmp_array["source_proxy"]=$name_source;
-            $tmp_array["type_proxy"]=trim($matches_secret_code['type_proxy'][$key_secret_code]);
-            $proxy_seprox['content'][]=$tmp_array;
-        }
-    }
-    $pagenation++;
-    sleep(rand(1,3));
-    if(!$content=$get_seprox_content->get_content($url_source.$pagenation.".html")) continue;
+	$reg_ex='#<tr\s*class="proxyStr">\s*<td>\s*<script\s*type="text/javascript">\s*(?<js>[^<]*)\s*</script>\s*</td>\s*<td>\s*(?<type_proxy>.*)\s*</td>#iUms';
+	if(!preg_match_all($reg_ex, $content, $matches_secret_code)) break;
+	foreach ($matches_secret_code['js'] as $key_secret_code => $str_secret_code)
+	{
+	if(!preg_match('#Proxy=String.fromCharCode\((?<js_code>[^\)]*)\)#iUs', $str_secret_code,$match_secret_array)) break;
+	$lit=explode(",",$match_secret_array['js_code']);
+	$litera=array();
+	foreach ($lit as $key => $value) $litera[$key]=chr($value);
+	foreach ($litera as $key_litera => $value_litera)
+	    $str_secret_code=preg_replace('#Proxy\['.$key_litera.'\]#iUs',$value_litera, $str_secret_code);
+	foreach ($javascript_encode as $key_javascript => $value_javascript)
+	    $str_secret_code=preg_replace('#'.preg_quote($value_javascript,'#').'#',$key_javascript,$str_secret_code);
+	preg_match_all('#(?:\(|\+)(?<ip>\w+)#s', $str_secret_code,$matches_secret_var);
+	$ip="";
+	foreach ($matches_secret_var['ip'] as $key_ip => $value_ip)
+	    if(preg_match('#'.$value_ip.'=\'(?<ip>[^\']*)\'#s', $str_secret_code, $match_ip)) $ip.=$match_ip['ip'];
+	if(c_string_work::is_ip($ip))
+	{
+	    $tmp_array['proxy']=trim($ip);
+	    $tmp_array["source_proxy"]=$name_source;
+	    $tmp_array["type_proxy"]=trim($matches_secret_code['type_proxy'][$key_secret_code]);
+	    $proxy_seprox['content'][]=$tmp_array;
+	}
+	}
+	$pagenation++;
+	sleep(rand(1,3));
+	if(!$content=$get_seprox_content->get_content($url_source.$pagenation.".html")) continue;
 }while($pagenation<$count_page);
 unset($javascript_encode);
 unset($matches_secret_code);

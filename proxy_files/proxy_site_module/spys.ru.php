@@ -23,10 +23,10 @@ if(!$answer_spys=c_string_work::between_tag($answer_spys,'<table width="100%" BO
 if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims",$answer_spys,$matches_spys)) return array();
 foreach ($matches_spys['ip'] as $value_spys)
 {
-    $tmp_array['proxy']=trim($value_spys);
-    $tmp_array["source_proxy"]=$name_source;
-    $tmp_array["type_proxy"]='http';
-    $proxy_spys_proxy['content'][]=$tmp_array;
+	$tmp_array['proxy']=trim($value_spys);
+	$tmp_array["source_proxy"]=$name_source;
+	$tmp_array["type_proxy"]='http';
+	$proxy_spys_proxy['content'][]=$tmp_array;
 }
 unset($answer_spys, $get_spys_content);
 return $proxy_spys_proxy;

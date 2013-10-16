@@ -17,8 +17,8 @@ $proxy->select_proxy_list($name);
 $list = $proxy->get_proxy_list();
 
 foreach ($list['content'] as $proxy) {
-    $source[$proxy['source_proxy']][] = $proxy['proxy'];
-    if($proxy['cookie']) $data['cookie'][] = $proxy['proxy'];
+	$source[$proxy['source_proxy']][] = $proxy['proxy'];
+	if($proxy['cookie']) $data['cookie'][] = $proxy['proxy'];
 	if($proxy['get']) $data['get'][] = $proxy['proxy'];
 	if($proxy['post']) $data['post'][] = $proxy['proxy'];
 	if($proxy['referer']) $data['referer'][] = $proxy['proxy'];
@@ -28,7 +28,7 @@ foreach ($list['content'] as $proxy) {
 echo '<p>------------FUNCTION----------</p>';
 arsort($data);
 foreach ($data as $source_proxy => $proxyes) {
-    echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
+	echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
 }
 echo '<p>------------SOURCE----------</p>';
 arsort($source);

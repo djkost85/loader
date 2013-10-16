@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 return array(
-                "http://free-lance.dyndns.info/proxy_chek.php",
-                "http://pchecker.vrozetke.com/proxy_chek.php",
-                "http://bpteam.net/proxy_chek.php"
-            );
+	        "http://free-lance.dyndns.info/proxy_chek.php",
+	        "http://pchecker.vrozetke.com/proxy_chek.php",
+	        "http://bpteam.net/proxy_chek.php"
+	    );

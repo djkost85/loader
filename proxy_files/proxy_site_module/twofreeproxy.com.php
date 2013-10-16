@@ -38,21 +38,21 @@ $answer_twofreeproxy=$get_twofreeproxy_content->get_content($url_source);
 $tmp_proxy_array=array();
 if($answer_twofreeproxy)
 {
-    $tmp_json_proxy=json_decode($answer_twofreeproxy,true);
-    $tmp_proxy_array=explode('<br>',$tmp_json_proxy['proxy']);
+	$tmp_json_proxy=json_decode($answer_twofreeproxy,true);
+	$tmp_proxy_array=explode('<br>',$tmp_json_proxy['proxy']);
 }
 $http_head=array(
-    'Host: 2freeproxy.com',
-    'User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0',
-    'Accept: application/json, text/javascript, */*; q=0.01',
-    'Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-    'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
-    'X-Requested-With: XMLHttpRequest',
-    'Referer: http://2freeproxy.com/elite-proxy.html',
-    'Content-Length: 10',
-    'Connection: keep-alive',
-    'Pragma: no-cache',
-    'Cache-Control: no-cache'
+	'Host: 2freeproxy.com',
+	'User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0',
+	'Accept: application/json, text/javascript, */*; q=0.01',
+	'Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+	'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
+	'X-Requested-With: XMLHttpRequest',
+	'Referer: http://2freeproxy.com/elite-proxy.html',
+	'Content-Length: 10',
+	'Connection: keep-alive',
+	'Pragma: no-cache',
+	'Cache-Control: no-cache'
 );
 $get_twofreeproxy_content->set_default_setting(CURLOPT_HTTPHEADER,$http_head);
 $get_twofreeproxy_content->set_default_setting(CURLOPT_REFERER,'http://2freeproxy.com/elite-proxy.html');
@@ -62,15 +62,15 @@ $answer_twofreeproxy=$get_twofreeproxy_content->get_content($url_source);
 $tmp_proxy_array2=array();
 if($answer_twofreeproxy)
 {
-    $tmp_json_proxy=json_decode($answer_twofreeproxy,true);
-    $tmp_proxy_array2=explode('<br>',$tmp_json_proxy['proxy']);
+	$tmp_json_proxy=json_decode($answer_twofreeproxy,true);
+	$tmp_proxy_array2=explode('<br>',$tmp_json_proxy['proxy']);
 }
 $tmp_proxy_new=array_merge($tmp_proxy_array2,$tmp_proxy_array);
 foreach ($tmp_proxy_new as $value_poststar)
 {
-    $tmp_array['proxy']=trim($value_poststar);
-    $tmp_array["source_proxy"]=$name_source;
-    $tmp_array["type_proxy"]='http';
-    $proxy_twofreeproxy_proxy['content'][]=$tmp_array;
+	$tmp_array['proxy']=trim($value_poststar);
+	$tmp_array["source_proxy"]=$name_source;
+	$tmp_array["type_proxy"]='http';
+	$proxy_twofreeproxy_proxy['content'][]=$tmp_array;
 }
 return $proxy_twofreeproxy_proxy;

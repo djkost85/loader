@@ -24,10 +24,10 @@ if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s
 $proxy_xseo_proxy=array();
 foreach ($matches_xseo['ip'] as $value_xseo)
 {
-    $tmp_array['proxy']=trim($value_xseo);
-    $tmp_array["source_proxy"]=$name_source;
-    $tmp_array["type_proxy"]='http';
-    $proxy_xseo_proxy['content'][]=$tmp_array;
+	$tmp_array['proxy']=trim($value_xseo);
+	$tmp_array["source_proxy"]=$name_source;
+	$tmp_array["type_proxy"]='http';
+	$proxy_xseo_proxy['content'][]=$tmp_array;
 }
 unset($get_xseo_content, $answer_xseo);
 return $proxy_xseo_proxy;

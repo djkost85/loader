@@ -22,10 +22,10 @@ if(!$answer_stopinfection) return array();
 if(!preg_match_all('#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu',$answer_stopinfection,$matches_stopinfection)) return array();
 foreach ($matches_stopinfection['ip'] as $value_stopinfection)
 {
-    $tmp_array['proxy']=trim($value_stopinfection);
-    $tmp_array["source_proxy"]=$name_source;
-    $tmp_array["type_proxy"]='http';
-    $proxy_stopinfection_proxy['content'][]=$tmp_array;
+	$tmp_array['proxy']=trim($value_stopinfection);
+	$tmp_array["source_proxy"]=$name_source;
+	$tmp_array["type_proxy"]='http';
+	$proxy_stopinfection_proxy['content'][]=$tmp_array;
 }
 unset($url_source, $name_source, $get_stopinfection_content, $answer_stopinfection, $matches_stopinfection, $value_stopinfection);
 return $proxy_stopinfection_proxy;

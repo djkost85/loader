@@ -22,10 +22,10 @@ if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s
 $proxy_poststar_proxy=array();
 foreach ($matches_poststar['ip'] as $value_poststar)
 {
-    $tmp_array['proxy']=trim($value_poststar);
-    $tmp_array["source_proxy"]=$name_source;
-    $tmp_array["type_proxy"]='http';
-    $proxy_poststar_proxy['content'][]=$tmp_array;
+	$tmp_array['proxy']=trim($value_poststar);
+	$tmp_array["source_proxy"]=$name_source;
+	$tmp_array["type_proxy"]='http';
+	$proxy_poststar_proxy['content'][]=$tmp_array;
 }
 unset($get_poststar_content, $answer_poststar);
 return $proxy_poststar_proxy;

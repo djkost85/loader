@@ -24,10 +24,10 @@ if(!$answer_cool_tests) return array();
 if(!preg_match_all("#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu",$answer_cool_tests,$matches_cool_tests)) return array();
 foreach ($matches_cool_tests['ip'] as $value_cool_tests)
 {
-    $tmp_array['proxy']=trim($value_cool_tests);
-    $tmp_array["source_proxy"]=$name_source;
-    $tmp_array["type_proxy"]='http';
-    $proxy_cool_tests_proxy['content'][]=$tmp_array;
+	$tmp_array['proxy']=trim($value_cool_tests);
+	$tmp_array["source_proxy"]=$name_source;
+	$tmp_array["type_proxy"]='http';
+	$proxy_cool_tests_proxy['content'][]=$tmp_array;
 }
 unset($url_source, $name_source, $get_cool_tests_content, $answer_cool_tests, $matches_cool_tests, $value_cool_tests);
 return $proxy_cool_tests_proxy;
