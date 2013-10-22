@@ -1,7 +1,7 @@
 <?php
-namespace get_content\c_proxy;
-use get_content\c_get_content\c_get_content as c_get_content;
-use get_content\c_string_work\c_string_work as c_string_work;
+namespace get_content;
+use get_content\c_get_content as c_get_content;
+use get_content\c_string_work as c_string_work;
 /**
  * Class c_proxy
  * Класс для получения актуального списка прокси, проверки работоспособности прокси с определенными сайтами
@@ -168,7 +168,7 @@ class c_proxy
 
 	/**
 	 * Конструктор инициализируте переменные значениями по умолчанию
-	 * @return \get_content\c_proxy\c_proxy
+	 * @return \get_content\c_proxy
 	 */
  function __construct()
 {

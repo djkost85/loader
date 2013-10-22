@@ -7,9 +7,9 @@
  * @package get_content
  * @version 2.0
  */
-namespace get_content\c_get_content;
-use get_content\c_proxy\c_proxy as c_proxy;
-use get_content\c_string_work\c_string_work as c_string_work;
+namespace get_content;
+use get_content\c_proxy as c_proxy;
+use get_content\c_string_work as c_string_work;
 class c_get_content
 {
 	/**
@@ -155,7 +155,7 @@ class c_get_content
 	private $count_requests;
 
 	/**
-	 * @return \get_content\c_get_content\c_get_content
+	 * @return \get_content\c_get_content
 	 */
 function __construct()
 {
@@ -1070,13 +1070,9 @@ public function get_answer($get_all_answer=false)
 		case 'multi':
 			if(!$get_all_answer)
 			{
-				//if(is_array(current($this->answer)))
-				//{
 				$a=array();
 				foreach ($this->answer as $key => $value) $a[$key]=$this->get_big_answer($value);
 				return $a;
-				//}
-				//else return $this->get_big_answer($this->answer);
 			}
 			else return $this->answer;
 			break;

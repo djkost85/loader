@@ -6,7 +6,7 @@
  * @package get_content
  * @version 2.0
  */
-namespace get_content\c_string_work;
+namespace get_content;
 class c_string_work
 {
 	/**
