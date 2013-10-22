@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Получение контента в режиме multi через прокси список без аренды
  */
-use get_content\c_get_content\c_get_content as c_get_content;
+use get_content\c_get_content as c_get_content;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(0);
 

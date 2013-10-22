@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Создание , изменение, обновление и удаление прокси листа
  */
-use get_content\c_proxy\c_proxy as c_proxy;
+use get_content\c_proxy as c_proxy;
 require_once dirname(__FILE__)."/../../include.php";
 $proxy= new c_proxy();
 $proxy->create_proxy_list('test',"http://ya.ru",array("#yandex#ims"),array('cookie'=> 1,'referer' => 1, 'country' => 'United States'),false); // создаем список с именем test

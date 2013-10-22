@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Загрузка всех прокси из бесплатных источников в список по умолчанию из которого черпают прокси другие листы
  */
-use get_content\c_proxy\c_proxy as c_proxy;
+use get_content\c_proxy as c_proxy;
 set_time_limit(1200);
 require_once dirname(__FILE__)."/../../include.php";
 $proxy= new c_proxy();

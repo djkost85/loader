@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * @info Передать в Get параметр t имя тестируемого модуля.
  */
-use get_content\c_proxy\c_proxy as c_proxy;
+use get_content\c_proxy as c_proxy;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
 $proxy= new c_proxy();

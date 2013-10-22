@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Обновление всех списков прокси
  */
-use get_content\c_proxy\c_proxy as c_proxy;
+use get_content\c_proxy as c_proxy;
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
 require_once dirname(__FILE__)."/../../include.php";

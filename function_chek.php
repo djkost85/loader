@@ -7,9 +7,9 @@
  * Project: get_content
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-use get_content\c_get_content\c_get_content as c_get_content;
-use get_content\c_proxy\c_proxy as c_proxy;
-use get_content\c_string_work\c_string_work as c_string_work;
+use get_content\c_get_content as c_get_content;
+use get_content\c_proxy as c_proxy;
+use get_content\c_string_work as c_string_work;
 include_once "include.php";
 
 $get_content = new c_get_content();

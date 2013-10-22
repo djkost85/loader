@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Тест работы функции определения кодировки (Только для кирилицы)
  */
-use get_content\c_string_work\c_string_work as c_string_work;
+use get_content\c_string_work as c_string_work;
 require_once dirname(__FILE__)."/../../include.php";
 $cp1251=file_get_contents('cp1251.txt');
 $utf8=file_get_contents('utf-8.txt');
