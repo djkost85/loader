@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace stopinfection;
-use get_content\c_get_content\c_get_content as c_get_content;
+use get_content\c_get_content as c_get_content;
 //return array();
 $url_source="http://stopinfection.narod.ru/Proxy.htm";
 $name_source="cool-tests.com";

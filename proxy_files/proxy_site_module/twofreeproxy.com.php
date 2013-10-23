@@ -8,8 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace twofreeproxy;
-use get_content\c_get_content\c_get_content as c_get_content;
-use get_content\c_string_work\c_string_work as c_string_work;
+use get_content\c_get_content as c_get_content;
 
 $url_source="http://2freeproxy.com/wp-content/plugins/proxy/load_proxy.php";
 $name_source="2freeproxy.com";

@@ -9,8 +9,8 @@
  */
 
 namespace foxtools;
-use get_content\c_get_content\c_get_content as c_get_content;
-use get_content\c_string_work\c_string_work as c_string_work;
+use get_content\c_get_content as c_get_content;
+use get_content\c_string_work as c_string_work;
 //return array();
 $url_source="http://foxtools.ru/Proxy?page=";
 $name_source="foxtools.ru";
