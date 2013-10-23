@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace cool_tests;
-use get_content\c_get_content\c_get_content as c_get_content;
+use get_content\c_get_content as c_get_content;
 //return array();
 $url_source="http://www.cool-tests.com/all-working-proxies.php";
 $name_source="cool-tests.com";
