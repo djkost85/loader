@@ -246,7 +246,7 @@ public static function parse_url($url)
 	foreach ($array_fragment as $value)
 	{
 	    $part_fragment=explode("=",$value);
-	    $array_url['fragment'][$part_fragment[0]]=$part_fragment[1];
+	    $array_url['fragment'][$part_fragment[0]]=(isset($part_fragment[1]) ? $part_fragment[1] : '');
 	}
 	}
 	return $array_url;
