@@ -71,9 +71,4 @@ do {
 	sleep(rand(1,3));
 	if(!$content=$get_seprox_content->get_content($url_source.$pagenation.".html")) continue;
 }while($pagenation<$count_page);
-unset($javascript_encode);
-unset($matches_secret_code);
-unset($str_secret_code);
-unset($get_seprox_content);
-unset($content);
-return $proxy_seprox;
+return is_array($proxy_seprox)? $proxy_seprox : array();

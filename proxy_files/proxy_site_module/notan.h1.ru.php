@@ -29,4 +29,4 @@ for($i=1;$i<=10;$i++){
 	sleep(rand(1,3));
 }
 unset($name_source, $get_notan_content, $answer_notan, $matches_notan);
-return $proxy_notan_proxy;
+return is_array($proxy_notan_proxy) ? $proxy_notan_proxy : array();

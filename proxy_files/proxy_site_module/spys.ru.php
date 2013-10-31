@@ -29,4 +29,4 @@ foreach ($matches_spys['ip'] as $value_spys)
 	$proxy_spys_proxy['content'][]=$tmp_array;
 }
 unset($answer_spys, $get_spys_content);
-return $proxy_spys_proxy;
+return is_array($proxy_spys_proxy)? $proxy_spys_proxy : array();

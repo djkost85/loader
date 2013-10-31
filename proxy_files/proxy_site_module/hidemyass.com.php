@@ -46,4 +46,4 @@ do{
 	sleep(rand(1,3));
 }while(isset($url_source));
 unset($get_hidemyass_content, $answer_hidemyass);
-return $proxy_hidemyass;
+return is_array($proxy_hidemyass) ? $proxy_hidemyass : array();

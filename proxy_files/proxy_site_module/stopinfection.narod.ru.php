@@ -28,4 +28,4 @@ foreach ($matches_stopinfection['ip'] as $value_stopinfection)
 	$proxy_stopinfection_proxy['content'][]=$tmp_array;
 }
 unset($url_source, $name_source, $get_stopinfection_content, $answer_stopinfection, $matches_stopinfection, $value_stopinfection);
-return $proxy_stopinfection_proxy;
+return is_array($proxy_stopinfection_proxy) ? $proxy_stopinfection_proxy : array();

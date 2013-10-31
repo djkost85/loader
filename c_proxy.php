@@ -322,21 +322,20 @@ public function get_dir_url_proxy_list()
 	 * Возвращает ip сервера с которого запущен скрипт или false
 	 * @return bool|string
 	 */
-public function get_server_ip()
-{
-	if(isset($this->server_ip)) return $this->server_ip;
-	if(isset($_SERVER['SERVER_ADDR']) && c_string_work::is_ip($_SERVER['SERVER_ADDR'])) $this->server_ip=$_SERVER['SERVER_ADDR'];
-	else
-	{
-	$this->get_content->set_use_proxy(0);
-	$this->get_content->set_type_content('html');
-	$this->get_content->set_mode_get_content('single');
-	$this->get_content->get_content("http://2ip.ru/");
-	$answer=$this->get_content->get_answer();
-	$reg="/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
-	preg_match($reg, $answer,$match);
-	if(!$match['ip'] && !c_string_work::is_ip($match['ip'])) return false;
-	$this->server_ip=$match['ip'];
+public function get_server_ip() {
+	if (isset($this->server_ip)) return $this->server_ip;
+	if (isset($_SERVER['SERVER_ADDR']) && c_string_work::is_ip($_SERVER['SERVER_ADDR'])) {
+		$this->server_ip = $_SERVER['SERVER_ADDR'];
+	} else {
+		$this->get_content->set_use_proxy(false);
+		$this->get_content->set_type_content('html');
+		$this->get_content->set_mode_get_content('single');
+		$this->get_content->get_content("http://2ip.ru/");
+		$answer = $this->get_content->get_answer();
+		$reg = "/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
+		preg_match($reg, $answer, $match);
+		if (!isset($match['ip']) && !$match['ip'] && !c_string_work::is_ip($match['ip'])) return false;
+		$this->server_ip = $match['ip'];
 	}
 	return $this->server_ip;
 }
@@ -366,7 +365,7 @@ public function get_proxy_checker($check_url_proxy="")
 	$answer=$this->get_content->get_content($check_url_proxy);
 	foreach($answer as $key => $value)
 	{
-		if(preg_match("/^[01]{5}$/i",$value))
+		if(preg_match("/^[01]{5}/i",$value))
 		{
 			return $this->check_url_proxy[$key];
 		}
@@ -571,15 +570,20 @@ public function get_proxy_list_in_file()
 {
 	while(true)
 	{
-	rewind($this->f_heandle_proxy_list);
-	clearstatcache(true,$this->file_proxy_list);
-	$json_proxy=fread($this->f_heandle_proxy_list,filesize($this->file_proxy_list));
-	if(strlen($json_proxy)==filesize($this->file_proxy_list))
-	{
-	    $this->proxy_list=json_decode($json_proxy,true);
-	    if(isset($this->proxy_list)) break;
-	}
-	else sleep(1);// Прокси лист занят
+		rewind($this->f_heandle_proxy_list);
+		clearstatcache(true,$this->file_proxy_list);
+		$json_proxy=fread($this->f_heandle_proxy_list,filesize($this->file_proxy_list));
+		if(strlen($json_proxy)==filesize($this->file_proxy_list)){
+			$this->proxy_list=json_decode($json_proxy,true);
+			if($this->proxy_list) {
+				if(!is_array($this->proxy_list['content'])) {
+					$this->proxy_list['content'] = array();
+				}
+				break;
+			}
+		} else {
+			sleep(1); // Прокси лист занят
+		}
 	}
 	return $this->proxy_list;
 }
@@ -1067,33 +1071,37 @@ private function check_proxy_array_to_site($array_proxy,$url,$check_word)
 	 * @param array $fun_array перечень необходимых функций anonym|referer|post|get|cookie
 	 * @return array|bool
 	 */
-private function get_proxy_by_function($proxy_list,$fun_array)
+public function get_proxy_by_function($proxy_list,$fun_array = array())
 {
 	if(!is_array($proxy_list)) return false;
 	$good_proxy=array();
 	foreach ($proxy_list as $challenger)
 	{
 			$approach = false;
-			foreach ($fun_array as $name_function => $value_function) {
-					if(in_array($name_function, $this->proxy_function) && $challenger[$name_function]>=$value_function){
-							if($name_function == 'country'){
-									if($value_function === $challenger[$name_function]){
-											$approach = true;
+			if(count($fun_array)){
+					foreach ($fun_array as $name_function => $value_function) {
+							if(in_array($name_function, $this->proxy_function) && $challenger[$name_function]>=$value_function){
+									if($name_function == 'country'){
+											if($value_function === $challenger[$name_function]){
+													$approach = true;
+											} else {
+													$approach = false;
+													break;
+											}
 									} else {
-											$approach = false;
-											break;
+											$approach = true;
 									}
 							} else {
-									$approach = true;
+									$approach = false;
+									break;
 							}
-					} else {
-							$approach = false;
-							break;
 					}
+			} else {
+				$approach = true;
 			}
-			if($approach){
-				$good_proxy[]= $challenger;
-			}
+				if($approach){
+					$good_proxy[]= $challenger;
+				}
 	}
 	if(count($good_proxy)) return $good_proxy;
 	return false;
@@ -1108,7 +1116,7 @@ private function get_proxy_by_function($proxy_list,$fun_array)
 		 */
 private function gen_proxy_info($proxy,$answer,$curl_info = null)
 {
-	if(preg_match('#^[01]{5}$#',$answer) && preg_match_all('#(?<fun_status>[01])#U',$answer,$matches))
+	if(preg_match('#^[01]{5}#',$answer) && preg_match_all('#(?<fun_status>[01])#U',$answer,$matches))
 	{
 			if(is_string($proxy)){
 					$info_proxy['proxy']       =$proxy;
@@ -1273,16 +1281,16 @@ public function update_proxy_list($name_list,$force=false)
 	$this->free_proxy_list();
 	$end_term_proxy=time()-$this->storage_time;
 	if(
-	   (
-	$this->proxy_list
-	&& isset($this->proxy_list['content'])
-	&& count($this->proxy_list['content'])
-	&& $this->proxy_list['time']
-	> $end_term_proxy
-	&& !$force
-	   )
-	|| !$this->proxy_list['need_update']
-	  )
+		(
+		isset($this->proxy_list)
+		&& is_array($this->proxy_list)
+		&& isset($this->proxy_list['content'])
+		&& count($this->proxy_list['content'])
+		&& $this->proxy_list['time'] > $end_term_proxy
+		&& !$force
+		)
+		|| (!isset($this->proxy_list['need_update']) || !$this->proxy_list['need_update'])
+	)
 	{
 		return $this->proxy_list;
 	}
@@ -1301,12 +1309,16 @@ public function update_proxy_list($name_list,$force=false)
 public function update_default_proxy_list($force=false)
 {
 	$old_proxy=$this->select_proxy_list($this->get_default_list_name());
+	if(!is_array($old_proxy)) {
+		$old_proxy = array();
+	}
 	$this->free_proxy_list();
 	$end_term_proxy=time()-$this->storage_time;
 	if(
 	(
 	    $this->proxy_list
 	    && isset($this->proxy_list['content'])
+	    && is_array($this->proxy_list['content'])
 	    && count($this->proxy_list['content'])
 	    && $this->proxy_list['time']
 	    > $end_term_proxy
@@ -1315,7 +1327,7 @@ public function update_default_proxy_list($force=false)
 	|| !$this->proxy_list['need_update']
 	)
 	{
-	return $this->proxy_list;
+		return $this->proxy_list;
 	}
 	$proxy_list=$this->download_proxy();
 	$old_proxy['content']=array_merge($old_proxy['content'],$proxy_list['content']);

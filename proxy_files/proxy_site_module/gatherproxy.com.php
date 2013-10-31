@@ -32,4 +32,4 @@ foreach ($matches_gatherproxy['ip'] as $value_gatherproxy)
 	$proxy_gatherproxy_proxy['content'][]=$tmp_array;
 }
 unset($get_gatherproxy_content, $answer_gatherproxy);
-return $proxy_gatherproxy_proxy;
+return is_array($proxy_gatherproxy_proxy) ? $proxy_gatherproxy_proxy : array();

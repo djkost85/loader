@@ -36,4 +36,4 @@ for($nom=1;$nom<50;$nom++){
 	sleep(rand(1,3));
 }
 unset($url_source, $name_source, $get_foxtools_content, $url_page, $answer_foxtools, $matches_ip);
-return $proxy_foxtools;
+return is_array($proxy_foxtools) ? $proxy_foxtools : array();

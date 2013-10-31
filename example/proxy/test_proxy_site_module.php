@@ -9,10 +9,15 @@
  * @info Передать в Get параметр t имя тестируемого модуля.
  */
 use get_content\c_proxy as c_proxy;
+$start = time();
+echo date('[H:i:s Y/m/d]', $start);
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
 $proxy= new c_proxy();
 $test_module = isset($_GET['t']) ? $_GET['t'] : 'cool';
 $data=$proxy->test_download_proxy($test_module);
-echo 'count:'.count($data['content']);
+$end = time();
+echo date('[H:i:s Y/m/d]', $end);
+echo '[~'.(($end-$start)/60).' min]';
+echo '[count:'.count($data['content']).']';
 var_dump($data);

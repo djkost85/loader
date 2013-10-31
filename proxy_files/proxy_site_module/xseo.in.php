@@ -30,4 +30,4 @@ foreach ($matches_xseo['ip'] as $value_xseo)
 	$proxy_xseo_proxy['content'][]=$tmp_array;
 }
 unset($get_xseo_content, $answer_xseo);
-return $proxy_xseo_proxy;
+return is_array($proxy_xseo_proxy) ? $proxy_xseo_proxy : array();

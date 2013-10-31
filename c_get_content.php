@@ -1,4 +1,7 @@
 <?php
+namespace get_content;
+use get_content\c_proxy as c_proxy;
+use get_content\c_string_work as c_string_work;
 /**
  * Class c_get_content
  * С помощью основных функций библиотеки cURL посылает http запросы для скачивания контента из сети
@@ -7,9 +10,6 @@
  * @package get_content
  * @version 2.0
  */
-namespace get_content;
-use get_content\c_proxy as c_proxy;
-use get_content\c_string_work as c_string_work;
 class c_get_content
 {
 	/**
@@ -308,7 +308,7 @@ public function restore_default_settings()
 	$this->set_default_settings(array(
 	CURLOPT_HEADER => false,
 	CURLOPT_URL => "http://ya.ru",
-	CURLOPT_TIMEOUT => 25,
+	CURLOPT_TIMEOUT => 30,
 	CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31",
 	CURLOPT_RETURNTRANSFER => true,
 	CURLOPT_FOLLOWLOCATION => true,

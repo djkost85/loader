@@ -42,4 +42,4 @@ do{
 	sleep(rand(1,3));
 }while(isset($url_source));
 unset($answer_samair, $get_samair_content);
-return $proxy_samair;
+return is_array($proxy_samair)? $proxy_samair : array();

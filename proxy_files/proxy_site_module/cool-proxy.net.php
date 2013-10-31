@@ -19,8 +19,7 @@ $i=1;
 if(!$content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc")) return array();
 if(preg_match_all('#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<pagenation>\d*)"#iUm', $content, $matches))
 {
-	rsort($matches['pagenation']);
-	$count_page=$matches['pagenation'][0];
+	$count_page=max($matches['pagenation']);
 }
 else return array();
 unset($matches);
@@ -45,4 +44,4 @@ do{
 	$content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc");
 }while($i<=$count_page);
 unset($url_source, $name_source, $get_cool_proxy_content, $content, $count_proxy);
-return $proxy_cool_proxy;
+return is_array($proxy_cool_proxy) ? $proxy_cool_proxy : array();

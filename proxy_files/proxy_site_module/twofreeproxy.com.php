@@ -72,4 +72,4 @@ foreach ($tmp_proxy_new as $value_poststar)
 	$tmp_array["type_proxy"]='http';
 	$proxy_twofreeproxy_proxy['content'][]=$tmp_array;
 }
-return $proxy_twofreeproxy_proxy;
+return is_array($proxy_twofreeproxy_proxy) ? $proxy_twofreeproxy_proxy : array() ;

@@ -28,4 +28,4 @@ foreach ($matches_poststar['ip'] as $value_poststar)
 	$proxy_poststar_proxy['content'][]=$tmp_array;
 }
 unset($get_poststar_content, $answer_poststar);
-return $proxy_poststar_proxy;
+return is_array($proxy_poststar_proxy)? $proxy_poststar_proxy : array();
