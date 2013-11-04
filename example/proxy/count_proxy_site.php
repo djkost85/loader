@@ -25,6 +25,7 @@ foreach ($list['content'] as $proxy) {
 	if($proxy['anonym']) $data['anonym'][] = $proxy['proxy'];
 	$country[$proxy['country']][] = $proxy['proxy'];
 }
+echo "<p>last update : ".date("H:i:s d-m-Y",$list['time'])."</p>";
 echo '<p>------------FUNCTION----------</p>';
 arsort($data);
 foreach ($data as $source_proxy => $proxyes) {
@@ -40,5 +41,3 @@ arsort($country);
 foreach ($country as $source_proxy => $proxyes) {
 		echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
 }
-
-echo "<p>last update : ".date("H:i:s d-m-Y",$list['time'])."</p>";

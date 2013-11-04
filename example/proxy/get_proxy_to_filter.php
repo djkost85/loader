@@ -31,8 +31,9 @@ if(isset($_GET['filter'])){
 	}
 	$proxyList = $proxy->get_proxy_by_function($list['content'],$function);
 	foreach($proxyList as $ipProxy){
-		echo $ipProxy['proxy']."\n";
+		$data[] = $ipProxy['proxy'];
 	}
+	echo implode("\n",$data);
 } else {
 	$data = array();
 	foreach ($list['content'] as $proxyInList) {

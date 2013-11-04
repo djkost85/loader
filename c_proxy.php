@@ -1,7 +1,5 @@
 <?php
 namespace get_content;
-use get_content\c_get_content as c_get_content;
-use get_content\c_string_work as c_string_work;
 /**
  * Class c_proxy
  * Класс для получения актуального списка прокси, проверки работоспособности прокси с определенными сайтами
@@ -167,20 +165,26 @@ class c_proxy
 	protected $proxy_function;
 
 	/**
+	 * файл с архивными прокси
+	 * @var string
+	 */
+	protected $archive_proxy_name;
+
+	/**
 	 * Конструктор инициализируте переменные значениями по умолчанию
 	 * @return \get_content\c_proxy
 	 */
  function __construct()
 {
-	$this->storage_time            =72000;
-	$this->rent_time               =3600;
-	$this->get_content             = new c_get_content();
+	$this->storage_time = 72000;
+	$this->rent_time    = 3600;
+	$this->get_content  = new c_get_content();
 	$this->get_content->set_type_content('html');
 	$this->get_content->set_encoding_answer(true);
 	$this->set_method_get_proxy("random");
-	$this->dir_proxy_file          ="proxy_files";
-	$this->dir_proxy_list_file     ="proxy_list";
-	$this->dir_url_proxy_list      ="proxy_site_module";
+	$this->dir_proxy_file      = "proxy_files";
+	$this->dir_proxy_list_file = "proxy_list";
+	$this->dir_url_proxy_list  = "proxy_site_module";
 	$this->proxy_function = array(
 			'anonym',
 			'referer',
@@ -189,15 +193,18 @@ class c_proxy
 			'cookie',
 			'country'
 	);
-	$this->f_heandle_proxy_list    =NULL;
-	$this->file_url_proxy_list 	   =glob($this->get_dir_url_proxy_list()."/*.php");
-	$this->check_url_proxy         =require $this->get_dir_proxy_file()."/check_url_list.php";
-	$this->proxy_list              =array();
-	$this->need_check_proxy        =true;
-	$this->last_use_proxy          ='';
+	$this->f_heandle_proxy_list = NULL;
+	$this->file_url_proxy_list  = glob($this->get_dir_url_proxy_list()."/*.php");
+	$this->check_url_proxy      = require $this->get_dir_proxy_file()."/check_url_list.php";
+	$this->proxy_list           = array();
+	$this->need_check_proxy     = true;
+	$this->last_use_proxy       = '';
 	$this->set_default_list('all');
-	$this->name_list               =$this->get_default_list_name();
-	if(!file_exists($this->get_dir_proxy_list_file()."/".$this->name_list.".proxy")) $this->create_proxy_list($this->name_list);
+	$this->set_archive_proxy_name('archive');
+	$this->name_list = $this->get_default_list_name();
+	if(!file_exists($this->get_dir_proxy_list_file()."/".$this->name_list.".proxy")){
+		$this->create_proxy_list($this->name_list);
+	}
 	$this->select_proxy_list($this->name_list);
 	$this->set_remove_proxy(false);
 }
@@ -265,6 +272,26 @@ public function set_default_list($default_list)
 	$this->default_list = $default_list;
 }
 
+public function get_archive_proxy_name(){
+	return $this->archive_proxy_name;
+}
+
+public function set_archive_proxy_name($value){
+	$this->archive_proxy_name = $value;
+}
+
+private function get_archive_proxy(){
+	$archive = explode("\n",file_get_contents($this->get_dir_proxy_list_file()."/".$this->get_archive_proxy_name().".archive"));
+	return $archive;
+}
+
+private function save_in_archive(array $proxy){
+	$archive = $this->get_archive_proxy();
+	$archive = array_merge($archive, $proxy);
+	$archive = array_unique($archive);
+	$string_proxy=implode("\n",$archive);
+	file_put_contents($this->get_dir_proxy_list_file()."/".$this->get_archive_proxy_name().".archive", $string_proxy);
+}
 /**
  * @return string
  */
@@ -992,7 +1019,7 @@ private function check_proxy_array($array_proxy)
 	$this->get_content->set_type_content('text');
 	$this->get_content->set_default_setting(CURLOPT_HEADER,false);
 	$this->get_content->set_check_answer(false);
-	foreach(array_chunk($array_proxy,100) as $value_array_proxy)
+	foreach(array_chunk($array_proxy,200) as $value_array_proxy)
 	{
 	    $this->get_content->set_count_multi_curl(count($value_array_proxy));
 	    $url_array=array();
@@ -1271,7 +1298,7 @@ public function update_proxy_list($name_list,$force=false)
 {
 	if($name_list==$this->get_default_list_name())
 	{
-	return $this->select_proxy_list($this->get_default_list_name());
+		return $this->select_proxy_list($this->get_default_list_name());
 	}
 	else
 	{
@@ -1308,14 +1335,9 @@ public function update_proxy_list($name_list,$force=false)
 	 */
 public function update_default_proxy_list($force=false)
 {
-	$old_proxy=$this->select_proxy_list($this->get_default_list_name());
-	if(!is_array($old_proxy)) {
-		$old_proxy = array();
-	}
-	$this->free_proxy_list();
+	$this->select_proxy_list($this->get_default_list_name());
 	$end_term_proxy=time()-$this->storage_time;
 	if(
-	(
 	    $this->proxy_list
 	    && isset($this->proxy_list['content'])
 	    && is_array($this->proxy_list['content'])
@@ -1324,13 +1346,25 @@ public function update_default_proxy_list($force=false)
 	    > $end_term_proxy
 	    && !$force
 	)
-	|| !$this->proxy_list['need_update']
-	)
 	{
 		return $this->proxy_list;
 	}
 	$proxy_list=$this->download_proxy();
-	$old_proxy['content']=array_merge($old_proxy['content'],$proxy_list['content']);
+	$archive = $this->get_archive_proxy();
+	$archive_proxy_list = array();
+	$tmp['source_proxy'] = 'archive';
+	$tmp['type_proxy'] = 'http';
+	foreach($archive as $proxy){
+		$tmp['proxy'] = $proxy;
+		$archive_proxy_list[] = $tmp;
+	}
+	$new_proxy = array();
+	foreach($proxy_list['content'] as $proxy){
+		$new_proxy[] = $proxy['proxy'];
+	}
+	$this->save_in_archive($new_proxy);
+
+	$old_proxy['content']=array_merge($proxy_list['content'], $archive_proxy_list);
 	$old_proxy['content']=$this->get_unique_proxy_ip($old_proxy['content']);
 	$old_proxy['content']=$this->check_proxy_array($old_proxy['content']);
 	$this->proxy_list=$old_proxy;
@@ -1347,7 +1381,7 @@ public function update_all_proxy_list($force=false)
 	$this->update_default_proxy_list($force);
 	foreach ($this->get_all_name_proxy_list() as $value)
 	{
-	$this->update_proxy_list($value,$force);
+		$this->update_proxy_list($value,$force);
 	}
 }
 	/**
