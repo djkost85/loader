@@ -311,7 +311,7 @@ public function restore_default_settings()
 	CURLOPT_TIMEOUT => 30,
 	CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31",
 	CURLOPT_RETURNTRANSFER => true,
-	CURLOPT_FOLLOWLOCATION => true,
+	CURLOPT_FOLLOWLOCATION => false,
 	CURLOPT_REFERER => '',
 	CURLOPT_POSTFIELDS => '',
 	CURLOPT_POST => false,
@@ -983,7 +983,7 @@ private function check_option(&$descriptor,$option,$value=NULL)
 			if(!$value)
 			{
 				unset($descriptor['option'][$option]);
-	        $this->set_option_to_descriptor($descriptor,CURLOPT_POST,false);
+				$this->set_option_to_descriptor($descriptor,CURLOPT_POST,false);
 				return true;
 			}
 			else $this->set_option_to_descriptor($descriptor,CURLOPT_POST,true);
