@@ -13,9 +13,11 @@ require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(600);
 $get_content = new c_get_content();
 $get_content->set_mode_get_content('single');// Режим single
-$get_content->set_type_content('html'); // Ожидаемый контент html страница
-$url='http://bpteam.net';
+//$get_content->set_type_content('html'); // Ожидаемый контент html страница
+$url='http://market.yandex.ua/model.xml?modelid=10495456&hid=91491';
+$get_content->setCookieFile('test');
 $answer=$get_content->get_content($url);
+var_dump($answer);
 /*
  * $answert содержимое http://bpteam.net
  */

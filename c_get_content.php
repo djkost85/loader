@@ -180,6 +180,10 @@ class c_get_content
 	 */
 	private $cookieFile;
 	/**
+	 * @var string
+	 */
+	private $referer;
+	/**
 	 * @return \get_content\c_get_content
 	 */
 	function __construct() {
@@ -197,7 +201,7 @@ class c_get_content
 			CURLOPT_FORBID_REUSE,
 			CURLOPT_HTTPHEADER
 		);
-		$this->set_dir_cookie("./get_content_files/cookie");
+		$this->set_dir_cookie("get_content_files/cookie");
 		$this->restore_default_settings();
 		$this->count_multi_stream = 1;
 		$this->count_multi_curl = 1;
@@ -211,6 +215,9 @@ class c_get_content
 		$this->set_encoding_answer(false);
 		$this->set_encoding_name("UTF-8");
 		$this->set_check_answer(false);
+		$this->setRedirectCount(0);
+		$this->setMaxRedirect(10);
+		$this->setReferer('');
 		$this->setUseStaticCookie(false);
 		$this->set_mode_get_content('single');
 	}
@@ -249,9 +256,10 @@ class c_get_content
 	public function clear_cookie($storage_time = 172800) {
 		$file_list = glob($this->get_dir_cookie() . "*.cookie");
 		foreach ($file_list as $value) {
-			preg_match("/\/(?<create_time>\d+)(?:\.|\s*)\d*\.cookie$/iU", $value, $match);
-			if ((int)$match['create_time'] < time() - $storage_time) {
-				unlink($value);
+			if(preg_match("/\/(?<create_time>\d+)(?:\.|\s*)\d*\.cookie$/iU", $value, $match)){
+				if ((int)$match['create_time'] < time() - $storage_time) {
+					unlink($value);
+				}
 			}
 		}
 	}
@@ -314,6 +322,14 @@ class c_get_content
 		return $this->cookieFile;
 	}
 
+	public function setReferer($val){
+		$this->referer = $val;
+		$this->set_default_setting(CURLOPT_REFERER, $this->referer);
+	}
+
+	public function getReferer(){
+		return $this->referer;
+	}
 	/**
 	 * @param int   $option
 	 * @param mixed $value
@@ -674,11 +690,6 @@ class c_get_content
 	private function init_single_get_content() {
 		$descriptor =& $this->get_descriptor();
 		if (!isset($descriptor['descriptor_key'])) $descriptor['descriptor_key'] = microtime(1) . mt_rand();
-		$file_name = $this->get_dir_cookie() . $descriptor['descriptor_key'] . ".cookie";
-		if (!is_writable($file_name)) {
-			$fh = fopen($file_name, "w");
-			fclose($fh);
-		}
 		$descriptor['descriptor'] = curl_init();
 	}
 
@@ -695,10 +706,6 @@ class c_get_content
 		}
 		for ($i = 0; $i < $this->get_count_multi_descriptor(); $i++) {
 			if (!isset($descriptor_array[$i]['descriptor_key'])) $descriptor_array[$i]['descriptor_key'] = microtime(1) . mt_rand();
-			if (!file_exists($this->get_dir_cookie() . $descriptor_array[$i]['descriptor_key'] . ".cookie")) {
-				$fh = fopen($this->get_dir_cookie() . $descriptor_array[$i]['descriptor_key'] . ".cookie", "w");
-				fclose($fh);
-			}
 			$descriptor_array[$i]['descriptor'] = curl_init();
 			curl_multi_add_handle($descriptor['descriptor'], $descriptor_array[$i]['descriptor']);
 		}
@@ -819,9 +826,14 @@ class c_get_content
 			$this->set_default_setting(CURLOPT_URL, $url);
 			$this->set_options_to_descriptor($descriptor);
 			$answer = $this->exec_single_get_content();
+			$this->setReferer($url);
 			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
-			if($this->isRedirect() && $this->useRedirect()){
-				$answer = $this->get_single_content($descriptor['info']['redirect_url'], $reg);
+			if($this->isRedirect()){
+				if($this->useRedirect()){
+					$answer = $this->get_single_content(urldecode($descriptor['info']['redirect_url']), $reg);
+				} else {
+					return false;
+				}
 			}
 			$this->setRedirectCount(0);
 			if ($reg && preg_match($reg, $answer)) $reg_answer = true;
@@ -905,7 +917,6 @@ class c_get_content
 	public function set_options_to_descriptor(&$descriptor, $option_array = array()) {
 		foreach ($this->all_setting as $key_setting) {
 			if (isset($option_array[$key_setting])) $this->set_option_to_descriptor($descriptor, $key_setting, $option_array[$key_setting]);
-			elseif (isset($descriptor['option'][$key_setting])) $this->set_option_to_descriptor($descriptor, $key_setting, $descriptor['option'][$key_setting]);
 			else $this->set_option_to_descriptor($descriptor, $key_setting);
 		}
 		unset($key_setting);
@@ -920,6 +931,10 @@ class c_get_content
 			$cookieFile = $this->get_dir_cookie() . $this->getCookieFile() . ".cookie";
 		} else {
 			$cookieFile = $this->get_dir_cookie() . $descriptor['descriptor_key'] . ".cookie";
+		}
+		if (!is_writable($cookieFile)) {
+			$fh = fopen($cookieFile, "a+");
+			fclose($fh);
 		}
 		$this->set_option_to_descriptor($descriptor, CURLOPT_COOKIEJAR, $cookieFile);
 		$this->set_option_to_descriptor($descriptor, CURLOPT_COOKIEFILE, $cookieFile);
