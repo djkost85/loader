@@ -1014,12 +1014,14 @@ class c_get_content
 	private function getHeader(&$answer){
 		$header = '';
 		if($answer){
-			if(preg_match_all("%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums",$answer,$data)){
-				$header = $data['head'];
-				foreach($header as $head){
-					$answer = trim(preg_replace('%'.preg_quote($head,'%').'%ims', '', $answer));
+			do{
+				if(preg_match("%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums",$answer,$data)){
+					$header[] = $data['head'];
+					$answer = trim(preg_replace('%'.preg_quote($data['head'],'%').'%ims', '', $answer));
+				} else {
+					break;
 				}
-			}
+			}while(true);
 		}
 		return $header;
 	}
