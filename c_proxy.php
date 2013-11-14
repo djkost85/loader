@@ -332,7 +332,7 @@ class c_proxy
 	 */
 	public function get_server_ip() {
 		if (isset($this->server_ip)) return $this->server_ip;
-		if (isset($_SERVER['SERVER_ADDR']) && c_string_work::is_ip($_SERVER['SERVER_ADDR'])) {
+		if (false && isset($_SERVER['SERVER_ADDR']) && c_string_work::is_ip($_SERVER['SERVER_ADDR'])) {
 			$this->server_ip = $_SERVER['SERVER_ADDR'];
 		} else {
 			$this->get_content->set_use_proxy(false);
@@ -341,8 +341,7 @@ class c_proxy
 			$this->get_content->get_content("http://2ip.ru/");
 			$answer = $this->get_content->get_answer();
 			$reg = "/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
-			preg_match($reg, $answer, $match);
-			if (!isset($match['ip']) && !$match['ip'] && !c_string_work::is_ip($match['ip'])) return false;
+			if (preg_match($reg, $answer, $match) && !isset($match['ip']) || !$match['ip'] || !c_string_work::is_ip($match['ip'])) return false;
 			$this->server_ip = $match['ip'];
 		}
 		return $this->server_ip;
@@ -364,7 +363,6 @@ class c_proxy
 		if ($check_url_proxy === "") $check_url_proxy = $this->check_url_proxy;
 		$this->get_content->set_use_proxy(false);
 		$this->get_content->set_type_content('text');
-		$this->get_content->set_default_setting(CURLOPT_HEADER, false);
 		$this->get_content->set_mode_get_content('multi');
 		$this->get_content->set_count_multi_stream(1);
 		$this->get_content->set_min_size_answer(5);

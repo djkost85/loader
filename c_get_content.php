@@ -919,6 +919,7 @@ class c_get_content
 	public function set_options_to_descriptor(&$descriptor, $option_array = array()) {
 		foreach ($this->all_setting as $key_setting) {
 			if (isset($option_array[$key_setting])) $this->set_option_to_descriptor($descriptor, $key_setting, $option_array[$key_setting]);
+			elseif(isset($descriptor['option'][$key_setting])) $this->set_option_to_descriptor($descriptor,$key_setting,$descriptor['option'][$key_setting]);
 			else $this->set_option_to_descriptor($descriptor, $key_setting);
 		}
 		unset($key_setting);
@@ -1011,10 +1012,15 @@ class c_get_content
 	 * @return string
 	 */
 	private function getHeader(&$answer){
-		preg_match("%(?<head>^.*)(\r\n\r\n|\r\r|\n\n)%Uims",$answer,$data);
-		$header = $data['head'];
-		preg_match("%(\r\n\r\n|\r\r|\n\n)(?<answer>.*)$%ims", $answer, $data);
-		$answer = $data['answer'];
+		$header = '';
+		if($answer){
+			if(preg_match_all("%(?<head>HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums",$answer,$data)){
+				$header = $data['head'];
+				foreach($header as $head){
+					$answer = trim(preg_replace('%'.preg_quote($head,'%').'%ims', '', $answer));
+				}
+			}
+		}
 		return $header;
 	}
 
