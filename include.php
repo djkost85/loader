@@ -8,8 +8,7 @@
  * Author: Evgeny Pynykh
  * Email: bpteam22@gmail.com
  */
-chdir(dirname(__FILE__));
-require_once "c_get_content.php";
-require_once "c_proxy.php";
-require_once "c_string_work.php";
-chdir(dirname(__FILE__));
+require_once dirname(__FILE__)."/cfg.php";
+require_once GC_ROOT_DIR."/c_get_content.php";
+require_once GC_ROOT_DIR."/c_proxy.php";
+require_once GC_ROOT_DIR."/c_string_work.php";

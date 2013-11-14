@@ -372,7 +372,7 @@ class c_get_content
 			CURLOPT_HEADER => true,
 			CURLOPT_URL => "http://ya.ru",
 			CURLOPT_TIMEOUT => 30,
-			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31",
+			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36",
 			CURLOPT_RETURNTRANSFER => true,
 			CURLOPT_FOLLOWLOCATION => false,
 			CURLOPT_REFERER => '',
@@ -482,14 +482,12 @@ class c_get_content
 		switch ($type_content) {
 			case 'file':
 				$this->type_content = 'file';
-				$this->set_default_setting(CURLOPT_HEADER, false);
-				$this->set_encoding_answer(0);
+				$this->set_encoding_answer(false);
 				return true;
 				break;
 			case 'img':
 				$this->type_content = 'img';
-				$this->set_default_setting(CURLOPT_HEADER, false);
-				$this->set_encoding_answer(0);
+				$this->set_encoding_answer(false);
 				return true;
 				break;
 			case 'text':
@@ -642,10 +640,12 @@ class c_get_content
 		switch ($new_mode_get_content) {
 			case 'single':
 				$this->mode_get_content = 'single';
+				$this->set_default_setting(CURLOPT_FOLLOWLOCATION,false);
 				break;
 			case 'multi':
 				$this->mode_get_content = 'multi';
 				if ($this->get_count_multi_curl() < 1) $this->set_count_multi_curl(1);
+				$this->set_default_setting(CURLOPT_FOLLOWLOCATION,true);
 				break;
 			default:
 				return false;
@@ -881,6 +881,7 @@ class c_get_content
 			$answer = $this->exec_multi_get_content();
 			foreach ($answer as $key => $value) {
 				$descriptor_array[$key]['info'] = curl_getinfo($descriptor_array[$key]['descriptor']);
+				$descriptor_array[$key]['info']['header'] = $this->getHeader($value);
 				$key_good_answer = ($url_descriptors[$key] * $count_multi_stream) + $key % $count_multi_stream;
 				if ($reg && preg_match($reg, $value)) $reg_answer = true;
 				else $reg_answer = false;
