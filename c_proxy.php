@@ -181,9 +181,9 @@ class c_proxy
 		$this->get_content->set_type_content('html');
 		$this->get_content->set_encoding_answer(true);
 		$this->set_method_get_proxy("random");
-		$this->dir_proxy_file = GC_ROOT_DIR . "/proxy_files";
-		$this->dir_proxy_list_file = GC_ROOT_DIR . "/proxy_list";
-		$this->dir_url_proxy_list = GC_ROOT_DIR . "/proxy_site_module";
+		$this->dir_proxy_file = "proxy_files";
+		$this->dir_proxy_list_file = "proxy_list";
+		$this->dir_url_proxy_list = "proxy_site_module";
 		$this->proxy_function = array(
 			'anonym',
 			'referer',
@@ -311,7 +311,7 @@ class c_proxy
 
 
 	public function get_dir_proxy_file() {
-		return $this->dir_proxy_file;
+		return GC_ROOT_DIR . '/' . $this->dir_proxy_file;
 	}
 
 	/**

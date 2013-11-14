@@ -273,7 +273,7 @@ class c_get_content
 	}
 
 	public function get_dir_cookie() {
-		return dirname(__FILE__) . "/" . $this->dir_cookie . "/";
+		return GC_ROOT_DIR . "/" . $this->dir_cookie . "/";
 	}
 
 	public function set_count_requests($val) {

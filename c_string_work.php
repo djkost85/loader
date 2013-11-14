@@ -244,7 +244,7 @@ class c_string_work
 		$possible_encodings = array('windows-1251', 'koi8-r', 'iso8859-5');
 		foreach ($possible_encodings as $encoding) {
 			$weights[$encoding] = 0;
-			$specters[$encoding] = require GC_ROOT_DIR.'/string_work_files/specters/' . $encoding . '.php';
+			$specters[$encoding] = require GC_ROOT_DIR . '/string_work_files/specters/' . $encoding . '.php';
 		}
 		foreach (str_split($str, 2) as $key) {
 			foreach ($possible_encodings as $encoding) {
