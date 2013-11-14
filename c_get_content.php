@@ -369,7 +369,7 @@ class c_get_content
 	 */
 	public function restore_default_settings() {
 		$this->set_default_settings(array(
-			CURLOPT_HEADER => false,
+			CURLOPT_HEADER => true,
 			CURLOPT_URL => "http://ya.ru",
 			CURLOPT_TIMEOUT => 30,
 			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.64 Safari/537.31",
@@ -828,6 +828,7 @@ class c_get_content
 			$answer = $this->exec_single_get_content();
 			$this->setReferer($url);
 			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
+			$descriptor['info']['header'] = $this->getHeader($answer);
 			if($this->isRedirect()){
 				if($this->useRedirect()){
 					$answer = $this->get_single_content(urldecode($descriptor['info']['redirect_url']), $reg);
@@ -1001,6 +1002,19 @@ class c_get_content
 				break;
 		}
 		return false;
+	}
+
+	/**
+	 * Вырезает HTTP заголовки из ответа
+	 * @param $answer
+	 * @return string
+	 */
+	private function getHeader(&$answer){
+		preg_match("%(?<head>^.*)(\r\n\r\n|\r\r|\n\n)%Uims",$answer,$data);
+		$header = $data['head'];
+		preg_match("%(\r\n\r\n|\r\r|\n\n)(?<answer>.*)$%ims", $answer, $data);
+		$answer = $data['answer'];
+		return $header;
 	}
 
 	/**
