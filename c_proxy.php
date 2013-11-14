@@ -218,7 +218,7 @@ class c_proxy
 	 * Закрывает все соединения перед уничтожением объекта
 	 */
 	function __destruct() {
-		if($this->get_list_type() == 'dynamic') $this->close_proxy_list();
+		if($this->get_proxy_list_type() == 'dynamic') $this->close_proxy_list();
 		unset($this->get_content);
 	}
 
@@ -320,7 +320,7 @@ class c_proxy
 		return GC_ROOT_DIR . '/' . $this->dir_proxy_file;
 	}
 
-	public function get_list_type(){
+	public function get_proxy_list_type(){
 		return $this->list_type;
 	}
 
@@ -328,8 +328,8 @@ class c_proxy
 		$this->list_type = $val;
 	}
 
-	public function get_list(){
-		switch($this->get_list_type()){
+	public function get_proxy_list(){
+		switch($this->get_proxy_list_type()){
 			case 'dynamic':
 				$proxy_list = $this->get_proxy_list_in_file();
 				$this->free_proxy_list();
@@ -544,7 +544,7 @@ class c_proxy
 	 * @return bool|string
 	 */
 	public function get_random_proxy() {
-		$proxy_list = $this->get_list();
+		$proxy_list = $this->get_proxy_list();
 		$count_check = 10;
 		$count_proxy = count($proxy_list['content']);
 		if (is_array($proxy_list['content'])) {
@@ -874,17 +874,6 @@ class c_proxy
 		}
 	}
 
-	/**
-	 * @return array|bool
-	 */
-	public function get_proxy_list() {
-		if (isset($this->proxy_list) && count($this->proxy_list) && ($this->proxy_list['time'] > (time() - 3600))) return $this->proxy_list;
-		if (!$proxy = $this->get_proxy_list_in_file()) {
-			return false;
-		}
-		return $this->proxy_list = $proxy;
-	}
-
 	public function get_last_use_proxy() {
 		return $this->last_use_proxy;
 	}
@@ -893,7 +882,9 @@ class c_proxy
 		$proxy = file_get_contents($url);
 		$this->set_list_type('static');
 		$this->set_method_get_proxy('random');
-		$this->proxy_list['content'] = explode("\n",$proxy);
+		foreach(explode("\n",$proxy) as $proxy){
+			$this->proxy_list['content']['proxy'] = $proxy;
+		}
 	}
 
 	/**
