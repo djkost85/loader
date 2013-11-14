@@ -171,6 +171,12 @@ class c_proxy
 	protected $archive_proxy_name;
 
 	/**
+	 * тип списка прокси
+	 * @var string
+	 */
+	protected $list_type;
+
+	/**
 	 * Конструктор инициализируте переменные значениями по умолчанию
 	 * @return \get_content\c_proxy
 	 */
@@ -212,7 +218,7 @@ class c_proxy
 	 * Закрывает все соединения перед уничтожением объекта
 	 */
 	function __destruct() {
-		$this->close_proxy_list();
+		if($this->get_list_type() == 'dynamic') $this->close_proxy_list();
 		unset($this->get_content);
 	}
 
@@ -312,6 +318,29 @@ class c_proxy
 
 	public function get_dir_proxy_file() {
 		return GC_ROOT_DIR . '/' . $this->dir_proxy_file;
+	}
+
+	public function get_list_type(){
+		return $this->list_type;
+	}
+
+	public function set_list_type($val){
+		$this->list_type = $val;
+	}
+
+	public function get_list(){
+		switch($this->get_list_type()){
+			case 'dynamic':
+				$proxy_list = $this->get_proxy_list_in_file();
+				$this->free_proxy_list();
+				break;
+			case 'static':
+				$proxy_list = $this->proxy_list;
+				break;
+			default:
+				$proxy_list = $this->proxy_list;
+		}
+		return $proxy_list;
 	}
 
 	/**
@@ -515,8 +544,7 @@ class c_proxy
 	 * @return bool|string
 	 */
 	public function get_random_proxy() {
-		$proxy_list = $this->get_proxy_list_in_file();
-		$this->free_proxy_list();
+		$proxy_list = $this->get_list();
 		$count_check = 10;
 		$count_proxy = count($proxy_list['content']);
 		if (is_array($proxy_list['content'])) {
@@ -859,6 +887,13 @@ class c_proxy
 
 	public function get_last_use_proxy() {
 		return $this->last_use_proxy;
+	}
+
+	public function load_proxy($url){
+		$proxy = file_get_contents($url);
+		$this->set_list_type('static');
+		$this->set_method_get_proxy('random');
+		$this->proxy_list['content'] = explode("\n",$proxy);
 	}
 
 	/**
@@ -1280,6 +1315,7 @@ class c_proxy
 	 */
 	public function select_proxy_list($name_list) {
 		$this->close_proxy_list();
+		$this->set_list_type('dynamic');
 		$this->name_list = $name_list;
 		if ($this->proxy_list_exist($name_list)) {
 			$this->file_proxy_list = $this->get_dir_proxy_list_file() . "/" . $this->name_list . ".proxy";
