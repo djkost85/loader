@@ -247,13 +247,13 @@ class cGetContent
 
 	/**
 	 * Удаляет старые файлы, которые уже не используются
-	 * @param int $storage_time время хранения прокси
+	 * @param int $storageTime время хранения прокси
 	 */
-	public function clearCookie($storage_time = 172800) {
-		$file_list = glob($this->getDirCookie() . "*.cookie");
-		foreach ($file_list as $value) {
-			if(preg_match("/\/(?<create_time>\d+)(?:\.|\s*)\d*\.cookie$/iU", $value, $match)){
-				if ((int)$match['create_time'] < time() - $storage_time) {
+	public function clearCookie($storageTime = 172800) {
+		$fileList = glob($this->getDirCookie() . "*.cookie");
+		foreach ($fileList as $value) {
+			if(preg_match("#/(?<create_time>\d+)(?:\.|\s*)\d*\.cookie$#iU", $value, $match)){
+				if ((int)$match['create_time'] < time() - $storageTime) {
 					unlink($value);
 				}
 			}
@@ -262,10 +262,10 @@ class cGetContent
 
 	/**
 	 * Адерс должен быть относительным папке где лежит исходник класса
-	 * @param string $new_dir_cookie
+	 * @param string $val
 	 */
-	public function setDirCookie($new_dir_cookie) {
-		$this->_dirCookie = $new_dir_cookie;
+	public function setDirCookie($val) {
+		$this->_dirCookie = $val;
 	}
 
 	public function getDirCookie() {
@@ -414,7 +414,7 @@ class cGetContent
 		$this->_numberRepeat = $value;
 	}
 
-	public function get_number_repeat() {
+	public function getNumberRepeat() {
 		return $this->_numberRepeat;
 	}
 
@@ -434,7 +434,7 @@ class cGetContent
 	 * @return bool
 	 */
 	private function repeatGetContent() {
-		if ($this->get_number_repeat() < $this->getMaxNumberRepeat()) {
+		if ($this->getNumberRepeat() < $this->getMaxNumberRepeat()) {
 			$this->nextRepeat();
 			return true;
 		} else {
@@ -447,7 +447,7 @@ class cGetContent
 	 * Регестрирует повторный запрос
 	 */
 	private function nextRepeat() {
-		$num_repeat = $this->get_number_repeat();
+		$num_repeat = $this->getNumberRepeat();
 		$num_repeat++;
 		$this->setNumberRepeat($num_repeat);
 	}
@@ -471,11 +471,11 @@ class cGetContent
 	}
 
 	/**
-	 * @param string $type_content file|img|text|html
+	 * @param string $typeContent file|img|text|html
 	 * @return bool
 	 */
-	public function setTypeContent($type_content = "text") {
-		switch ($type_content) {
+	public function setTypeContent($typeContent = "text") {
+		switch ($typeContent) {
 			case 'file':
 				$this->_typeContent = 'file';
 				$this->setEncodingAnswer(false);
@@ -628,12 +628,12 @@ class cGetContent
 	}
 
 	/**
-	 * @param string $new_mode_get_content single|multi
+	 * @param string $val single|multi
 	 * @return bool
 	 */
-	public function setModeGetContent($new_mode_get_content = 'single') {
+	public function setModeGetContent($val = 'single') {
 		$this->closeGetContent();
-		switch ($new_mode_get_content) {
+		switch ($val) {
 			case 'single':
 				$this->_modeGetContent = 'single';
 				$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,false);
@@ -695,15 +695,15 @@ class cGetContent
 	 */
 	private function initMultiGetContent() {
 		$descriptor =& $this->getDescriptor();
-		$descriptor_array =& $this->getDescriptorArray();
+		$descriptorArray =& $this->getDescriptorArray();
 		$descriptor['descriptor'] = curl_multi_init();
-		if (is_array($descriptor_array) && count($descriptor_array) > $this->getCountMultiDescriptor()) {
-			$descriptor_array = array_slice($descriptor_array, 0, $this->getCountMultiDescriptor());
+		if (is_array($descriptorArray) && count($descriptorArray) > $this->getCountMultiDescriptor()) {
+			$descriptorArray = array_slice($descriptorArray, 0, $this->getCountMultiDescriptor());
 		}
 		for ($i = 0; $i < $this->getCountMultiDescriptor(); $i++) {
-			if (!isset($descriptor_array[$i]['descriptor_key'])) $descriptor_array[$i]['descriptor_key'] = microtime(1) . mt_rand();
-			$descriptor_array[$i]['descriptor'] = curl_init();
-			curl_multi_add_handle($descriptor['descriptor'], $descriptor_array[$i]['descriptor']);
+			if (!isset($descriptorArray[$i]['descriptor_key'])) $descriptorArray[$i]['descriptor_key'] = microtime(1) . mt_rand();
+			$descriptorArray[$i]['descriptor'] = curl_init();
+			curl_multi_add_handle($descriptor['descriptor'], $descriptorArray[$i]['descriptor']);
 		}
 	}
 
@@ -749,17 +749,17 @@ class cGetContent
 	 */
 	private function closeMultiGetContent($reinit) {
 		$descriptor =& $this->getDescriptor();
-		$descriptor_array =& $this->getDescriptorArray();
-		if (is_array($descriptor_array)) {
-			foreach ($descriptor_array as $key => $value) {
-				if (isset($descriptor_array[$key]['descriptor'])) {
-					@curl_multi_remove_handle($descriptor['descriptor'], $descriptor_array[$key]['descriptor']);
-					curl_close($descriptor_array[$key]['descriptor']);
+		$descriptorArray =& $this->getDescriptorArray();
+		if (is_array($descriptorArray)) {
+			foreach ($descriptorArray as $key => $value) {
+				if (isset($descriptorArray[$key]['descriptor'])) {
+					@curl_multi_remove_handle($descriptor['descriptor'], $descriptorArray[$key]['descriptor']);
+					curl_close($descriptorArray[$key]['descriptor']);
 					if ($this->getUseProxy() && is_object($this->proxy)) {
-						$this->proxy->removeAllRentFromCode($descriptor_array[$key]['descriptor_key']);
+						$this->proxy->removeAllRentFromCode($descriptorArray[$key]['descriptor_key']);
 					}
-					unset($descriptor_array[$key]['descriptor']);
-					if (!$reinit) unset($descriptor_array[$key]['option']);
+					unset($descriptorArray[$key]['descriptor']);
+					if (!$reinit) unset($descriptorArray[$key]['option']);
 				}
 			}
 			unset($value);
@@ -788,7 +788,7 @@ class cGetContent
 	/**
 	 * Выполнение заросов по $url с определением по какому методу осуществлять запрос
 	 * @param string|array $url
-	 * @param string       $reg регулярное выражение для дополнительной проверки ответа
+	 * @param string $reg регулярное выражение для дополнительной проверки ответа
 	 * @return array|string
 	 */
 	public function getContent($url = "", $reg = '##') {
@@ -818,7 +818,7 @@ class cGetContent
 	private function getSingleContent($url, $reg) {
 		$descriptor =& $this->getDescriptor();
 		do {
-			if ($this->get_number_repeat() > 0) $this->reinitGetContent();
+			if ($this->getNumberRepeat() > 0) $this->reinitGetContent();
 			$this->setDefaultSetting(CURLOPT_URL, $url);
 			$this->setOptionsToDescriptor($descriptor);
 			$answer = $this->execSingleGetContent();
@@ -833,9 +833,9 @@ class cGetContent
 				}
 			}
 			$this->setRedirectCount(0);
-			if ($reg && preg_match($reg, $answer)) $reg_answer = true;
-			else $reg_answer = false;
-			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $reg_answer) {
+			if ($reg && preg_match($reg, $answer)) $regAnswer = true;
+			else $regAnswer = false;
+			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {
 				$this->_answer = $answer;
 				$this->endRepeat();
 				break;
@@ -854,39 +854,39 @@ class cGetContent
 	 * @return array
 	 */
 	private function getMultiContent($url, $reg) {
-		$copy_url = $url; //Копируем для создания связи по ключам после удаления из основного массива
-		$good_answer = array();
+		$copyUrl = $url; //Копируем для создания связи по ключам после удаления из основного массива
+		$goodAnswer = array();
 		do {
-			if ($this->get_number_repeat() > 0) $this->reinitGetContent();
+			if ($this->getNumberRepeat() > 0) $this->reinitGetContent();
 			$this->setCountMultiCurl(count($url));
-			$descriptor_array =& $this->getDescriptorArray();
-			$count_multi_stream = $this->getCountMultiStream();
+			$descriptorArray =& $this->getDescriptorArray();
+			$countMultiStream = $this->getCountMultiStream();
 			$j = 0;
-			$url_descriptors = array();
-			foreach ($url as $key_url => $value_url) {
-				for ($i = 0; $i < $count_multi_stream; $i++) {
-					$url_descriptors[$j] = $key_url; //Для связи ключа url и вычисления ключа хорошего ответа
-					if (isset($descriptor_array[$j]['descriptor'])) {
-						$this->setOptionToDescriptor($descriptor_array[$j], CURLOPT_URL, $value_url);
+			$urlDescriptors = array();
+			foreach ($url as $keyUrl => $valueUrl) {
+				for ($i = 0; $i < $countMultiStream; $i++) {
+					$urlDescriptors[$j] = $keyUrl; //Для связи ключа url и вычисления ключа хорошего ответа
+					if (isset($descriptorArray[$j]['descriptor'])) {
+						$this->setOptionToDescriptor($descriptorArray[$j], CURLOPT_URL, $valueUrl);
 					}
 					$j++;
 				}
 			}
-			foreach ($descriptor_array as $key => $value) $this->setOptionsToDescriptor($descriptor_array[$key]);
+			foreach ($descriptorArray as $key => $value) $this->setOptionsToDescriptor($descriptorArray[$key]);
 			unset($value);
 			$answer = $this->execMultiGetContent();
 			foreach ($answer as $key => $value) {
-				$descriptor_array[$key]['info'] = curl_getinfo($descriptor_array[$key]['descriptor']);
-				$descriptor_array[$key]['info']['header'] = $this->getHeader($value);
-				$key_good_answer = ($url_descriptors[$key] * $count_multi_stream) + $key % $count_multi_stream;
-				if ($reg && preg_match($reg, $value)) $reg_answer = true;
-				else $reg_answer = false;
-				if (!isset($good_answer[$key_good_answer]) && (!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptor_array[$key]['info'])) && $reg_answer) {
+				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
+				$descriptorArray[$key]['info']['header'] = $this->getHeader($value);
+				$keyGoodAnswer = ($urlDescriptors[$key] * $countMultiStream) + $key % $countMultiStream;
+				if ($reg && preg_match($reg, $value)) $regAnswer = true;
+				else $regAnswer = false;
+				if (!isset($goodAnswer[$keyGoodAnswer]) && (!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
 
-					if (isset($url[$url_descriptors[$key]])) unset($url[$url_descriptors[$key]]);
-					$good_answer[$key_good_answer] = $value;
+					if (isset($url[$urlDescriptors[$key]])) unset($url[$urlDescriptors[$key]]);
+					$goodAnswer[$keyGoodAnswer] = $value;
 				} elseif ($this->getUseProxy() && is_object($this->proxy)) {
-					$this->proxy->removeProxyInList($descriptor_array[$key]['option'][CURLOPT_PROXY]);
+					$this->proxy->removeProxyInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
 				}
 			}
 			if (count($url) == 0) {
@@ -894,35 +894,35 @@ class cGetContent
 				break;
 			}
 		} while ($this->repeatGetContent());
-		foreach ($good_answer as &$value) $value = $this->prepareContent($value);
-		$tmp_answer = array();
+		foreach ($goodAnswer as &$value) $value = $this->prepareContent($value);
+		$tmpAnswer = array();
 		$j = 0;
-		foreach ($copy_url as $key_url => $value_url) {
-			for ($i = 0; $i < $count_multi_stream; $i++) {
-				if (isset($good_answer[$j])) $tmp_answer[$key_url][$i] = $good_answer[$j];
+		foreach ($copyUrl as $keyUrl => $valueUrl) {
+			for ($i = 0; $i < $countMultiStream; $i++) {
+				if (isset($goodAnswer[$j])) $tmpAnswer[$keyUrl][$i] = $goodAnswer[$j];
 				$j++;
 			}
 		}
-		return $this->_answer = $tmp_answer;
+		return $this->_answer = $tmpAnswer;
 	}
 
 	/**
 	 * Присваивает настройки cURL декскриптору
 	 * @param array $descriptor   дескриптор cURL
-	 * @param array $option_array список настроек для cURL дексриптора
+	 * @param array $optionArray список настроек для cURL дексриптора
 	 * @return bool
 	 */
-	public function setOptionsToDescriptor(&$descriptor, $option_array = array()) {
-		foreach ($this->_allSetting as $key_setting) {
-			if (isset($option_array[$key_setting])) $this->setOptionToDescriptor($descriptor, $key_setting, $option_array[$key_setting]);
-			elseif(isset($descriptor['option'][$key_setting])) $this->setOptionToDescriptor($descriptor,$key_setting,$descriptor['option'][$key_setting]);
-			else $this->setOptionToDescriptor($descriptor, $key_setting);
+	public function setOptionsToDescriptor(&$descriptor, $optionArray = array()) {
+		foreach ($this->_allSetting as $keySetting) {
+			if (isset($optionArray[$keySetting])) $this->setOptionToDescriptor($descriptor, $keySetting, $optionArray[$keySetting]);
+			elseif(isset($descriptor['option'][$keySetting])) $this->setOptionToDescriptor($descriptor,$keySetting,$descriptor['option'][$keySetting]);
+			else $this->setOptionToDescriptor($descriptor, $keySetting);
 		}
-		unset($key_setting);
+		unset($keySetting);
 		if ($this->getUseProxy() && !isset($descriptor['option'][CURLOPT_PROXY])) {
 			if (is_object($this->proxy)) {
-				if (is_string($proxy_ip = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]))) && cStringWork::isIp($proxy_ip))
-					$this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $proxy_ip);
+				if (is_string($proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]))) && cStringWork::isIp($proxyIp))
+					$this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $proxyIp);
 				else $descriptor['option'][CURLOPT_URL] = '';
 			} elseif (is_string($this->proxy)) $this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $this->proxy);
 		}
@@ -1023,25 +1023,6 @@ class cGetContent
 	}
 
 	/**
-	 * Выполнение запроса cURL
-	 * @return mixed
-	 */
-	private function execGetContent() {
-		switch ($this->getModeGetContent()) {
-			case 'single':
-				return $this->execSingleGetContent();
-				break;
-			case 'multi':
-				return $this->execMultiGetContent();
-				break;
-			default:
-				break;
-		}
-		return false;
-	}
-
-
-	/**
 	 * Выполнение запроса cURL в режиме single
 	 * @return string
 	 */
@@ -1057,29 +1038,29 @@ class cGetContent
 	 */
 	private function execMultiGetContent() {
 		$descriptor =& $this->getDescriptor();
-		$descriptor_array =& $this->getDescriptorArray();
+		$descriptorArray =& $this->getDescriptorArray();
 		do {
 			curl_multi_exec($descriptor['descriptor'], $running);
 			usleep(100);
 		} while ($running > 0);
 		$this->_answer = array();
-		foreach ($descriptor_array as $key => $value) $this->_answer[$key] = curl_multi_getcontent($descriptor_array[$key]['descriptor']);
+		foreach ($descriptorArray as $key => $value) $this->_answer[$key] = curl_multi_getcontent($descriptorArray[$key]['descriptor']);
 		unset($value);
 		return $this->_answer;
 	}
 
 	/**
 	 * Возвращает данные полученые после запросов
-	 * @param bool $get_all_answer для режима multi, возваращать все или самы большой по размеру
+	 * @param bool $getAllAnswer для режима multi, возваращать все или самы большой по размеру
 	 * @return array|string
 	 */
-	public function getAnswer($get_all_answer = false) {
+	public function getAnswer($getAllAnswer = false) {
 		switch ($this->getModeGetContent()) {
 			case 'single':
 				return $this->_answer;
 				break;
 			case 'multi':
-				if (!$get_all_answer) {
+				if (!$getAllAnswer) {
 					$a = array();
 					foreach ($this->_answer as $key => $value) $a[$key] = $this->getBigAnswer($value);
 					return $a;
@@ -1097,36 +1078,36 @@ class cGetContent
 	 * @return bool|string
 	 */
 	private function getBigAnswer($a) {
-		$big_a = 0;
-		$big_key = 0;
+		$bigA = 0;
+		$bigKey = 0;
 		foreach ($a as $key => $value) {
-			$this_a = strlen($value);
-			if ($this_a > $big_a) {
-				$big_a = $this_a;
-				$big_key = $key;
+			$thisA = strlen($value);
+			if ($thisA > $bigA) {
+				$bigA = $thisA;
+				$bigKey = $key;
 			}
 		}
-		return $a[$big_key];
+		return $a[$bigKey];
 	}
 
 	/**
 	 * Проверка ответа на корректность
 	 * @param       $answer    Текс ответа
-	 * @param array $curl_data массив информации о запросе при помощи функции curl_getinfo()
+	 * @param array $curlData массив информации о запросе при помощи функции curl_getinfo()
 	 * @return bool
 	 */
-	private function checkAnswerValid($answer, $curl_data) {
-		if (!$this->httpCode($curl_data['http_code'])) return false;
-		if (($curl_data['size_download'] < $curl_data['download_content_length'] && $curl_data['download_content_length'] != -1) || $curl_data['size_download'] < $this->getMinSizeAnswer()) return false;
+	private function checkAnswerValid($answer, $curlData) {
+		if (!$this->httpCode($curlData['http_code'])) return false;
+		if (($curlData['size_download'] < $curlData['download_content_length'] && $curlData['download_content_length'] != -1) || $curlData['size_download'] < $this->getMinSizeAnswer()) return false;
 		switch ($this->getTypeContent()) {
 			case 'file':
-				if ($this->mimeType($curl_data['content_type'], 'file')) return true;
+				if ($this->mimeType($curlData['content_type'], 'file')) return true;
 				break;
 			case 'img':
-				if ($this->mimeType($curl_data['content_type'], 'img')) return true;
+				if ($this->mimeType($curlData['content_type'], 'img')) return true;
 				break;
 			case 'html':
-				if ($this->mimeType($curl_data['content_type'], 'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims', $answer)) return true;
+				if ($this->mimeType($curlData['content_type'], 'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims', $answer)) return true;
 				break;
 			default:
 				break;
@@ -1160,14 +1141,14 @@ class cGetContent
 	/**
 	 * Проверает HTTP код ответа на запрос
 	 * @url http://goo.gl/KKiFi
-	 * @param int $http_code
+	 * @param int $httpCode
 	 * @return bool
 	 * @internal в будущем планируется вести лог с ошибками и из этой функции будет записываться ошибки
 	 * @internal в запросах и дополнительо будет приниматься решения больше на посылать заросы на текуший URL
 	 * @internal Пример: Если вернуло ошибку 500, то не повторять запрос
 	 */
-	private function httpCode($http_code) {
-		switch ((int)$http_code) {
+	private function httpCode($httpCode) {
+		switch ((int)$httpCode) {
 			case 100:
 				return false;
 			case 101:
