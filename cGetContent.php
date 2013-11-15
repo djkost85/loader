@@ -68,7 +68,7 @@ class cGetContent
 	 * $_descriptorArray[key]['option'][имя опции] = value параметры cURL
 	 * $_descriptorArray[key]['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
 	 */
-	private $_descriptorArray;
+	private $descriptor_array;
 	/**
 	 * Количество потоков cURL в режиме multi
 	 * @var int
@@ -208,7 +208,7 @@ class cGetContent
 		$this->setMinSizeAnswer(100);
 		$this->setTypeContent("text");
 		$this->setInCache(false);
-		$this->setEncodingAnswer(false);
+		$this->setEncodingAnswer(true);
 		$this->setEncodingName("UTF-8");
 		$this->setCheckAnswer(false);
 		$this->setRedirectCount(0);
@@ -488,10 +488,12 @@ class cGetContent
 				break;
 			case 'text':
 				$this->_typeContent = 'text';
+				$this->setEncodingAnswer(true);
 				return true;
 				break;
 			case 'html':
 				$this->_typeContent = 'html';
+				$this->setEncodingAnswer(true);
 				break;
 			default:
 				break;
