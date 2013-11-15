@@ -66,7 +66,7 @@ class cProxy
 	/**
 	 * Класс для тестирования и скачивания списков прокси
 	 * @access protected
-	 * @var c_get_content
+	 * @var cGetContent
 	 */
 	protected $_getContent;
 	/**
@@ -183,9 +183,9 @@ class cProxy
 	function __construct() {
 		$this->_storageTime = 72000;
 		$this->_rentTime = 3600;
-		$this->_getContent = new c_get_content();
-		$this->_getContent->set_type_content('html');
-		$this->_getContent->set_encoding_answer(true);
+		$this->_getContent = new cGetContent();
+		$this->_getContent->setTypeContent('html');
+		$this->_getContent->setEncodingAnswer(true);
 		$this->setMethodGetProxy("random");
 		$this->_dirProxyFile = "proxy_files";
 		$this->_dirProxyListFile = "proxy_list";
@@ -364,11 +364,11 @@ class cProxy
 		if (false && isset($_SERVER['SERVER_ADDR']) && c_string_work::is_ip($_SERVER['SERVER_ADDR'])) {
 			$this->_serverIp = $_SERVER['SERVER_ADDR'];
 		} else {
-			$this->_getContent->set_use_proxy(false);
-			$this->_getContent->set_type_content('html');
-			$this->_getContent->set_mode_get_content('single');
-			$this->_getContent->get_content("http://2ip.ru/");
-			$answer = $this->_getContent->get_answer();
+			$this->_getContent->setUseProxy(false);
+			$this->_getContent->setTypeContent('html');
+			$this->_getContent->setModeGetContent('single');
+			$this->_getContent->getContent("http://2ip.ru/");
+			$answer = $this->_getContent->getAnswer();
 			$reg = "/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
 			if (preg_match($reg, $answer, $match) && !isset($match['ip']) || !$match['ip'] || !c_string_work::is_ip($match['ip'])) return false;
 			$this->_serverIp = $match['ip'];
@@ -390,12 +390,12 @@ class cProxy
 	 */
 	public function getProxyChecker($check_url_proxy = "") {
 		if ($check_url_proxy === "") $check_url_proxy = $this->_checkUrlProxy;
-		$this->_getContent->set_use_proxy(false);
-		$this->_getContent->set_type_content('text');
-		$this->_getContent->set_mode_get_content('multi');
-		$this->_getContent->set_count_multi_stream(1);
-		$this->_getContent->set_min_size_answer(5);
-		$answer = $this->_getContent->get_content($check_url_proxy);
+		$this->_getContent->setUseProxy(false);
+		$this->_getContent->setTypeContent('text');
+		$this->_getContent->setModeGetContent('multi');
+		$this->_getContent->setCountMultiStream(1);
+		$this->_getContent->setMinSizeAnswer(5);
+		$answer = $this->_getContent->getContent($check_url_proxy);
 		foreach ($answer as $key => $value) {
 			if (preg_match("/^[01]{5}/i", $value)) {
 				return $this->_checkUrlProxy[$key];
@@ -906,18 +906,18 @@ class cProxy
 	public function checkProxy($proxy) {
 		if (!$this->_needCheckProxy) return $proxy;
 		if (is_string($proxy) && c_string_work::is_ip($proxy)) {
-			$this->_getContent->set_mode_get_content('single');
-			$this->_getContent->set_use_proxy($proxy);
-			$this->_getContent->set_min_size_answer(5);
-			$this->_getContent->set_default_setting(CURLOPT_REFERER, "proxy-check.net");
-			$this->_getContent->set_default_setting(CURLOPT_POST, true);
-			$this->_getContent->set_default_setting(CURLOPT_POSTFIELDS, "proxy=yandex");
-			$this->_getContent->set_type_content('text');
-			$this->_getContent->set_default_setting(CURLOPT_HEADER, false);
-			$this->_getContent->set_check_answer(false);
-			$answer = $this->_getContent->get_content($this->getProxyChecker() . '?ip=' . $this->getServerIp() . '&proxy=yandex');
-			$descriptor = $this->_getContent->get_descriptor();
-			$this->_getContent->restore_default_settings();
+			$this->_getContent->setModeGetContent('single');
+			$this->_getContent->setUseProxy($proxy);
+			$this->_getContent->setMinSizeAnswer(5);
+			$this->_getContent->setDefaultSetting(CURLOPT_REFERER, "proxy-check.net");
+			$this->_getContent->setDefaultSetting(CURLOPT_POST, true);
+			$this->_getContent->setDefaultSetting(CURLOPT_POSTFIELDS, "proxy=yandex");
+			$this->_getContent->setTypeContent('text');
+			$this->_getContent->setDefaultSetting(CURLOPT_HEADER, false);
+			$this->_getContent->setCheckAnswer(false);
+			$answer = $this->_getContent->getContent($this->getProxyChecker() . '?ip=' . $this->getServerIp() . '&proxy=yandex');
+			$descriptor = $this->_getContent->getDescriptor();
+			$this->_getContent->restoreDefaultSettings();
 			$info_proxy = $this->genProxyInfo($proxy, $answer, $descriptor['info']);
 			if ($info_proxy) {
 				$good_proxy[] = $info_proxy;
@@ -936,25 +936,25 @@ class cProxy
 			if (!$this->_needCheckProxy) return $array_proxy;
 			$good_proxy = array();
 			$url = $this->getProxyChecker() . '?ip=' . $this->getServerIp() . '&proxy=yandex';
-			$this->_getContent->set_mode_get_content('multi');
-			$this->_getContent->set_count_multi_stream(1);
-			$this->_getContent->set_min_size_answer(5);
-			$this->_getContent->set_max_number_repeat(0);
-			$this->_getContent->set_default_setting(CURLOPT_REFERER, "proxy-check.net");
-			$this->_getContent->set_default_setting(CURLOPT_POST, true);
-			$this->_getContent->set_default_setting(CURLOPT_POSTFIELDS, "proxy=yandex");
-			$this->_getContent->set_type_content('text');
-			$this->_getContent->set_default_setting(CURLOPT_HEADER, false);
-			$this->_getContent->set_check_answer(false);
+			$this->_getContent->setModeGetContent('multi');
+			$this->_getContent->setCountMultiStream(1);
+			$this->_getContent->setMinSizeAnswer(5);
+			$this->_getContent->setMaxNumberRepeat(0);
+			$this->_getContent->setDefaultSetting(CURLOPT_REFERER, "proxy-check.net");
+			$this->_getContent->setDefaultSetting(CURLOPT_POST, true);
+			$this->_getContent->setDefaultSetting(CURLOPT_POSTFIELDS, "proxy=yandex");
+			$this->_getContent->setTypeContent('text');
+			$this->_getContent->setDefaultSetting(CURLOPT_HEADER, false);
+			$this->_getContent->setCheckAnswer(false);
 			foreach (array_chunk($array_proxy, 200) as $value_array_proxy) {
-				$this->_getContent->set_count_multi_curl(count($value_array_proxy));
+				$this->_getContent->setCountMultiCurl(count($value_array_proxy));
 				$url_array = array();
-				$descriptor_array =& $this->_getContent->get_descriptor_array();
+				$descriptor_array =& $this->_getContent->getDescriptorArray();
 				foreach ($descriptor_array as $key => $value) {
-					$this->_getContent->set_option_to_descriptor($descriptor_array[$key], CURLOPT_PROXY, $value_array_proxy[$key]['proxy']);
+					$this->_getContent->setOptionToDescriptor($descriptor_array[$key], CURLOPT_PROXY, $value_array_proxy[$key]['proxy']);
 					$url_array[] = $url;
 				}
-				$answer_content = $this->_getContent->get_content($url_array);
+				$answer_content = $this->_getContent->getContent($url_array);
 				foreach ($answer_content as $key => $value) {
 					$info_proxy = $this->genProxyInfo($value_array_proxy[$key], $value, $descriptor_array[$key]['info']);
 					if ($info_proxy) {
@@ -963,7 +963,7 @@ class cProxy
 				}
 				unset($value);
 			}
-			$this->_getContent->restore_default_settings();
+			$this->_getContent->restoreDefaultSettings();
 			if (count($good_proxy)) return $good_proxy;
 		}
 		return false;
@@ -979,21 +979,21 @@ class cProxy
 	private function checkProxyArrayToSite($array_proxy, $url, $check_word) {
 		if (!is_array($array_proxy)) return false;
 		$good_proxy = array();
-		$this->_getContent->set_mode_get_content('multi');
-		$this->_getContent->set_count_multi_stream(1);
-		$this->_getContent->set_type_content('text');
-		$this->_getContent->set_default_setting(CURLOPT_HEADER, false);
-		$this->_getContent->set_default_setting(CURLOPT_POST, false);
-		$this->_getContent->set_check_answer(false);
+		$this->_getContent->setModeGetContent('multi');
+		$this->_getContent->setCountMultiStream(1);
+		$this->_getContent->setTypeContent('text');
+		$this->_getContent->setDefaultSetting(CURLOPT_HEADER, false);
+		$this->_getContent->setDefaultSetting(CURLOPT_POST, false);
+		$this->_getContent->setCheckAnswer(false);
 		foreach (array_chunk($array_proxy, 100) as $value_proxy) {
-			$this->_getContent->set_count_multi_curl(count($value_proxy));
-			$descriptor_array =& $this->_getContent->get_descriptor_array();
+			$this->_getContent->setCountMultiCurl(count($value_proxy));
+			$descriptor_array =& $this->_getContent->getDescriptorArray();
 			$url_array = array();
 			foreach ($descriptor_array as $key => $value) {
-				$this->_getContent->set_option_to_descriptor($descriptor_array[$key], CURLOPT_PROXY, $value_proxy[$key]['proxy']);
+				$this->_getContent->setOptionToDescriptor($descriptor_array[$key], CURLOPT_PROXY, $value_proxy[$key]['proxy']);
 				$url_array[] = $url;
 			}
-			$answer_content = $this->_getContent->get_content($url_array);
+			$answer_content = $this->_getContent->getContent($url_array);
 			foreach ($answer_content as $key => $value) {
 				$test_count = 0;
 				$count_good_check = 0;
@@ -1006,7 +1006,7 @@ class cProxy
 			}
 			unset($value);
 		}
-		$this->_getContent->restore_default_settings();
+		$this->_getContent->restoreDefaultSettings();
 		if (count($good_proxy)) return $good_proxy;
 		else return false;
 	}

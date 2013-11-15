@@ -8,11 +8,11 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace stopinfection;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 //return array();
 $url_source="http://stopinfection.narod.ru/Proxy.htm";
 $name_source="cool-tests.com";
-$get_stopinfection_content= new c_get_content();
+$get_stopinfection_content= new cGetContent();
 $get_stopinfection_content->set_encoding_answer(true);
 $get_stopinfection_content->set_encoding_name('UTF-8');
 $get_stopinfection_content->set_type_content("html");

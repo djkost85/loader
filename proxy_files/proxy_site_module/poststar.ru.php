@@ -8,12 +8,12 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace poststar;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 use GetContent\c_string_work as c_string_work;
 
 $url_source="http://www.poststar.ru/proxy.htm";
 $name_source="poststar.ru";
-$get_poststar_content= new c_get_content();
+$get_poststar_content= new cGetContent();
 $get_poststar_content->set_type_content("html");
 $answer_poststar=$get_poststar_content->get_content($url_source);
 if(!$answer_poststar) return array();

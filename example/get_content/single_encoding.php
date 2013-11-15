@@ -8,10 +8,10 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Декодирование в режиме single
  */
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(600);
-$get_content = new c_get_content();
+$get_content = new cGetContent();
 $get_content->set_mode_get_content('single');// Режим single
 $get_content->set_type_content('text'); // Ожидаемый контент html страница
 $get_content->set_encoding_answer(true);

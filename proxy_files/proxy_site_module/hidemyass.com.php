@@ -9,12 +9,12 @@
  */
 
 namespace hidemyass;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 use GetContent\c_string_work as c_string_work;
 //return array();
 $url_source="http://hidemyass.com/proxy-list/";
 $name_source="hidemyass.com";
-$get_hidemyass_content= new c_get_content();
+$get_hidemyass_content= new cGetContent();
 $get_hidemyass_content->set_type_content("html");
 $proxy_hidemyass = array();
 do{

@@ -8,12 +8,12 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace xseo;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 use GetContent\c_string_work as c_string_work;
 
 $url_source="http://xseo.in/freeproxy";
 $name_source="xseo.in";
-$get_xseo_content= new c_get_content();
+$get_xseo_content= new cGetContent();
 $get_xseo_content->set_type_content("html");
 $get_xseo_content->set_default_setting(CURLOPT_POST,true);
 $get_xseo_content->set_default_setting(CURLOPT_POSTFIELDS,'submit=%CF%EE%EA%E0%E7%E0%F2%FC+%EF%EE+100+%EF%F0%EE%EA%F1%E8+%ED%E0+%F1%F2%F0%E0%ED%E8%F6%E5');

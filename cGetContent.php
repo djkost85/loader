@@ -5,45 +5,45 @@ use GetContent\cProxy as c_proxy;
 use GetContent\c_string_work as c_string_work;
 
 /**
- * Class c_get_content
+ * Class cGetContent
  * С помощью основных функций библиотеки cURL посылает http запросы для скачивания контента из сети
  * Умеет работать через прокси сервера, в много поточном режиме с верификацией данных.
  * @author  Evgeny Pynykh <bpteam22@gmail.com>
  * @package GetContent
  * @version 2.0
  */
-class c_get_content
+class cGetContent
 {
 	/**
 	 * Набор настроек по умолчанию для cURL
 	 * @access private
 	 * @var array
 	 * Структура:
-	 * $default_settings[CURLOPT_HEADER]= bool для включения заголовков в вывод
-	 * $default_settings[CURLOPT_URL]= string url источника данных
-	 * $default_settings[CURLOPT_TIMEOUT]= int максимальное время ожидания ответа от запроса
-	 * $default_settings[CURLOPT_USERAGENT]= string useragent баузера
-	 * $default_settings[CURLOPT_PROXY]= string прокси адрес через который будет проходить запрос
-	 * $default_settings[CURLOPT_RETURNTRANSFER]= bool флаг для обозначения возвращения результата в переменную
-	 * $default_settings[CURLOPT_REFERER]= string адрес страници с которой перешли на текущую
-	 * $default_settings[CURLOPT_FOLLOWLOCATION]= bool следовать переадресации сервера или нет
-	 * $default_settings[CURLOPT_POST]= bool врключение отправки post запроса на удаленный сервер
-	 * $default_settings[CURLOPT_POSTFIELDS]= string|mixed данные post запроса
-	 * $default_settings[CURLOPT_FRESH_CONNECT] = bool TRUE для принудительного использования нового соединения вместо закэшированного.
-	 * $default_settings[CURLOPT_HTTPHEADER] array Отправка http заголовков
-	 * $default_settings[CURLOPT_FORBID_REUSE] TRUE для принудительного закрытия соединения после завершения его обработки так, чтобы его нельзя было использовать повторно.
+	 * $_defaultSettings[CURLOPT_HEADER]= bool для включения заголовков в вывод
+	 * $_defaultSettings[CURLOPT_URL]= string url источника данных
+	 * $_defaultSettings[CURLOPT_TIMEOUT]= int максимальное время ожидания ответа от запроса
+	 * $_defaultSettings[CURLOPT_USERAGENT]= string useragent баузера
+	 * $_defaultSettings[CURLOPT_PROXY]= string прокси адрес через который будет проходить запрос
+	 * $_defaultSettings[CURLOPT_RETURNTRANSFER]= bool флаг для обозначения возвращения результата в переменную
+	 * $_defaultSettings[CURLOPT_REFERER]= string адрес страници с которой перешли на текущую
+	 * $_defaultSettings[CURLOPT_FOLLOWLOCATION]= bool следовать переадресации сервера или нет
+	 * $_defaultSettings[CURLOPT_POST]= bool врключение отправки post запроса на удаленный сервер
+	 * $_defaultSettings[CURLOPT_POSTFIELDS]= string|mixed данные post запроса
+	 * $_defaultSettings[CURLOPT_FRESH_CONNECT] = bool TRUE для принудительного использования нового соединения вместо закэшированного.
+	 * $_defaultSettings[CURLOPT_HTTPHEADER] array Отправка http заголовков
+	 * $_defaultSettings[CURLOPT_FORBID_REUSE] TRUE для принудительного закрытия соединения после завершения его обработки так, чтобы его нельзя было использовать повторно.
 	 */
-	private $default_settings;
+	private $_defaultSettings;
 	/**
 	 * Пересление всех поддерживаемых настроек для cURL
 	 * @var array
 	 */
-	private $all_setting;
+	private $_allSetting;
 	/**
 	 * Флаг для включения запросов через прокси сервера
 	 * @var bool
 	 */
-	private $use_proxy;
+	private $_useProxy;
 	/**
 	 * Адрес спрокси или класс для работы с прокси
 	 * @var string|cProxy
@@ -53,56 +53,56 @@ class c_get_content
 	 * Хранит разультаты запросов если режим singele, то string, если multi то array
 	 * @var string|array
 	 */
-	private $answer;
+	private $_answer;
 	/**
 	 * Дескриптор с текущими настройками и уникальным ключом
 	 * @var array
 	 * Структура:
-	 * $descriptor['descriptor'] дескриптор  cURL
-	 * $descriptor['info'] Информация выданная функцией curl_getinfo()
-	 * $descriptor['option'][имя опции] = value параметры cURL
-	 * $descriptor['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
+	 * $_descriptor['descriptor'] дескриптор  cURL
+	 * $_descriptor['info'] Информация выданная функцией curl_getinfo()
+	 * $_descriptor['option'][имя опции] = value параметры cURL
+	 * $_descriptor['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
 	 */
-	private $descriptor;
+	private $_descriptor;
 	/**
 	 * Список дескрипторов с текущими настройками и уникальным ключом для работы в multi режиме
 	 * @var array
-	 * $descriptor_array[key]['descriptor'] дескриптор  cURL
-	 * $descriptor_array[key]['info'] Информация выданная функцией curl_getinfo()
-	 * $descriptor_array[key]['option'][имя опции] = value параметры cURL
-	 * $descriptor_array[key]['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
+	 * $_descriptorArray[key]['descriptor'] дескриптор  cURL
+	 * $_descriptorArray[key]['info'] Информация выданная функцией curl_getinfo()
+	 * $_descriptorArray[key]['option'][имя опции] = value параметры cURL
+	 * $_descriptorArray[key]['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
 	 */
-	private $descriptor_array;
+	private $_descriptorArray;
 	/**
 	 * Количество потоков cURL в режиме multi
 	 * @var int
 	 */
-	private $count_multi_curl;
+	private $_countMultiCurl;
 	/**
 	 * Количество запросов к одному url в режиме multi
 	 * @var int
 	 */
-	private $count_multi_stream;
+	private $_countMultiStream;
 	/**
 	 * Количество дескрипторов которые нужно инициализировать для режима multi
-	 * @var int = count_multi_curl*count_multi_stream
+	 * @var int = _countMultiCurl*_countMultiStream
 	 */
-	private $count_multi_descriptor;
+	private $_countMultiDescriptor;
 	/**
 	 * Текущий номер повторного запроса для получения контента
 	 * @var int
 	 */
-	private $number_repeat;
+	private $_numberRepeat;
 	/**
 	 * Максимальное количество разрешенных повторных запросов для получения корректного ответа
 	 * @var int
 	 */
-	private $max_number_repeat; // максимальное количество повторных запросов на получение контента
+	private $_maxNumberRepeat; // максимальное количество повторных запросов на получение контента
 	/**
 	 * Минимальный размер ответа в байтах
 	 * @var int
 	 */
-	private $min_size_answer;
+	private $_minSizeAnswer;
 	/**
 	 * Тип получаемых данных
 	 * @var mixed
@@ -111,83 +111,83 @@ class c_get_content
 	 * [text] Текст
 	 * [html] html страницы
 	 */
-	private $type_content;
+	private $_typeContent;
 	/**
 	 * Флаг на включение запроса из кеша поисковых машин если страница не доступна
 	 * @var bool
 	 */
-	private $in_cache;
+	private $_inCache;
 	/**
 	 * Флаг на включение смены кодировки текста
 	 * @var bool
 	 */
-	private $encoding_answer;
+	private $_encodingAnswer;
 	/**
 	 * Имя кодировки в которую преобразовывать текст ответа
 	 * @var string
 	 */
-	private $encoding_name;
+	private $_encodingName;
 	/**
 	 * Имя кодировки полученого текста
 	 * @var string
 	 */
-	private $encoding_name_answer;
+	private $_encodingNameAnswer;
 	/**
 	 * Флаг на включение проверки ответа на корректность
 	 * @var bool
 	 */
-	private $check_answer;
+	private $_checkAnswer;
 	/**
 	 * Режим скачивания контента
 	 * @var string
 	 * multi многопоточный режим
 	 * string однопоточный режим
 	 */
-	private $mode_get_content;
+	private $_modeGetContent;
 	/**
 	 * Папка в которую сохраняются файлы cookie
 	 * @var string
 	 */
-	private $dir_cookie;
+	private $_dirCookie;
 
 	/**
 	 * Количество одновременных запросов
 	 * @var int
 	 */
-	private $count_requests;
+	private $_countRequests;
 
 	/**
 	 * текущее количество редиректов в одном запросе
 	 * @var int
 	 */
-	private $redirectCount;
+	private $_redirectCount;
 
 	/**
 	 * Максимальное количество редиректов для одного запроса
 	 * @var  int
 	 */
-	private $maxRedirect;
+	private $_maxRedirect;
 
 	/**
 	 * использование статического файла cookie
 	 * @var bool
 	 */
-	private $useStaticCookie;
+	private $_useStaticCookie;
 
 	/**
 	 * имя файла с cookie
 	 * @var string
 	 */
-	private $cookieFile;
+	private $_cookieFile;
 	/**
 	 * @var string
 	 */
-	private $referer;
+	private $_referer;
 	/**
-	 * @return \GetContent\c_get_content
+	 * @return \GetContent\cGetContent
 	 */
 	function __construct() {
-		$this->all_setting = array(
+		$this->_allSetting = array(
 			CURLOPT_HEADER,
 			CURLOPT_URL,
 			CURLOPT_TIMEOUT,
@@ -201,60 +201,60 @@ class c_get_content
 			CURLOPT_FORBID_REUSE,
 			CURLOPT_HTTPHEADER
 		);
-		$this->set_dir_cookie("get_content_files/cookie");
-		$this->restore_default_settings();
-		$this->count_multi_stream = 1;
-		$this->count_multi_curl = 1;
-		$this->set_count_multi_descriptor();
-		$this->set_use_proxy(false);
-		$this->set_number_repeat(0);
-		$this->set_max_number_repeat(10);
-		$this->set_min_size_answer(100);
-		$this->set_type_content("text");
-		$this->set_in_cache(false);
-		$this->set_encoding_answer(false);
-		$this->set_encoding_name("UTF-8");
-		$this->set_check_answer(false);
+		$this->setDirCookie("get_content_files/cookie");
+		$this->restoreDefaultSettings();
+		$this->_countMultiStream = 1;
+		$this->_countMultiCurl = 1;
+		$this->setCountMultiDescriptor();
+		$this->setUseProxy(false);
+		$this->setNumberRepeat(0);
+		$this->setMaxNumberRepeat(10);
+		$this->setMinSizeAnswer(100);
+		$this->setTypeContent("text");
+		$this->setInCache(false);
+		$this->setEncodingAnswer(false);
+		$this->setEncodingName("UTF-8");
+		$this->setCheckAnswer(false);
 		$this->setRedirectCount(0);
 		$this->setMaxRedirect(10);
 		$this->setReferer('');
 		$this->setUseStaticCookie(false);
-		$this->set_mode_get_content('single');
+		$this->setModeGetContent('single');
 	}
 
 	function __destrukt() {
-		$this->clear_cookie();
-		$this->close_get_content();
+		$this->clearCookie();
+		$this->closeGetContent();
 
 	}
 
 	/**
 	 * функция для проверки доступа к необходимым ресурсам системы
 	 */
-	public function function_check() {
-		echo "c_get_content->function_check {</br>\n";
+	public function functionCheck() {
+		echo "cGetContent->functionCheck {</br>\n";
 		$mess = '';
 		if (!function_exists('curl_init')) $mess .= "Error: CURL is not installed</br>\n";
-		if (!is_dir($this->get_dir_cookie())) {
+		if (!is_dir($this->getDirCookie())) {
 			$mess .= "Warning: folder for the cookie does not exist</br>\n";
 		} else {
-			if (!is_readable($this->get_dir_cookie()) || !is_writable($this->get_dir_cookie())) {
+			if (!is_readable($this->getDirCookie()) || !is_writable($this->getDirCookie())) {
 				$mess .= "Warning: folder for the cookie does not have the necessary rights to use</br>\n";
 			}
 		}
 		if (!class_exists('cProxy')) $mess .= "Warning: cProxy class is declared, can not work with proxy</br>\n";
 		if (!class_exists('c_string_work')) $mess .= "Warning: c_string_work class is declared, word processing is not possible</br>\n";
-		if ($mess) echo $mess . " To work correctly, correct the above class c_get_content requirements </br>\n";
-		else echo "c_get_content ready</br>\n";
-		echo "c_get_content->function_check }</br>\n";
+		if ($mess) echo $mess . " To work correctly, correct the above class cGetContent requirements </br>\n";
+		else echo "cGetContent ready</br>\n";
+		echo "cGetContent->functionCheck }</br>\n";
 	}
 
 	/**
 	 * Удаляет старые файлы, которые уже не используются
 	 * @param int $storage_time время хранения прокси
 	 */
-	public function clear_cookie($storage_time = 172800) {
-		$file_list = glob($this->get_dir_cookie() . "*.cookie");
+	public function clearCookie($storage_time = 172800) {
+		$file_list = glob($this->getDirCookie() . "*.cookie");
 		foreach ($file_list as $value) {
 			if(preg_match("/\/(?<create_time>\d+)(?:\.|\s*)\d*\.cookie$/iU", $value, $match)){
 				if ((int)$match['create_time'] < time() - $storage_time) {
@@ -268,36 +268,36 @@ class c_get_content
 	 * Адерс должен быть относительным папке где лежит исходник класса
 	 * @param string $new_dir_cookie
 	 */
-	public function set_dir_cookie($new_dir_cookie) {
-		$this->dir_cookie = $new_dir_cookie;
+	public function setDirCookie($new_dir_cookie) {
+		$this->_dirCookie = $new_dir_cookie;
 	}
 
-	public function get_dir_cookie() {
-		return GC_ROOT_DIR . "/" . $this->dir_cookie . "/";
+	public function getDirCookie() {
+		return GC_ROOT_DIR . "/" . $this->_dirCookie . "/";
 	}
 
-	public function set_count_requests($val) {
-		$this->count_requests = $val;
+	public function setCountRequests($val) {
+		$this->_countRequests = $val;
 	}
 
-	public function get_count_requests() {
-		return $this->count_requests;
+	public function getCountRequests() {
+		return $this->_countRequests;
 	}
 
 	public function getRedirectCount(){
-		return $this->redirectCount;
+		return $this->_redirectCount;
 	}
 
 	public function setRedirectCount($val){
-		$this->redirectCount = $val;
+		$this->_redirectCount = $val;
 	}
 
 	public function getMaxRedirect(){
-		return $this->maxRedirect;
+		return $this->_maxRedirect;
 	}
 
 	public function setMaxRedirect($val){
-		$this->maxRedirect = $val;
+		$this->_maxRedirect = $val;
 	}
 
 	private function useRedirect(){
@@ -306,53 +306,53 @@ class c_get_content
 	}
 
 	public function setUseStaticCookie($val){
-		$this->useStaticCookie = (bool)$val;
+		$this->_useStaticCookie = (bool)$val;
 	}
 
 	private function getUseStaticCookie(){
-		return $this->useStaticCookie;
+		return $this->_useStaticCookie;
 	}
 
 	public function setCookieFile($val){
 		$this->setUseStaticCookie(true);
-		$this->cookieFile = $val;
+		$this->_cookieFile = $val;
 	}
 
 	public function getCookieFile(){
-		return $this->cookieFile;
+		return $this->_cookieFile;
 	}
 
 	public function setReferer($val){
-		$this->referer = $val;
-		$this->set_default_setting(CURLOPT_REFERER, $this->referer);
+		$this->_referer = $val;
+		$this->setDefaultSetting(CURLOPT_REFERER, $this->_referer);
 	}
 
 	public function getReferer(){
-		return $this->referer;
+		return $this->_referer;
 	}
 	/**
 	 * @param int   $option
 	 * @param mixed $value
 	 */
-	public function set_default_setting($option, $value) {
-		$this->default_settings[$option] = $value;
+	public function setDefaultSetting($option, $value) {
+		$this->_defaultSettings[$option] = $value;
 	}
 
 	/**
 	 * @param int $option
 	 * @return mixed
 	 */
-	public function get_default_setting($option) {
-		return $this->default_settings[$option];
+	public function getDefaultSetting($option) {
+		return $this->_defaultSettings[$option];
 	}
 
 	/**
 	 * @param array $value
 	 * @return bool
 	 */
-	public function set_default_settings($value) {
+	public function setDefaultSettings($value) {
 		if (is_array($value)) {
-			$this->default_settings = $value;
+			$this->_defaultSettings = $value;
 			return true;
 		} else return false;
 	}
@@ -360,15 +360,15 @@ class c_get_content
 	/**
 	 * @return array
 	 */
-	public function get_default_settings() {
-		return $this->default_settings;
+	public function getDefaultSettings() {
+		return $this->_defaultSettings;
 	}
 
 	/**
 	 * Востанавливает настройки по умолчанию для всех потоков где не изменены настройки дескрипторов
 	 */
-	public function restore_default_settings() {
-		$this->set_default_settings(array(
+	public function restoreDefaultSettings() {
+		$this->setDefaultSettings(array(
 			CURLOPT_HEADER => true,
 			CURLOPT_URL => "http://ya.ru",
 			CURLOPT_TIMEOUT => 30,
@@ -389,7 +389,7 @@ class c_get_content
 	 * @param bool|string $value
 	 * @return bool
 	 */
-	public function set_use_proxy($value = false) {
+	public function setUseProxy($value = false) {
 		switch ((bool)$value) {
 			case true:
 				if (is_string($value) && c_string_work::is_ip($value)) $this->proxy = $value;
@@ -403,46 +403,46 @@ class c_get_content
 			default:
 				return false;
 		}
-		$this->use_proxy = (bool)$value;
+		$this->_useProxy = (bool)$value;
 		return true;
 	}
 
-	public function get_use_proxy() {
-		return $this->use_proxy;
+	public function getUseProxy() {
+		return $this->_useProxy;
 	}
 
 	/**
 	 * @param int $value
 	 */
-	public function set_number_repeat($value = 0) {
-		$this->number_repeat = $value;
+	public function setNumberRepeat($value = 0) {
+		$this->_numberRepeat = $value;
 	}
 
 	public function get_number_repeat() {
-		return $this->number_repeat;
+		return $this->_numberRepeat;
 	}
 
 	/**
 	 * @param int $value
 	 */
-	public function set_max_number_repeat($value = 10) {
-		$this->max_number_repeat = $value;
+	public function setMaxNumberRepeat($value = 10) {
+		$this->_maxNumberRepeat = $value;
 	}
 
-	public function get_max_number_repeat() {
-		return $this->max_number_repeat;
+	public function getMaxNumberRepeat() {
+		return $this->_maxNumberRepeat;
 	}
 
 	/**
 	 * Проверяет возможность сделать повторный запрос
 	 * @return bool
 	 */
-	private function repeat_get_content() {
-		if ($this->get_number_repeat() < $this->get_max_number_repeat()) {
-			$this->next_repeat();
+	private function repeatGetContent() {
+		if ($this->get_number_repeat() < $this->getMaxNumberRepeat()) {
+			$this->nextRepeat();
 			return true;
 		} else {
-			$this->end_repeat();
+			$this->endRepeat();
 			return false;
 		}
 	}
@@ -450,52 +450,52 @@ class c_get_content
 	/**
 	 * Регестрирует повторный запрос
 	 */
-	private function next_repeat() {
+	private function nextRepeat() {
 		$num_repeat = $this->get_number_repeat();
 		$num_repeat++;
-		$this->set_number_repeat($num_repeat);
+		$this->setNumberRepeat($num_repeat);
 	}
 
 	/**
 	 * Обнуляет счетчик повторных запросов
 	 */
-	private function end_repeat() {
-		$this->set_number_repeat(0);
+	private function endRepeat() {
+		$this->setNumberRepeat(0);
 	}
 
 	/**
 	 * @param int $value
 	 */
-	public function set_min_size_answer($value = 5000) {
-		$this->min_size_answer = $value;
+	public function setMinSizeAnswer($value = 5000) {
+		$this->_minSizeAnswer = $value;
 	}
 
-	public function get_min_size_answer() {
-		return $this->min_size_answer;
+	public function getMinSizeAnswer() {
+		return $this->_minSizeAnswer;
 	}
 
 	/**
 	 * @param string $type_content file|img|text|html
 	 * @return bool
 	 */
-	public function set_type_content($type_content = "text") {
+	public function setTypeContent($type_content = "text") {
 		switch ($type_content) {
 			case 'file':
-				$this->type_content = 'file';
-				$this->set_encoding_answer(false);
+				$this->_typeContent = 'file';
+				$this->setEncodingAnswer(false);
 				return true;
 				break;
 			case 'img':
-				$this->type_content = 'img';
-				$this->set_encoding_answer(false);
+				$this->_typeContent = 'img';
+				$this->setEncodingAnswer(false);
 				return true;
 				break;
 			case 'text':
-				$this->type_content = 'text';
+				$this->_typeContent = 'text';
 				return true;
 				break;
 			case 'html':
-				$this->type_content = 'html';
+				$this->_typeContent = 'html';
 				break;
 			default:
 				break;
@@ -503,52 +503,52 @@ class c_get_content
 		return false;
 	}
 
-	public function get_type_content() {
-		return $this->type_content;
+	public function getTypeContent() {
+		return $this->_typeContent;
 	}
 
 	/**
 	 * @param bool $value
 	 */
-	public function set_in_cache($value = false) {
-		$this->in_cache = $value;
+	public function setInCache($value = false) {
+		$this->_inCache = $value;
 	}
 
-	public function get_in_cache() {
-		return $this->in_cache;
+	public function getInCache() {
+		return $this->_inCache;
 	}
 
 	/**
 	 * @param bool $value
 	 */
-	public function set_encoding_answer($value = false) {
-		$this->encoding_answer = $value;
+	public function setEncodingAnswer($value = false) {
+		$this->_encodingAnswer = $value;
 	}
 
-	public function get_encoding_answer() {
-		return $this->encoding_answer;
-	}
-
-	/**
-	 * @param string $value
-	 */
-	public function set_encoding_name($value = "UTF-8") {
-		$this->encoding_name = $this->check_name_encoding($value);
-	}
-
-	public function get_encoding_name() {
-		return $this->encoding_name;
+	public function getEncodingAnswer() {
+		return $this->_encodingAnswer;
 	}
 
 	/**
 	 * @param string $value
 	 */
-	public function set_encoding_name_answer($value) {
-		$this->encoding_name_answer = $this->check_name_encoding($value);
+	public function setEncodingName($value = "UTF-8") {
+		$this->_encodingName = $this->checkNameEncoding($value);
 	}
 
-	public function get_encoding_name_answer() {
-		return $this->encoding_name_answer;
+	public function getEncodingName() {
+		return $this->_encodingName;
+	}
+
+	/**
+	 * @param string $value
+	 */
+	public function setEncodingNameAnswer($value) {
+		$this->_encodingNameAnswer = $this->checkNameEncoding($value);
+	}
+
+	public function getEncodingNameAnswer() {
+		return $this->_encodingNameAnswer;
 	}
 
 	/**
@@ -556,7 +556,7 @@ class c_get_content
 	 * @param $value название кодировки
 	 * @return bool|string
 	 */
-	private function check_name_encoding($value) {
+	private function checkNameEncoding($value) {
 		switch (true) {
 			case preg_match('#1251#', $value):
 				$value = 'windows-1251';
@@ -580,102 +580,102 @@ class c_get_content
 	/**
 	 * @param bool $value
 	 */
-	public function set_check_answer($value = true) {
-		$this->check_answer = $value;
+	public function setCheckAnswer($value = true) {
+		$this->_checkAnswer = $value;
 	}
 
-	public function get_check_answer() {
-		return $this->check_answer;
-	}
-
-	/**
-	 * @param int $value
-	 */
-	public function set_count_multi_curl($value = 1) {
-		if ($this->get_count_multi_curl() != $value) {
-			$this->close_get_content();
-			$this->count_multi_curl = $value;
-			$this->set_count_multi_descriptor();
-			$this->init_get_content();
-		}
-	}
-
-	public function get_count_multi_curl() {
-		return $this->count_multi_curl;
+	public function getCheckAnswer() {
+		return $this->_checkAnswer;
 	}
 
 	/**
 	 * @param int $value
 	 */
-	public function set_count_multi_stream($value = 1) {
-		if ($this->get_count_multi_stream() != $value) {
-			$this->close_get_content();
-			$this->count_multi_stream = $value;
-			$this->set_count_multi_descriptor();
-			$this->init_get_content();
+	public function setCountMultiCurl($value = 1) {
+		if ($this->getCountMultiCurl() != $value) {
+			$this->closeGetContent();
+			$this->_countMultiCurl = $value;
+			$this->setCountMultiDescriptor();
+			$this->initGetContent();
 		}
 	}
 
-	public function get_count_multi_stream() {
-		return $this->count_multi_stream;
+	public function getCountMultiCurl() {
+		return $this->_countMultiCurl;
+	}
+
+	/**
+	 * @param int $value
+	 */
+	public function setCountMultiStream($value = 1) {
+		if ($this->getCountMultiStream() != $value) {
+			$this->closeGetContent();
+			$this->_countMultiStream = $value;
+			$this->setCountMultiDescriptor();
+			$this->initGetContent();
+		}
+	}
+
+	public function getCountMultiStream() {
+		return $this->_countMultiStream;
 	}
 
 	/**
 	 * Задает число дескрипторов cURL для подлучение данных
 	 */
-	private function set_count_multi_descriptor() {
-		$this->count_multi_descriptor = $this->get_count_multi_curl() * $this->get_count_multi_stream();
+	private function setCountMultiDescriptor() {
+		$this->_countMultiDescriptor = $this->getCountMultiCurl() * $this->getCountMultiStream();
 	}
 
-	private function get_count_multi_descriptor() {
-		return $this->count_multi_descriptor;
+	private function getCountMultiDescriptor() {
+		return $this->_countMultiDescriptor;
 	}
 
 	/**
 	 * @param string $new_mode_get_content single|multi
 	 * @return bool
 	 */
-	public function set_mode_get_content($new_mode_get_content = 'single') {
-		$this->close_get_content();
+	public function setModeGetContent($new_mode_get_content = 'single') {
+		$this->closeGetContent();
 		switch ($new_mode_get_content) {
 			case 'single':
-				$this->mode_get_content = 'single';
-				$this->set_default_setting(CURLOPT_FOLLOWLOCATION,false);
+				$this->_modeGetContent = 'single';
+				$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,false);
 				break;
 			case 'multi':
-				$this->mode_get_content = 'multi';
-				if ($this->get_count_multi_curl() < 1) $this->set_count_multi_curl(1);
-				$this->set_default_setting(CURLOPT_FOLLOWLOCATION,true);
+				$this->_modeGetContent = 'multi';
+				if ($this->getCountMultiCurl() < 1) $this->setCountMultiCurl(1);
+				$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,true);
 				break;
 			default:
 				return false;
 		}
-		$this->init_get_content();
+		$this->initGetContent();
 		return true;
 	}
 
-	public function get_mode_get_content() {
-		return $this->mode_get_content;
+	public function getModeGetContent() {
+		return $this->_modeGetContent;
 	}
 
-	public function &get_descriptor() {
-		return $this->descriptor;
+	public function &getDescriptor() {
+		return $this->_descriptor;
 	}
 
-	public function &get_descriptor_array() {
-		return $this->descriptor_array;
+	public function &getDescriptorArray() {
+		return $this->_descriptorArray;
 	}
 
 	/**
 	 * Инициализирует дескрипторы cURL
 	 */
-	private function init_get_content() {
-		switch ($this->get_mode_get_content()) {
+	private function initGetContent() {
+		switch ($this->getModeGetContent()) {
 			case 'single':
-				$this->init_single_get_content();
+				$this->initSingleGetContent();
 				break;
 			case 'multi':
-				$this->init_multi_get_content();
+				$this->initMultiGetContent();
 				break;
 			default:
 				# code
@@ -687,8 +687,8 @@ class c_get_content
 	 * Инициализация дескриптора cURL в режиме single
 	 * @return void
 	 */
-	private function init_single_get_content() {
-		$descriptor =& $this->get_descriptor();
+	private function initSingleGetContent() {
+		$descriptor =& $this->getDescriptor();
 		if (!isset($descriptor['descriptor_key'])) $descriptor['descriptor_key'] = microtime(1) . mt_rand();
 		$descriptor['descriptor'] = curl_init();
 	}
@@ -697,14 +697,14 @@ class c_get_content
 	 * Инициализация дескриптора cURL в режиме multi
 	 * @return void
 	 */
-	private function init_multi_get_content() {
-		$descriptor =& $this->get_descriptor();
-		$descriptor_array =& $this->get_descriptor_array();
+	private function initMultiGetContent() {
+		$descriptor =& $this->getDescriptor();
+		$descriptor_array =& $this->getDescriptorArray();
 		$descriptor['descriptor'] = curl_multi_init();
-		if (is_array($descriptor_array) && count($descriptor_array) > $this->get_count_multi_descriptor()) {
-			$descriptor_array = array_slice($descriptor_array, 0, $this->get_count_multi_descriptor());
+		if (is_array($descriptor_array) && count($descriptor_array) > $this->getCountMultiDescriptor()) {
+			$descriptor_array = array_slice($descriptor_array, 0, $this->getCountMultiDescriptor());
 		}
-		for ($i = 0; $i < $this->get_count_multi_descriptor(); $i++) {
+		for ($i = 0; $i < $this->getCountMultiDescriptor(); $i++) {
 			if (!isset($descriptor_array[$i]['descriptor_key'])) $descriptor_array[$i]['descriptor_key'] = microtime(1) . mt_rand();
 			$descriptor_array[$i]['descriptor'] = curl_init();
 			curl_multi_add_handle($descriptor['descriptor'], $descriptor_array[$i]['descriptor']);
@@ -715,15 +715,15 @@ class c_get_content
 	 * Закрывает инициализированные дескрипторы cURL
 	 * @param bool $reinit Переменная для обхода стирания параметров в опциях дескриптора для повторного запроса. Причина: не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
 	 */
-	private function close_get_content($reinit = false) {
-		$descriptor =& $this->get_descriptor();
+	private function closeGetContent($reinit = false) {
+		$descriptor =& $this->getDescriptor();
 		if (isset($descriptor['descriptor'])) {
-			switch ($this->get_mode_get_content()) {
+			switch ($this->getModeGetContent()) {
 				case 'single':
-					$this->close_single_get_content($reinit);
+					$this->closeSingleGetContent($reinit);
 					break;
 				case 'multi':
-					$this->close_multi_get_content($reinit);
+					$this->closeMultiGetContent($reinit);
 					break;
 				default:
 					break;
@@ -736,10 +736,10 @@ class c_get_content
 	 * @param $reinit Переменная для обхода стирания параметров в опциях дескриптора для повторного запроса. Причина: не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
 	 * @return void
 	 */
-	private function close_single_get_content($reinit) {
-		$descriptor =& $this->get_descriptor();
+	private function closeSingleGetContent($reinit) {
+		$descriptor =& $this->getDescriptor();
 		curl_close($descriptor['descriptor']);
-		if ($this->get_use_proxy() && is_object($this->proxy)) {
+		if ($this->getUseProxy() && is_object($this->proxy)) {
 			$this->proxy->removeAllRentFromCode($descriptor['descriptor_key']);
 		}
 		unset($descriptor['descriptor']);
@@ -751,15 +751,15 @@ class c_get_content
 	 * @param $reinit Переменная для обхода стирания параметров в опциях дескриптора для повторного запроса. Причина: не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
 	 * @return void
 	 */
-	private function close_multi_get_content($reinit) {
-		$descriptor =& $this->get_descriptor();
-		$descriptor_array =& $this->get_descriptor_array();
+	private function closeMultiGetContent($reinit) {
+		$descriptor =& $this->getDescriptor();
+		$descriptor_array =& $this->getDescriptorArray();
 		if (is_array($descriptor_array)) {
 			foreach ($descriptor_array as $key => $value) {
 				if (isset($descriptor_array[$key]['descriptor'])) {
 					@curl_multi_remove_handle($descriptor['descriptor'], $descriptor_array[$key]['descriptor']);
 					curl_close($descriptor_array[$key]['descriptor']);
-					if ($this->get_use_proxy() && is_object($this->proxy)) {
+					if ($this->getUseProxy() && is_object($this->proxy)) {
 						$this->proxy->removeAllRentFromCode($descriptor_array[$key]['descriptor_key']);
 					}
 					unset($descriptor_array[$key]['descriptor']);
@@ -774,15 +774,15 @@ class c_get_content
 	/**
 	 * Повторная инициализация дескрипторов cURL, функция создана по причине не срабатывания параметров CURLOPT_FRESH_CONNECT и CURLOPT_FORBID_REUSE после примерно трех запросов опция по не известной причине не срабатывают.
 	 */
-	private function reinit_get_content() {
-		switch ($this->get_mode_get_content()) {
+	private function reinitGetContent() {
+		switch ($this->getModeGetContent()) {
 			case 'single':
-				$this->close_single_get_content(true);
-				$this->init_single_get_content();
+				$this->closeSingleGetContent(true);
+				$this->initSingleGetContent();
 				break;
 			case 'multi':
-				$this->close_multi_get_content(true);
-				$this->init_multi_get_content();
+				$this->closeMultiGetContent(true);
+				$this->initMultiGetContent();
 				break;
 			default:
 				break;
@@ -795,22 +795,22 @@ class c_get_content
 	 * @param string       $reg регулярное выражение для дополнительной проверки ответа
 	 * @return array|string
 	 */
-	public function get_content($url = "", $reg = '##') {
-		if (is_string($url) && $this->get_mode_get_content() != 'single') $url = array($url);
-		if (is_array($url) && $this->get_mode_get_content() != 'multi') $this->set_mode_get_content('multi');
-		switch ($this->get_mode_get_content()) {
+	public function getContent($url = "", $reg = '##') {
+		if (is_string($url) && $this->getModeGetContent() != 'single') $url = array($url);
+		if (is_array($url) && $this->getModeGetContent() != 'multi') $this->setModeGetContent('multi');
+		switch ($this->getModeGetContent()) {
 			case 'single':
-				$this->get_single_content($url, $reg);
+				$this->getSingleContent($url, $reg);
 				break;
 			case 'multi':
-				$this->get_multi_content($url, $reg);
+				$this->getMultiContent($url, $reg);
 				break;
 			default:
 				break;
 		}
-		$this->close_get_content();
-		$this->init_get_content();
-		return $this->get_answer();
+		$this->closeGetContent();
+		$this->initGetContent();
+		return $this->getAnswer();
 	}
 
 	/**
@@ -819,19 +819,19 @@ class c_get_content
 	 * @param string $reg регулярное выражение для дополнительной проверки ответа
 	 * @return string
 	 */
-	private function get_single_content($url, $reg) {
-		$descriptor =& $this->get_descriptor();
+	private function getSingleContent($url, $reg) {
+		$descriptor =& $this->getDescriptor();
 		do {
-			if ($this->get_number_repeat() > 0) $this->reinit_get_content();
-			$this->set_default_setting(CURLOPT_URL, $url);
-			$this->set_options_to_descriptor($descriptor);
-			$answer = $this->exec_single_get_content();
+			if ($this->get_number_repeat() > 0) $this->reinitGetContent();
+			$this->setDefaultSetting(CURLOPT_URL, $url);
+			$this->setOptionsToDescriptor($descriptor);
+			$answer = $this->execSingleGetContent();
 			$this->setReferer($url);
 			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
 			$descriptor['info']['header'] = $this->getHeader($answer);
 			if($this->isRedirect()){
 				if($this->useRedirect()){
-					$answer = $this->get_single_content(urldecode($descriptor['info']['redirect_url']), $reg);
+					$answer = $this->getSingleContent(urldecode($descriptor['info']['redirect_url']), $reg);
 				} else {
 					return false;
 				}
@@ -839,16 +839,16 @@ class c_get_content
 			$this->setRedirectCount(0);
 			if ($reg && preg_match($reg, $answer)) $reg_answer = true;
 			else $reg_answer = false;
-			if ((!$this->get_check_answer() || $this->check_answer_valid($answer, $descriptor['info'])) && $reg_answer) {
-				$this->answer = $answer;
-				$this->end_repeat();
+			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $reg_answer) {
+				$this->_answer = $answer;
+				$this->endRepeat();
 				break;
-			} elseif ($this->get_use_proxy() && is_object($this->proxy)) {
+			} elseif ($this->getUseProxy() && is_object($this->proxy)) {
 				$this->proxy->removeProxyInList($descriptor['option'][CURLOPT_PROXY]);
 			}
-		} while ($this->repeat_get_content());
-		$this->answer = $this->prepare_content($answer);
-		return $this->get_answer();
+		} while ($this->repeatGetContent());
+		$this->_answer = $this->prepareContent($answer);
+		return $this->getAnswer();
 	}
 
 	/**
@@ -857,48 +857,48 @@ class c_get_content
 	 * @param string $reg регулярное выражение для дополнительной проверки ответа
 	 * @return array
 	 */
-	private function get_multi_content($url, $reg) {
+	private function getMultiContent($url, $reg) {
 		$copy_url = $url; //Копируем для создания связи по ключам после удаления из основного массива
 		$good_answer = array();
 		do {
-			if ($this->get_number_repeat() > 0) $this->reinit_get_content();
-			$this->set_count_multi_curl(count($url));
-			$descriptor_array =& $this->get_descriptor_array();
-			$count_multi_stream = $this->get_count_multi_stream();
+			if ($this->get_number_repeat() > 0) $this->reinitGetContent();
+			$this->setCountMultiCurl(count($url));
+			$descriptor_array =& $this->getDescriptorArray();
+			$count_multi_stream = $this->getCountMultiStream();
 			$j = 0;
 			$url_descriptors = array();
 			foreach ($url as $key_url => $value_url) {
 				for ($i = 0; $i < $count_multi_stream; $i++) {
 					$url_descriptors[$j] = $key_url; //Для связи ключа url и вычисления ключа хорошего ответа
 					if (isset($descriptor_array[$j]['descriptor'])) {
-						$this->set_option_to_descriptor($descriptor_array[$j], CURLOPT_URL, $value_url);
+						$this->setOptionToDescriptor($descriptor_array[$j], CURLOPT_URL, $value_url);
 					}
 					$j++;
 				}
 			}
-			foreach ($descriptor_array as $key => $value) $this->set_options_to_descriptor($descriptor_array[$key]);
+			foreach ($descriptor_array as $key => $value) $this->setOptionsToDescriptor($descriptor_array[$key]);
 			unset($value);
-			$answer = $this->exec_multi_get_content();
+			$answer = $this->execMultiGetContent();
 			foreach ($answer as $key => $value) {
 				$descriptor_array[$key]['info'] = curl_getinfo($descriptor_array[$key]['descriptor']);
 				$descriptor_array[$key]['info']['header'] = $this->getHeader($value);
 				$key_good_answer = ($url_descriptors[$key] * $count_multi_stream) + $key % $count_multi_stream;
 				if ($reg && preg_match($reg, $value)) $reg_answer = true;
 				else $reg_answer = false;
-				if (!isset($good_answer[$key_good_answer]) && (!$this->get_check_answer() || $this->check_answer_valid($value, $descriptor_array[$key]['info'])) && $reg_answer) {
+				if (!isset($good_answer[$key_good_answer]) && (!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptor_array[$key]['info'])) && $reg_answer) {
 
 					if (isset($url[$url_descriptors[$key]])) unset($url[$url_descriptors[$key]]);
 					$good_answer[$key_good_answer] = $value;
-				} elseif ($this->get_use_proxy() && is_object($this->proxy)) {
+				} elseif ($this->getUseProxy() && is_object($this->proxy)) {
 					$this->proxy->removeProxyInList($descriptor_array[$key]['option'][CURLOPT_PROXY]);
 				}
 			}
 			if (count($url) == 0) {
-				$this->end_repeat();
+				$this->endRepeat();
 				break;
 			}
-		} while ($this->repeat_get_content());
-		foreach ($good_answer as &$value) $value = $this->prepare_content($value);
+		} while ($this->repeatGetContent());
+		foreach ($good_answer as &$value) $value = $this->prepareContent($value);
 		$tmp_answer = array();
 		$j = 0;
 		foreach ($copy_url as $key_url => $value_url) {
@@ -907,7 +907,7 @@ class c_get_content
 				$j++;
 			}
 		}
-		return $this->answer = $tmp_answer;
+		return $this->_answer = $tmp_answer;
 	}
 
 	/**
@@ -916,31 +916,31 @@ class c_get_content
 	 * @param array $option_array список настроек для cURL дексриптора
 	 * @return bool
 	 */
-	public function set_options_to_descriptor(&$descriptor, $option_array = array()) {
-		foreach ($this->all_setting as $key_setting) {
-			if (isset($option_array[$key_setting])) $this->set_option_to_descriptor($descriptor, $key_setting, $option_array[$key_setting]);
-			elseif(isset($descriptor['option'][$key_setting])) $this->set_option_to_descriptor($descriptor,$key_setting,$descriptor['option'][$key_setting]);
-			else $this->set_option_to_descriptor($descriptor, $key_setting);
+	public function setOptionsToDescriptor(&$descriptor, $option_array = array()) {
+		foreach ($this->_allSetting as $key_setting) {
+			if (isset($option_array[$key_setting])) $this->setOptionToDescriptor($descriptor, $key_setting, $option_array[$key_setting]);
+			elseif(isset($descriptor['option'][$key_setting])) $this->setOptionToDescriptor($descriptor,$key_setting,$descriptor['option'][$key_setting]);
+			else $this->setOptionToDescriptor($descriptor, $key_setting);
 		}
 		unset($key_setting);
-		if ($this->get_use_proxy() && !isset($descriptor['option'][CURLOPT_PROXY])) {
+		if ($this->getUseProxy() && !isset($descriptor['option'][CURLOPT_PROXY])) {
 			if (is_object($this->proxy)) {
 				if (is_string($proxy_ip = $this->proxy->getProxy($descriptor['descriptor_key'], c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL]))) && c_string_work::is_ip($proxy_ip))
-					$this->set_option_to_descriptor($descriptor, CURLOPT_PROXY, $proxy_ip);
+					$this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $proxy_ip);
 				else $descriptor['option'][CURLOPT_URL] = '';
-			} elseif (is_string($this->proxy)) $this->set_option_to_descriptor($descriptor, CURLOPT_PROXY, $this->proxy);
+			} elseif (is_string($this->proxy)) $this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $this->proxy);
 		}
-		if($this->getUseStaticCookie() && $this->get_mode_get_content() == 'single'){
-			$cookieFile = $this->get_dir_cookie() . $this->getCookieFile() . ".cookie";
+		if($this->getUseStaticCookie() && $this->getModeGetContent() == 'single'){
+			$cookieFile = $this->getDirCookie() . $this->getCookieFile() . ".cookie";
 		} else {
-			$cookieFile = $this->get_dir_cookie() . $descriptor['descriptor_key'] . ".cookie";
+			$cookieFile = $this->getDirCookie() . $descriptor['descriptor_key'] . ".cookie";
 		}
 		if (!is_writable($cookieFile)) {
 			$fh = fopen($cookieFile, "a+");
 			fclose($fh);
 		}
-		$this->set_option_to_descriptor($descriptor, CURLOPT_COOKIEJAR, $cookieFile);
-		$this->set_option_to_descriptor($descriptor, CURLOPT_COOKIEFILE, $cookieFile);
+		$this->setOptionToDescriptor($descriptor, CURLOPT_COOKIEJAR, $cookieFile);
+		$this->setOptionToDescriptor($descriptor, CURLOPT_COOKIEFILE, $cookieFile);
 		if (curl_setopt_array($descriptor['descriptor'], $descriptor['option'])) return true;
 		else return false; // :| ошибка в присваивании параметров
 
@@ -954,18 +954,18 @@ class c_get_content
 	 * @param int   $key        ключ для дескриптора в режиме multi
 	 * @return bool
 	 */
-	public function set_option_to_descriptor(&$descriptor, $option, $value = -2, $key = -2) //
+	public function setOptionToDescriptor(&$descriptor, $option, $value = -2, $key = -2) //
 	{
 		if ($key != -2) {
 			if (array_key_exists($key, $descriptor)) {
-				if ($value == -2) $descriptor[$key]['option'][$option] = $this->get_default_setting($option);
+				if ($value == -2) $descriptor[$key]['option'][$option] = $this->getDefaultSetting($option);
 				else $descriptor[$key]['option'][$option] = $value;
-				if ($this->check_option($descriptor[$key], $option, $descriptor[$key]['option'][$option])) return false;
+				if ($this->checkOption($descriptor[$key], $option, $descriptor[$key]['option'][$option])) return false;
 			}
 		} else {
-			if ($value == -2) $descriptor['option'][$option] = $this->get_default_setting($option);
+			if ($value == -2) $descriptor['option'][$option] = $this->getDefaultSetting($option);
 			else $descriptor['option'][$option] = $value;
-			if ($this->check_option($descriptor, $option, $descriptor['option'][$option])) return true;
+			if ($this->checkOption($descriptor, $option, $descriptor['option'][$option])) return true;
 		}
 		return true;
 	}
@@ -977,7 +977,7 @@ class c_get_content
 	 * @param mixed $value      значение параметра
 	 * @return bool
 	 */
-	private function check_option(&$descriptor, $option, $value = NULL) {
+	private function checkOption(&$descriptor, $option, $value = NULL) {
 		switch ($option) {
 			case CURLOPT_POST:
 				if ($value != NULL) $descriptor['option'][$option] = (bool)$value;
@@ -985,13 +985,13 @@ class c_get_content
 			case CURLOPT_POSTFIELDS:
 				if (!$value) {
 					unset($descriptor['option'][$option]);
-					$this->set_option_to_descriptor($descriptor, CURLOPT_POST, false);
+					$this->setOptionToDescriptor($descriptor, CURLOPT_POST, false);
 					return true;
-				} else $this->set_option_to_descriptor($descriptor, CURLOPT_POST, true);
+				} else $this->setOptionToDescriptor($descriptor, CURLOPT_POST, true);
 				break;
 			case CURLOPT_URL:
 				if (!preg_match("#(http|https)://#iUm", $descriptor['option'][$option])) $descriptor['option'][$option] = "http://" . $value;
-				if ($this->get_in_cache()) {
+				if ($this->getInCache()) {
 					preg_match("#https?://(?<url>.*)$#iUm", $descriptor['option'][$option], $match);
 					$descriptor['option'][$option] = "http://webcache.googleusercontent.com/search?q=cache:" . $match['url'];
 					return true;
@@ -1030,13 +1030,13 @@ class c_get_content
 	 * Выполнение запроса cURL
 	 * @return mixed
 	 */
-	private function exec_get_content() {
-		switch ($this->get_mode_get_content()) {
+	private function execGetContent() {
+		switch ($this->getModeGetContent()) {
 			case 'single':
-				return $this->exec_single_get_content();
+				return $this->execSingleGetContent();
 				break;
 			case 'multi':
-				return $this->exec_multi_get_content();
+				return $this->execMultiGetContent();
 				break;
 			default:
 				break;
@@ -1049,27 +1049,27 @@ class c_get_content
 	 * Выполнение запроса cURL в режиме single
 	 * @return string
 	 */
-	private function exec_single_get_content() {
-		$descriptor =& $this->get_descriptor();
-		$this->answer = curl_exec($descriptor['descriptor']);
-		return $this->answer;
+	private function execSingleGetContent() {
+		$descriptor =& $this->getDescriptor();
+		$this->_answer = curl_exec($descriptor['descriptor']);
+		return $this->_answer;
 	}
 
 	/**
 	 * Выполнение запроса cURL в режиме multi
 	 * @return array
 	 */
-	private function exec_multi_get_content() {
-		$descriptor =& $this->get_descriptor();
-		$descriptor_array =& $this->get_descriptor_array();
+	private function execMultiGetContent() {
+		$descriptor =& $this->getDescriptor();
+		$descriptor_array =& $this->getDescriptorArray();
 		do {
 			curl_multi_exec($descriptor['descriptor'], $running);
 			usleep(100);
 		} while ($running > 0);
-		$this->answer = array();
-		foreach ($descriptor_array as $key => $value) $this->answer[$key] = curl_multi_getcontent($descriptor_array[$key]['descriptor']);
+		$this->_answer = array();
+		foreach ($descriptor_array as $key => $value) $this->_answer[$key] = curl_multi_getcontent($descriptor_array[$key]['descriptor']);
 		unset($value);
-		return $this->answer;
+		return $this->_answer;
 	}
 
 	/**
@@ -1077,17 +1077,17 @@ class c_get_content
 	 * @param bool $get_all_answer для режима multi, возваращать все или самы большой по размеру
 	 * @return array|string
 	 */
-	public function get_answer($get_all_answer = false) {
-		switch ($this->get_mode_get_content()) {
+	public function getAnswer($get_all_answer = false) {
+		switch ($this->getModeGetContent()) {
 			case 'single':
-				return $this->answer;
+				return $this->_answer;
 				break;
 			case 'multi':
 				if (!$get_all_answer) {
 					$a = array();
-					foreach ($this->answer as $key => $value) $a[$key] = $this->get_big_answer($value);
+					foreach ($this->_answer as $key => $value) $a[$key] = $this->getBigAnswer($value);
 					return $a;
-				} else return $this->answer;
+				} else return $this->_answer;
 				break;
 			default:
 				break;
@@ -1100,7 +1100,7 @@ class c_get_content
 	 * @param $a набор ответов на заросы multi_cURL
 	 * @return bool|string
 	 */
-	private function get_big_answer($a) {
+	private function getBigAnswer($a) {
 		$big_a = 0;
 		$big_key = 0;
 		foreach ($a as $key => $value) {
@@ -1119,18 +1119,18 @@ class c_get_content
 	 * @param array $curl_data массив информации о запросе при помощи функции curl_getinfo()
 	 * @return bool
 	 */
-	private function check_answer_valid($answer, $curl_data) {
-		if (!$this->http_code($curl_data['http_code'])) return false;
-		if (($curl_data['size_download'] < $curl_data['download_content_length'] && $curl_data['download_content_length'] != -1) || $curl_data['size_download'] < $this->get_min_size_answer()) return false;
-		switch ($this->get_type_content()) {
+	private function checkAnswerValid($answer, $curl_data) {
+		if (!$this->httpCode($curl_data['http_code'])) return false;
+		if (($curl_data['size_download'] < $curl_data['download_content_length'] && $curl_data['download_content_length'] != -1) || $curl_data['size_download'] < $this->getMinSizeAnswer()) return false;
+		switch ($this->getTypeContent()) {
 			case 'file':
-				if ($this->mime_type($curl_data['content_type'], 'file')) return true;
+				if ($this->mimeType($curl_data['content_type'], 'file')) return true;
 				break;
 			case 'img':
-				if ($this->mime_type($curl_data['content_type'], 'img')) return true;
+				if ($this->mimeType($curl_data['content_type'], 'img')) return true;
 				break;
 			case 'html':
-				if ($this->mime_type($curl_data['content_type'], 'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims', $answer)) return true;
+				if ($this->mimeType($curl_data['content_type'], 'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims', $answer)) return true;
 				break;
 			default:
 				break;
@@ -1144,7 +1144,7 @@ class c_get_content
 	 * @param string $type тип ожидаемого контента
 	 * @return bool
 	 */
-	private function mime_type($mime, $type) {
+	private function mimeType($mime, $type) {
 		switch ($type) {
 			case 'file':
 				return true;
@@ -1170,7 +1170,7 @@ class c_get_content
 	 * @internal в запросах и дополнительо будет приниматься решения больше на посылать заросы на текуший URL
 	 * @internal Пример: Если вернуло ошибку 500, то не повторять запрос
 	 */
-	private function http_code($http_code) {
+	private function httpCode($http_code) {
 		switch ((int)$http_code) {
 			case 100:
 				return false;
@@ -1307,15 +1307,15 @@ class c_get_content
 	 * @param $answer
 	 * @return string
 	 */
-	private function prepare_content($answer) {
-		switch ($this->get_type_content()) {
+	private function prepareContent($answer) {
+		switch ($this->getTypeContent()) {
 			case 'file':
 				break;
 			case 'text':
-				$answer = $this->encoding_answer_text($answer);
+				$answer = $this->encodingAnswerText($answer);
 				break;
 			case 'html':
-				$answer = $this->encoding_answer_text($answer);
+				$answer = $this->encodingAnswerText($answer);
 				break;
 			default:
 				break;
@@ -1328,9 +1328,9 @@ class c_get_content
 	 * @param string $text текс который нухно перекодировать
 	 * @return string текст с измененой кодировкой
 	 */
-	private function encoding_answer_text($text = "") {
-		if ($this->get_encoding_answer()) {
-			$to = $this->get_encoding_name();
+	private function encodingAnswerText($text = "") {
+		if ($this->getEncodingAnswer()) {
+			$to = $this->getEncodingName();
 			$from = c_string_work::get_encoding_name($text);
 			if ($from != $to) $text = iconv($from, $to, $text);
 			return $text;
@@ -1342,6 +1342,6 @@ class c_get_content
 	 * @return bool
 	 */
 	private function isRedirect(){
-		return ($this->descriptor['info']['http_code'] == 301 || $this->descriptor['info']['http_code'] == 302);
+		return ($this->_descriptor['info']['http_code'] == 301 || $this->_descriptor['info']['http_code'] == 302);
 	}
 }

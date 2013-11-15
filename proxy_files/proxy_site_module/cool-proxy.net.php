@@ -9,11 +9,11 @@
  */
 // "cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
 namespace cool_proxy;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 use GetContent\c_string_work as c_string_work;
 $url_source="http://www.cool-proxy.net/proxies/http_proxy_list/page:";
 $name_source="cool-proxy.net";
-$get_cool_proxy_content= new c_get_content();
+$get_cool_proxy_content= new cGetContent();
 $get_cool_proxy_content->set_type_content("html");
 $i=1;
 if(!$content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc")) return array();

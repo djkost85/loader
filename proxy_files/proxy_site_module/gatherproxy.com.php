@@ -8,12 +8,12 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace gatherproxy;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 
 $url_source="http://gatherproxy.com/subscribe/login";
 $name_source="gatherproxy.com";
 $proxy_gatherproxy_proxy=array();
-$get_gatherproxy_content= new c_get_content();
+$get_gatherproxy_content= new cGetContent();
 $get_gatherproxy_content->set_default_setting(CURLOPT_REFERER,'http://gatherproxy.com/subscribe/login');
 $get_gatherproxy_content->set_type_content("html");
 $get_gatherproxy_content->set_default_setting(CURLOPT_POSTFIELDS,'Username=zking.nothingz@gmail.com&Password=)VQd$x;7');

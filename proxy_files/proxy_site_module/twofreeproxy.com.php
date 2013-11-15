@@ -8,12 +8,12 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace twofreeproxy;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 
 $url_source="http://2freeproxy.com/wp-content/plugins/proxy/load_proxy.php";
 $name_source="2freeproxy.com";
 $proxy_twofreeproxy_proxy = array();
-$get_twofreeproxy_content= new c_get_content();
+$get_twofreeproxy_content= new cGetContent();
 $get_twofreeproxy_content->set_type_content("text");
 $http_head=array(
 'Host: 2freeproxy.com',

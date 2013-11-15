@@ -8,12 +8,12 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace samair;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 use GetContent\c_string_work as c_string_work;
 return array();
 $url_source="http://www.samair.ru/proxy/proxy-01.htm";
 $name_source="samair.ru";
-$get_samair_content= new c_get_content();
+$get_samair_content= new cGetContent();
 $get_samair_content->set_type_content("text");
 $proxy_samair = array();
 do{

@@ -8,11 +8,11 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace cool_tests;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 //return array();
 $url_source="http://www.cool-tests.com/all-working-proxies.php";
 $name_source="cool-tests.com";
-$get_cool_tests_content= new c_get_content();
+$get_cool_tests_content= new cGetContent();
 $get_cool_tests_content->set_encoding_answer(true);
 $get_cool_tests_content->set_encoding_name('UTF-8');
 $get_cool_tests_content->get_content('http://www.cool-tests.com');

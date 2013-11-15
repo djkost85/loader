@@ -9,12 +9,12 @@
  */
 
 namespace foxtools;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 use GetContent\c_string_work as c_string_work;
 //return array();
 $url_source="http://foxtools.ru/Proxy?page=";
 $name_source="foxtools.ru";
-$get_foxtools_content= new c_get_content();
+$get_foxtools_content= new cGetContent();
 $get_foxtools_content->set_type_content("html");
 $proxy_foxtools = array();
 for($nom=1;$nom<50;$nom++){

@@ -8,12 +8,12 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace spys;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 use GetContent\c_string_work as c_string_work;
 return array();
 $url_source="http://spys.ru/aproxy/";
 $name_source="spys.ru";
-$get_spys_content= new c_get_content();
+$get_spys_content= new cGetContent();
 $get_spys_content->set_type_content("html");
 $get_spys_content->set_default_setting(CURLOPT_POST,true);
 $get_spys_content->set_default_setting(CURLOPT_POSTFIELDS,'sto=%CF%EE%EA%E0%E7%E0%F2%FC+200');

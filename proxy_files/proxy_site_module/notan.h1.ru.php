@@ -8,13 +8,13 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace notan;
-use GetContent\c_get_content as c_get_content;
+use GetContent\cGetContent as c_get_content;
 
 $name_source="notan.h1.ru";
 $proxy_notan_proxy=array();
 for($i=1;$i<=10;$i++){
 	$url_source="http://notan.h1.ru/hack/xwww/proxy".$i.".html";
-	$get_notan_content= new c_get_content();
+	$get_notan_content= new cGetContent();
 	$get_notan_content->set_type_content("html");
 	$answer_notan=$get_notan_content->get_content($url_source);
 	if(!$answer_notan) return $proxy_notan_proxy;
