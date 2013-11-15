@@ -48,35 +48,35 @@ class cStringWork
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
 	 * @param string $text      разбиваемый текст
-	 * @param int    $part_size размер части
+	 * @param int    $partSize размер части
 	 * @param int    $offset    максимальное количество частей 0=бесконечно
 	 * @return array
 	 */
-	public static function dividedText($text = "", $part_size = 4900, $offset = 0) {
-		$divided_text_array = array();
-		if (strlen($text) > $part_size) {
+	public static function dividedText($text = "", $partSize = 4900, $offset = 0) {
+		$dividedTextArray = array();
+		if (strlen($text) > $partSize) {
 			for ($i = 0; ($i < $offset || $offset == 0) && $text; $i++) {
-				$part_text = substr($text, 0, $part_size);
-				preg_match("/^(.*\.)[^\.]*$/i", $part_text, $match);
+				$partText = substr($text, 0, $partSize);
+				preg_match("/^(.*\.)[^\.]*$/i", $partText, $match);
 				if (strlen($match[1]) == 0) break;
-				$divided_text_array[] = $match[1];
+				$dividedTextArray[] = $match[1];
 				$text = trim(str_replace($match[1], "", $text));
 			}
 		} else {
-			$divided_text_array[] = $text;
+			$dividedTextArray[] = $text;
 		}
-		return $divided_text_array;
+		return $dividedTextArray;
 	}
 
 	/**
 	 * Стирание спец. символов, двойных и более пробелов, табуляций и переводов строки
 	 * @param string $text
-	 * @param array  $rep_text_array массив регулярных выражений для выполнения
+	 * @param array  $repTextArray массив регулярных выражений для выполнения
 	 * @return string
 	 */
-	public static function clearNote($text = "", $rep_text_array = array("/\s+/")) {
-		if (is_string($rep_text_array)) $text = preg_replace($rep_text_array, " ", $text);
-		elseif (is_array($rep_text_array)) foreach ($rep_text_array as $value) $text = preg_replace($value, " ", $text);
+	public static function clearNote($text = "", $repTextArray = array("/\s+/")) {
+		if (is_string($repTextArray)) $text = preg_replace($repTextArray, " ", $text);
+		elseif (is_array($repTextArray)) foreach ($repTextArray as $value) $text = preg_replace($value, " ", $text);
 		return $text;
 	}
 
@@ -136,54 +136,54 @@ class cStringWork
 	/**
 	 * Парсит html страницу и вытаскивает содержимое тега
 	 * @param string $text        текст в котором ищет
-	 * @param string $start_tag   открывающий тег
-	 * @param bool   $without_tag возвращать с тегом или без
+	 * @param string $startTag   открывающий тег
+	 * @param bool   $withoutTag возвращать с тегом или без
 	 * @return string
 	 */
-	public static function betweenTag($text = "", $start_tag = '<div class="xxx">', $without_tag = true) {
-		if (!preg_match('#<(?<tag>\w+)[^>]*>#im', $start_tag, $tag)) return false;
-		if (preg_match('#<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>#im', $start_tag)) {
-			preg_match_all("#(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))#im", $start_tag, $matches);
+	public static function betweenTag($text = "", $startTag = '<div class="xxx">', $withoutTag = true) {
+		if (!preg_match('#<(?<tag>\w+)[^>]*>#im', $startTag, $tag)) return false;
+		if (preg_match('#<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>#im', $startTag)) {
+			preg_match_all("#(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))#im", $startTag, $matches);
 			$reg = "#<" . preg_quote($tag["tag"]) . "\s*";
 			foreach ($matches['parametr'] as $value) $reg .= "[^>]*" . preg_quote($value) . "[^>]*";
 			$reg .= ">#im";
 			if (!preg_match($reg, $text, $match)) return false;
-			$start_tag = $match[0];
+			$startTag = $match[0];
 		} else {
-			preg_match('/<(?<tag>[^\s]+)[^>]*>/i', $start_tag, $tag);
+			preg_match('/<(?<tag>[^\s]+)[^>]*>/i', $startTag, $tag);
 			preg_match('/<(?<tag>' . preg_quote($tag[1]) . ')[^>]*>/i', $text, $tag);
 		}
 		unset($match);
 		unset($matches);
-		$tag_name = $tag["tag"];
+		$tagName = $tag["tag"];
 		unset($tag);
-		$open_tag = "<" . $tag_name;
-		$close_tag = "</" . $tag_name;
-		$text = substr($text, strpos($text, $start_tag));
-		$count_open_tag = 0;
-		$pos_end = 0;
-		$count_tag = 2 * preg_match_all('#' . preg_quote($open_tag, '#') . '#ims', $text, $matches);
-		for ($i = 0; $i < $count_tag; $i++) {
-			$pos_open_tag = strpos($text, $open_tag, $pos_end);
-			$pos_close_tag = strpos($text, $close_tag, $pos_end);
-			if ($pos_open_tag === false) {
-				$pos_open_tag = $pos_close_tag + 1;
+		$openTag = "<" . $tagName;
+		$closeTag = "</" . $tagName;
+		$text = substr($text, strpos($text, $startTag));
+		$countOpenTag = 0;
+		$posEnd = 0;
+		$countTag = 2 * preg_match_all('#' . preg_quote($openTag, '#') . '#ims', $text, $matches);
+		for ($i = 0; $i < $countTag; $i++) {
+			$posOpenTag = strpos($text, $openTag, $posEnd);
+			$posCloseTag = strpos($text, $closeTag, $posEnd);
+			if ($posOpenTag === false) {
+				$posOpenTag = $posCloseTag + 1;
 			}
-			if ($pos_open_tag < $pos_close_tag) {
-				$count_open_tag++;
-				$pos_end += $pos_open_tag + 1 - $pos_end;
+			if ($posOpenTag < $posCloseTag) {
+				$countOpenTag++;
+				$posEnd += $posOpenTag + 1 - $posEnd;
 			} else {
-				$count_open_tag--;
-				$pos_end += $pos_close_tag + 1 - $pos_end;
+				$countOpenTag--;
+				$posEnd += $posCloseTag + 1 - $posEnd;
 			}
-			if (!$count_open_tag) {
+			if (!$countOpenTag) {
 				break;
 			}
 		}
-		if ($without_tag) $return_text = substr($text, strlen($start_tag), $pos_end - strlen($start_tag) - 1);
-		else $return_text = substr($text, 0, $pos_end + strlen($tag_name) + 2);
+		if ($withoutTag) $returnText = substr($text, strlen($startTag), $posEnd - strlen($startTag) - 1);
+		else $returnText = substr($text, 0, $posEnd + strlen($tagName) + 2);
 
-		return $return_text;
+		return $returnText;
 	}
 
 	/**
@@ -200,24 +200,24 @@ class cStringWork
 	 * fragment массив ссылок на HTML якоря [Имя якоря]=Значение
 	 */
 	public static function parseUrl($url) {
-		$array_url = parse_url($url);
-		if (isset($array_url['query'])) {
-			$array_query = explode("&", $array_url['query']);
-			unset($array_url['query']);
-			foreach ($array_query as $value) {
-				$part_query = explode("=", $value);
-				$array_url['query'][$part_query[0]] = $part_query[1];
+		$arrayUrl = parse_url($url);
+		if (isset($arrayUrl['query'])) {
+			$arrayQuery = explode("&", $arrayUrl['query']);
+			unset($arrayUrl['query']);
+			foreach ($arrayQuery as $value) {
+				$partQuery = explode("=", $value);
+				$arrayUrl['query'][$partQuery[0]] = $partQuery[1];
 			}
 		}
-		if (isset($array_url['fragment'])) {
-			$array_fragment = explode("&", $array_url['fragment']);
-			unset($array_url['fragment']);
-			foreach ($array_fragment as $value) {
-				$part_fragment = explode("=", $value);
-				$array_url['fragment'][$part_fragment[0]] = (isset($part_fragment[1]) ? $part_fragment[1] : '');
+		if (isset($arrayUrl['fragment'])) {
+			$arrayFragment = explode("&", $arrayUrl['fragment']);
+			unset($arrayUrl['fragment']);
+			foreach ($arrayFragment as $value) {
+				$partFragment = explode("=", $value);
+				$arrayUrl['fragment'][$partFragment[0]] = (isset($partFragment[1]) ? $partFragment[1] : '');
 			}
 		}
-		return $array_url;
+		return $arrayUrl;
 	}
 
 	/**
@@ -241,23 +241,23 @@ class cStringWork
 		if (mb_detect_encoding($str, array('UTF-8'), true) == 'UTF-8') return 'UTF-8';
 		$weights = array();
 		$specters = array();
-		$possible_encodings = array('windows-1251', 'koi8-r', 'iso8859-5');
-		foreach ($possible_encodings as $encoding) {
+		$possibleEncodings = array('windows-1251', 'koi8-r', 'iso8859-5');
+		foreach ($possibleEncodings as $encoding) {
 			$weights[$encoding] = 0;
 			$specters[$encoding] = require GC_ROOT_DIR . '/string_work_files/specters/' . $encoding . '.php';
 		}
 		foreach (str_split($str, 2) as $key) {
-			foreach ($possible_encodings as $encoding) {
+			foreach ($possibleEncodings as $encoding) {
 				if (isset($specters[$encoding][$key])) {
 					$weights[$encoding] += $specters[$encoding][$key];
 				}
 			}
 		}
 		unset($key);
-		$sum_weight = array_sum($weights);
+		$sumWeight = array_sum($weights);
 		foreach ($weights as $encoding => $weight) {
-			if (!$sum_weight) $weights[$encoding] = 0;
-			$weights[$encoding] = $sum_weight ? $weight / $sum_weight : 0;
+			if (!$sumWeight) $weights[$encoding] = 0;
+			$weights[$encoding] = $sumWeight ? $weight / $sumWeight : 0;
 		}
 		arsort($weights, SORT_NUMERIC);
 		return key($weights);
