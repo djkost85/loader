@@ -10,7 +10,7 @@
 // "cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
 namespace cool_proxy;
 use GetContent\cGetContent as c_get_content;
-use GetContent\c_string_work as c_string_work;
+use GetContent\cStringWork as c_string_work;
 $url_source="http://www.cool-proxy.net/proxies/http_proxy_list/page:";
 $name_source="cool-proxy.net";
 $get_cool_proxy_content= new cGetContent();
@@ -30,7 +30,7 @@ do{
 	for($j=0;$j<$count_proxy;$j++)
 	{
 	    $is_ip=base64_decode($matches['ip_base64'][$j]).":".$matches['port'][$j];
-	    if(c_string_work::is_ip($is_ip))
+	    if(cStringWork::is_ip($is_ip))
 	    {
 	        $tmp_array['proxy']=trim($is_ip);
 	        $tmp_array["source_proxy"]=$name_source;

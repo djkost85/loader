@@ -9,7 +9,7 @@
  */
 namespace spys;
 use GetContent\cGetContent as c_get_content;
-use GetContent\c_string_work as c_string_work;
+use GetContent\cStringWork as c_string_work;
 return array();
 $url_source="http://spys.ru/aproxy/";
 $name_source="spys.ru";
@@ -19,7 +19,7 @@ $get_spys_content->set_default_setting(CURLOPT_POST,true);
 $get_spys_content->set_default_setting(CURLOPT_POSTFIELDS,'sto=%CF%EE%EA%E0%E7%E0%F2%FC+200');
 $answer_spys=$get_spys_content->get_content($url_source);
 if(!$answer_spys) return array();
-if(!$answer_spys=c_string_work::between_tag($answer_spys,'<table width="100%" BORDER=0 CELLPADDING=1 CELLSPACING=1>')) return array();
+if(!$answer_spys=cStringWork::between_tag($answer_spys,'<table width="100%" BORDER=0 CELLPADDING=1 CELLSPACING=1>')) return array();
 if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims",$answer_spys,$matches_spys)) return array();
 foreach ($matches_spys['ip'] as $value_spys)
 {

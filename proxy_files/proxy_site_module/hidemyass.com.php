@@ -10,7 +10,7 @@
 
 namespace hidemyass;
 use GetContent\cGetContent as c_get_content;
-use GetContent\c_string_work as c_string_work;
+use GetContent\cStringWork as c_string_work;
 //return array();
 $url_source="http://hidemyass.com/proxy-list/";
 $name_source="hidemyass.com";
@@ -29,7 +29,7 @@ do{
 	    $proxy_address = implode('',$matches_proxy[0]).':'.$match_port['port'];
 	    $proxy_address = preg_replace('%<[^<>]*>%imsu','',$proxy_address);
 	    $proxy_address = preg_replace('%\s+%ms','',$proxy_address);
-	    if(c_string_work::is_ip($proxy_address))
+	    if(cStringWork::is_ip($proxy_address))
 	    {
 	        $tmp_array['proxy'] = trim($proxy_address);
 	        $tmp_array["source_proxy"] = $name_source;

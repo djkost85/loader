@@ -1,37 +1,37 @@
 <?php
+namespace GetContent;
 /**
- * Class c_string_work
+ * Class cStringWork
  * Класс для обработки строки и извлечения необходимой информации используя набор фильтров
  * @author  Evgeny Pynykh <bpteam22@gmail.com>
  * @package GetContent
  * @version 2.0
  */
-namespace GetContent;
-class c_string_work
+class cStringWork
 {
 	/**
 	 * Массив с тегами и хеш кодами для обработки через синонимайзер или переводчик, чтоб не потерять HTML теги
-	 * $cript_tag_array['tag'] набор тегов
-	 * $cript_tag_array['hash'] набор хешей
+	 * $_cryptTagArray['tag'] набор тегов
+	 * $_cryptTagArray['hash'] набор хешей
 	 * Порядок тегов и хешей соответстует их положению в строке.
 	 * @var array
 	 */
-	private $cript_tag_array;
+	private $_cryptTagArray;
 	/**
 	 * Текст который обрабатывается в классе
 	 * @var string
 	 */
-	private $text; //Текст который обрабатывается в классе
+	private $_text; //Текст который обрабатывается в классе
 
 	function __construct($text = "") {
-		$this->text = $text;
+		$this->_text = $text;
 	}
 
 	/**
 	 * функция для проверки доступа к необходимым ресурсам системы
 	 */
-	public function function_check() {
-		echo "c_string_work->function_check {</br>\n";
+	public function functionCheck() {
+		echo "cStringWork->functionCheck {</br>\n";
 		$mess = '';
 		if (!is_dir(GC_ROOT_DIR . "/strin_work_files")) {
 			$mess .= "Warning: folder for class files does not exist</br>\n";
@@ -40,9 +40,9 @@ class c_string_work
 				$mess .= "Warning: folder for the cookie does not have the necessary rights to use</br>\n";
 			}
 		}
-		if ($mess) echo $mess . " To work correctly, correct the above class c_string_work requirements</br>\n ";
-		else echo "c_string_work ready</br>\n";
-		echo "c_string_work->function_check }</br>\n";
+		if ($mess) echo $mess . " To work correctly, correct the above class cStringWork requirements</br>\n ";
+		else echo "cStringWork ready</br>\n";
+		echo "cStringWork->functionCheck }</br>\n";
 	}
 
 	/**
@@ -52,7 +52,7 @@ class c_string_work
 	 * @param int    $offset    максимальное количество частей 0=бесконечно
 	 * @return array
 	 */
-	public static function divided_text($text = "", $part_size = 4900, $offset = 0) {
+	public static function dividedText($text = "", $part_size = 4900, $offset = 0) {
 		$divided_text_array = array();
 		if (strlen($text) > $part_size) {
 			for ($i = 0; ($i < $offset || $offset == 0) && $text; $i++) {
@@ -74,7 +74,7 @@ class c_string_work
 	 * @param array  $rep_text_array массив регулярных выражений для выполнения
 	 * @return string
 	 */
-	public static function clear_note($text = "", $rep_text_array = array("/\s+/")) {
+	public static function clearNote($text = "", $rep_text_array = array("/\s+/")) {
 		if (is_string($rep_text_array)) $text = preg_replace($rep_text_array, " ", $text);
 		elseif (is_array($rep_text_array)) foreach ($rep_text_array as $value) $text = preg_replace($value, " ", $text);
 		return $text;
@@ -86,29 +86,29 @@ class c_string_work
 	 * @param string $reg  регулярное выражение для поиска шифруемых данных
 	 * @return string
 	 */
-	public function encrypt_tag($text = "", $reg = "%(<[^<>]*>)%iUsm") {
-		if (!$text) $text = $this->text;
+	public function encryptTag($text = "", $reg = "%(<[^<>]*>)%iUsm") {
+		if (!$text) $text = $this->_text;
 		$count = preg_match_all($reg, $text, $matches);
 		for ($i = 0; $i < $count; $i++) {
 			$str = $matches[0][$i];
-			$this->cript_tag_array['hash'][$i] = " " . microtime(1) . mt_rand() . " ";
-			$this->cript_tag_array['tag'][$i] = $str;
-			$text = preg_replace("#" . preg_quote($this->cript_tag_array['tag'][$i], '#') . "#ms", $this->cript_tag_array['hash'][$i], $text);
+			$this->_cryptTagArray['hash'][$i] = " " . microtime(1) . mt_rand() . " ";
+			$this->_cryptTagArray['tag'][$i] = $str;
+			$text = preg_replace("#" . preg_quote($this->_cryptTagArray['tag'][$i], '#') . "#ms", $this->_cryptTagArray['hash'][$i], $text);
 		}
-		return $this->text = $text;
+		return $this->_text = $text;
 	}
 
 	/**
-	 * Заменяет хеш на HTML код после обработки через функцию encrypt_tag
+	 * Заменяет хеш на HTML код после обработки через функцию encryptTag
 	 * @param string $text текст с хешами
 	 * @return string
 	 */
-	public function decrypt_tag($text = "") {
-		if (!$text) $text = $this->text;
-		foreach ($this->cript_tag_array['hash'] as $key => $value) {
-			$text = preg_replace("#" . preg_quote($this->cript_tag_array['hash'][$key], '#') . "#ms", $this->cript_tag_array['tag'][$key], $text);
+	public function decryptTag($text = "") {
+		if (!$text) $text = $this->_text;
+		foreach ($this->_cryptTagArray['hash'] as $key => $value) {
+			$text = preg_replace("#" . preg_quote($this->_cryptTagArray['hash'][$key], '#') . "#ms", $this->_cryptTagArray['tag'][$key], $text);
 		}
-		return $this->text = $text;
+		return $this->_text = $text;
 	}
 
 	/**
@@ -116,21 +116,21 @@ class c_string_work
 	 * @param $url исходный адрес
 	 * @return bool|string
 	 */
-	public static function get_domain_name($url) {
-		$url_data = c_string_work::parse_url($url);
+	public static function getDomainName($url) {
+		$url_data = cStringWork::parseUrl($url);
 		return $url_data['host'];
 	}
 
-	public function get_cript_tag_array() {
-		return $this->cript_tag_array;
+	public function getCryptTagArray() {
+		return $this->_cryptTagArray;
 	}
 
-	public function get_text() {
-		return $this->text;
+	public function getText() {
+		return $this->_text;
 	}
 
-	public function set_text($text) {
-		$this->text = $text;
+	public function setText($text) {
+		$this->_text = $text;
 	}
 
 	/**
@@ -140,7 +140,7 @@ class c_string_work
 	 * @param bool   $without_tag возвращать с тегом или без
 	 * @return string
 	 */
-	public static function between_tag($text = "", $start_tag = '<div class="xxx">', $without_tag = true) {
+	public static function betweenTag($text = "", $start_tag = '<div class="xxx">', $without_tag = true) {
 		if (!preg_match('#<(?<tag>\w+)[^>]*>#im', $start_tag, $tag)) return false;
 		if (preg_match('#<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>#im', $start_tag)) {
 			preg_match_all("#(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))#im", $start_tag, $matches);
@@ -199,7 +199,7 @@ class c_string_work
 	 * query массив GET запроса [Имя переменной]=Значение
 	 * fragment массив ссылок на HTML якоря [Имя якоря]=Значение
 	 */
-	public static function parse_url($url) {
+	public static function parseUrl($url) {
 		$array_url = parse_url($url);
 		if (isset($array_url['query'])) {
 			$array_query = explode("&", $array_url['query']);
@@ -225,7 +225,7 @@ class c_string_work
 	 * @param $str
 	 * @return bool
 	 */
-	public static function is_ip($str) {
+	public static function isIp($str) {
 		if (preg_match("#^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$#i", $str)) return true;
 		else return false;
 	}
@@ -237,7 +237,7 @@ class c_string_work
 	 * @author m00t
 	 * @url    https://github.com/m00t/detect_encoding
 	 */
-	public static function get_encoding_name($str) {
+	public static function getEncodingName($str) {
 		if (mb_detect_encoding($str, array('UTF-8'), true) == 'UTF-8') return 'UTF-8';
 		$weights = array();
 		$specters = array();

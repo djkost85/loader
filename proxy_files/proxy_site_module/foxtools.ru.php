@@ -10,7 +10,7 @@
 
 namespace foxtools;
 use GetContent\cGetContent as c_get_content;
-use GetContent\c_string_work as c_string_work;
+use GetContent\cStringWork as c_string_work;
 //return array();
 $url_source="http://foxtools.ru/Proxy?page=";
 $name_source="foxtools.ru";
@@ -21,11 +21,11 @@ for($nom=1;$nom<50;$nom++){
 	$url_page = $url_source.$nom;
 	$answer_foxtools=$get_foxtools_content->get_content($url_page);
 	if(!$answer_foxtools) return $proxy_foxtools;
-	$answer_foxtools = c_string_work::between_tag($answer_foxtools,'<table style="width:100%" id="theProxyList">');
+	$answer_foxtools = cStringWork::between_tag($answer_foxtools,'<table style="width:100%" id="theProxyList">');
 	if(!preg_match_all('%<td\s*style="[^"]*">(?<ip>\d+.\d+.\d+.\d+)</td>\s*<td\s*style="[^"]*">(?<port>\d+)</td>%imsu',$answer_foxtools,$matches_ip))    break;
 	foreach ($matches_ip['ip'] as $key => $proxy_ip) {
 	$proxy_address = $proxy_ip.':'.$matches_ip['port'][$key];
-	if(c_string_work::is_ip($proxy_address))
+	if(cStringWork::is_ip($proxy_address))
 	{
 	    $tmp_array['proxy'] = trim($proxy_address);
 	    $tmp_array["source_proxy"] = $name_source;

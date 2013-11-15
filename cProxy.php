@@ -226,7 +226,7 @@ class cProxy
 	 * функция для проверки доступа к необходимым ресурсам системы
 	 */
 	public function functionChek() {
-		echo "cProxy->function_check {</br>\n";
+		echo "cProxy->functionCheck {</br>\n";
 		$mess = '';
 		if (!is_dir($this->getDirProxyListFile())) {
 			$mess .= "Warning: folder for the proxy profile does not exist</br>\n";
@@ -252,10 +252,10 @@ class cProxy
 		}
 
 		if (!class_exists('cProxy')) $mess .= "Warning: cProxy class is declared, can not work with proxy</br>\n";
-		if (!class_exists('c_string_work')) $mess .= "Warning: c_string_work class is declared, word processing is not possible</br>\n";
+		if (!class_exists('cStringWork')) $mess .= "Warning: cStringWork class is declared, word processing is not possible</br>\n";
 		if ($mess) echo $mess . " To work correctly, correct the above class cProxy requirements </br>\n";
 		else echo "cProxy ready</br>\n";
-		echo "cProxy->function_check }</br>\n";
+		echo "cProxy->functionCheck }</br>\n";
 	}
 
 	/**
@@ -361,7 +361,7 @@ class cProxy
 	 */
 	public function getServerIp() {
 		if (isset($this->_serverIp)) return $this->_serverIp;
-		if (false && isset($_SERVER['SERVER_ADDR']) && c_string_work::is_ip($_SERVER['SERVER_ADDR'])) {
+		if (false && isset($_SERVER['SERVER_ADDR']) && cStringWork::isIp($_SERVER['SERVER_ADDR'])) {
 			$this->_serverIp = $_SERVER['SERVER_ADDR'];
 		} else {
 			$this->_getContent->setUseProxy(false);
@@ -370,7 +370,7 @@ class cProxy
 			$this->_getContent->getContent("http://2ip.ru/");
 			$answer = $this->_getContent->getAnswer();
 			$reg = "/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
-			if (preg_match($reg, $answer, $match) && !isset($match['ip']) || !$match['ip'] || !c_string_work::is_ip($match['ip'])) return false;
+			if (preg_match($reg, $answer, $match) && !isset($match['ip']) || !$match['ip'] || !cStringWork::isIp($match['ip'])) return false;
 			$this->_serverIp = $match['ip'];
 		}
 		return $this->_serverIp;
@@ -905,7 +905,7 @@ class cProxy
 	 */
 	public function checkProxy($proxy) {
 		if (!$this->_needCheckProxy) return $proxy;
-		if (is_string($proxy) && c_string_work::is_ip($proxy)) {
+		if (is_string($proxy) && cStringWork::isIp($proxy)) {
 			$this->_getContent->setModeGetContent('single');
 			$this->_getContent->setUseProxy($proxy);
 			$this->_getContent->setMinSizeAnswer(5);

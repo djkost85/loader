@@ -10,7 +10,7 @@
  */
 namespace seprox;
 use GetContent\cGetContent as c_get_content;
-use GetContent\c_string_work as c_string_work;
+use GetContent\cStringWork as c_string_work;
 //return array();
 $url_source="http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_";
 $name_source="seprox.ru";
@@ -59,7 +59,7 @@ do {
 	$ip="";
 	foreach ($matches_secret_var['ip'] as $key_ip => $value_ip)
 	    if(preg_match('#'.$value_ip.'=\'(?<ip>[^\']*)\'#s', $str_secret_code, $match_ip)) $ip.=$match_ip['ip'];
-	if(c_string_work::is_ip($ip))
+	if(cStringWork::is_ip($ip))
 	{
 	    $tmp_array['proxy']=trim($ip);
 	    $tmp_array["source_proxy"]=$name_source;

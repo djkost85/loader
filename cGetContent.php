@@ -1,9 +1,5 @@
 <?php
 namespace GetContent;
-
-use GetContent\cProxy as c_proxy;
-use GetContent\c_string_work as c_string_work;
-
 /**
  * Class cGetContent
  * С помощью основных функций библиотеки cURL посылает http запросы для скачивания контента из сети
@@ -243,7 +239,7 @@ class cGetContent
 			}
 		}
 		if (!class_exists('cProxy')) $mess .= "Warning: cProxy class is declared, can not work with proxy</br>\n";
-		if (!class_exists('c_string_work')) $mess .= "Warning: c_string_work class is declared, word processing is not possible</br>\n";
+		if (!class_exists('cStringWork')) $mess .= "Warning: cStringWork class is declared, word processing is not possible</br>\n";
 		if ($mess) echo $mess . " To work correctly, correct the above class cGetContent requirements </br>\n";
 		else echo "cGetContent ready</br>\n";
 		echo "cGetContent->functionCheck }</br>\n";
@@ -392,7 +388,7 @@ class cGetContent
 	public function setUseProxy($value = false) {
 		switch ((bool)$value) {
 			case true:
-				if (is_string($value) && c_string_work::is_ip($value)) $this->proxy = $value;
+				if (is_string($value) && cStringWork::isIp($value)) $this->proxy = $value;
 				elseif (!is_object($this->proxy)) $this->proxy = new cProxy();
 				else return false;
 				break;
@@ -925,7 +921,7 @@ class cGetContent
 		unset($key_setting);
 		if ($this->getUseProxy() && !isset($descriptor['option'][CURLOPT_PROXY])) {
 			if (is_object($this->proxy)) {
-				if (is_string($proxy_ip = $this->proxy->getProxy($descriptor['descriptor_key'], c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL]))) && c_string_work::is_ip($proxy_ip))
+				if (is_string($proxy_ip = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]))) && cStringWork::isIp($proxy_ip))
 					$this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $proxy_ip);
 				else $descriptor['option'][CURLOPT_URL] = '';
 			} elseif (is_string($this->proxy)) $this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $this->proxy);
@@ -1331,7 +1327,7 @@ class cGetContent
 	private function encodingAnswerText($text = "") {
 		if ($this->getEncodingAnswer()) {
 			$to = $this->getEncodingName();
-			$from = c_string_work::get_encoding_name($text);
+			$from = cStringWork::getEncodingName($text);
 			if ($from != $to) $text = iconv($from, $to, $text);
 			return $text;
 		} else return $text;

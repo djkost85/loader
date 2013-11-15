@@ -9,7 +9,7 @@
  */
 namespace samair;
 use GetContent\cGetContent as c_get_content;
-use GetContent\c_string_work as c_string_work;
+use GetContent\cStringWork as c_string_work;
 return array();
 $url_source="http://www.samair.ru/proxy/proxy-01.htm";
 $name_source="samair.ru";
@@ -25,7 +25,7 @@ do{
 //-----------------------------------------
 	if(!preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxy_html>.*)</tr>%imsu',$answer_samair,$matches_html)) break;
 	foreach ($matches_html['proxy_html'] as $proxy_html) {
-	if(c_string_work::is_ip($proxy_address))
+	if(cStringWork::is_ip($proxy_address))
 	{
 	    $tmp_array['proxy'] = trim($proxy_address);
 	    $tmp_array["source_proxy"] = $name_source;

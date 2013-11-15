@@ -11,4 +11,4 @@
 require_once dirname(__FILE__)."/cfg.php";
 require_once GC_ROOT_DIR . "/cGetContent.php";
 require_once GC_ROOT_DIR . "/cProxy.php";
-require_once GC_ROOT_DIR."/c_string_work.php";
+require_once GC_ROOT_DIR . "/cStringWork.php";
