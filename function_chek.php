@@ -4,17 +4,17 @@
  * User: EC
  * Date: 03.05.13
  * Time: 12:15
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-use get_content\c_get_content as c_get_content;
-use get_content\c_proxy as c_proxy;
-use get_content\c_string_work as c_string_work;
+use GetContent\c_get_content as c_get_content;
+use GetContent\cProxy as c_proxy;
+use GetContent\c_string_work as c_string_work;
 include_once dirname(__FILE__)."/include.php";
 
 $get_content = new c_get_content();
 $string_work = new c_string_work();
-$proxy = new c_proxy();
+$proxy = new cProxy();
 $get_content->function_check();
 $string_work->function_check();
 $proxy->function_chek();

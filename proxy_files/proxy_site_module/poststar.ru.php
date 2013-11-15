@@ -4,12 +4,12 @@
  * User: EC
  * Date: 14.05.13
  * Time: 2:36
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace poststar;
-use get_content\c_get_content as c_get_content;
-use get_content\c_string_work as c_string_work;
+use GetContent\c_get_content as c_get_content;
+use GetContent\c_string_work as c_string_work;
 
 $url_source="http://www.poststar.ru/proxy.htm";
 $name_source="poststar.ru";

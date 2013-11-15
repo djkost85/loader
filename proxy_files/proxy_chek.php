@@ -4,7 +4,7 @@
  * User: EC
  * Date: 04.05.13
  * Time: 20:01
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  *
  * Файл для проверки работоспособности прокси и его функций. распологаете в удобном месте у себя или на другом сервере

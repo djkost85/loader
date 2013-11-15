@@ -4,7 +4,7 @@
  * User: EC
  * Date: 07.05.13
  * Time: 16:22
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 return array(

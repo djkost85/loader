@@ -1,15 +1,15 @@
 <?php
-namespace get_content;
+namespace GetContent;
 
-use get_content\c_proxy as c_proxy;
-use get_content\c_string_work as c_string_work;
+use GetContent\cProxy as c_proxy;
+use GetContent\c_string_work as c_string_work;
 
 /**
  * Class c_get_content
  * С помощью основных функций библиотеки cURL посылает http запросы для скачивания контента из сети
  * Умеет работать через прокси сервера, в много поточном режиме с верификацией данных.
  * @author  Evgeny Pynykh <bpteam22@gmail.com>
- * @package get_content
+ * @package GetContent
  * @version 2.0
  */
 class c_get_content
@@ -46,7 +46,7 @@ class c_get_content
 	private $use_proxy;
 	/**
 	 * Адрес спрокси или класс для работы с прокси
-	 * @var string|c_proxy
+	 * @var string|cProxy
 	 */
 	public $proxy;
 	/**
@@ -184,7 +184,7 @@ class c_get_content
 	 */
 	private $referer;
 	/**
-	 * @return \get_content\c_get_content
+	 * @return \GetContent\c_get_content
 	 */
 	function __construct() {
 		$this->all_setting = array(
@@ -242,7 +242,7 @@ class c_get_content
 				$mess .= "Warning: folder for the cookie does not have the necessary rights to use</br>\n";
 			}
 		}
-		if (!class_exists('c_proxy')) $mess .= "Warning: c_proxy class is declared, can not work with proxy</br>\n";
+		if (!class_exists('cProxy')) $mess .= "Warning: cProxy class is declared, can not work with proxy</br>\n";
 		if (!class_exists('c_string_work')) $mess .= "Warning: c_string_work class is declared, word processing is not possible</br>\n";
 		if ($mess) echo $mess . " To work correctly, correct the above class c_get_content requirements </br>\n";
 		else echo "c_get_content ready</br>\n";
@@ -393,7 +393,7 @@ class c_get_content
 		switch ((bool)$value) {
 			case true:
 				if (is_string($value) && c_string_work::is_ip($value)) $this->proxy = $value;
-				elseif (!is_object($this->proxy)) $this->proxy = new c_proxy();
+				elseif (!is_object($this->proxy)) $this->proxy = new cProxy();
 				else return false;
 				break;
 			case false:
@@ -740,7 +740,7 @@ class c_get_content
 		$descriptor =& $this->get_descriptor();
 		curl_close($descriptor['descriptor']);
 		if ($this->get_use_proxy() && is_object($this->proxy)) {
-			$this->proxy->remove_all_rent_from_code($descriptor['descriptor_key']);
+			$this->proxy->removeAllRentFromCode($descriptor['descriptor_key']);
 		}
 		unset($descriptor['descriptor']);
 		if (!$reinit) unset($descriptor['option']);
@@ -760,7 +760,7 @@ class c_get_content
 					@curl_multi_remove_handle($descriptor['descriptor'], $descriptor_array[$key]['descriptor']);
 					curl_close($descriptor_array[$key]['descriptor']);
 					if ($this->get_use_proxy() && is_object($this->proxy)) {
-						$this->proxy->remove_all_rent_from_code($descriptor_array[$key]['descriptor_key']);
+						$this->proxy->removeAllRentFromCode($descriptor_array[$key]['descriptor_key']);
 					}
 					unset($descriptor_array[$key]['descriptor']);
 					if (!$reinit) unset($descriptor_array[$key]['option']);
@@ -844,7 +844,7 @@ class c_get_content
 				$this->end_repeat();
 				break;
 			} elseif ($this->get_use_proxy() && is_object($this->proxy)) {
-				$this->proxy->remove_proxy_in_list($descriptor['option'][CURLOPT_PROXY]);
+				$this->proxy->removeProxyInList($descriptor['option'][CURLOPT_PROXY]);
 			}
 		} while ($this->repeat_get_content());
 		$this->answer = $this->prepare_content($answer);
@@ -890,7 +890,7 @@ class c_get_content
 					if (isset($url[$url_descriptors[$key]])) unset($url[$url_descriptors[$key]]);
 					$good_answer[$key_good_answer] = $value;
 				} elseif ($this->get_use_proxy() && is_object($this->proxy)) {
-					$this->proxy->remove_proxy_in_list($descriptor_array[$key]['option'][CURLOPT_PROXY]);
+					$this->proxy->removeProxyInList($descriptor_array[$key]['option'][CURLOPT_PROXY]);
 				}
 			}
 			if (count($url) == 0) {
@@ -925,7 +925,7 @@ class c_get_content
 		unset($key_setting);
 		if ($this->get_use_proxy() && !isset($descriptor['option'][CURLOPT_PROXY])) {
 			if (is_object($this->proxy)) {
-				if (is_string($proxy_ip = $this->proxy->get_proxy($descriptor['descriptor_key'], c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL]))) && c_string_work::is_ip($proxy_ip))
+				if (is_string($proxy_ip = $this->proxy->getProxy($descriptor['descriptor_key'], c_string_work::get_domain_name($descriptor['option'][CURLOPT_URL]))) && c_string_work::is_ip($proxy_ip))
 					$this->set_option_to_descriptor($descriptor, CURLOPT_PROXY, $proxy_ip);
 				else $descriptor['option'][CURLOPT_URL] = '';
 			} elseif (is_string($this->proxy)) $this->set_option_to_descriptor($descriptor, CURLOPT_PROXY, $this->proxy);

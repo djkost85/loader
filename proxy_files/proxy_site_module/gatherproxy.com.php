@@ -4,11 +4,11 @@
  * User: EC
  * Date: 14.05.13
  * Time: 2:36
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace gatherproxy;
-use get_content\c_get_content as c_get_content;
+use GetContent\c_get_content as c_get_content;
 
 $url_source="http://gatherproxy.com/subscribe/login";
 $name_source="gatherproxy.com";

@@ -4,11 +4,11 @@
  * User: ec
  * Date: 26.09.13
  * Time: 22:15
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace notan;
-use get_content\c_get_content as c_get_content;
+use GetContent\c_get_content as c_get_content;
 
 $name_source="notan.h1.ru";
 $proxy_notan_proxy=array();

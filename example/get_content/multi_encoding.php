@@ -4,11 +4,11 @@
  * User: EC
  * Date: 11.05.13
  * Time: 0:14
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Проверка декодирования в режиме multi
  */
-use get_content\c_get_content as c_get_content;
+use GetContent\c_get_content as c_get_content;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(600);
 $get_content = new c_get_content();

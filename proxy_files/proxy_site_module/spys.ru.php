@@ -4,12 +4,12 @@
  * User: EC
  * Date: 14.05.13
  * Time: 3:35
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace spys;
-use get_content\c_get_content as c_get_content;
-use get_content\c_string_work as c_string_work;
+use GetContent\c_get_content as c_get_content;
+use GetContent\c_string_work as c_string_work;
 return array();
 $url_source="http://spys.ru/aproxy/";
 $name_source="spys.ru";

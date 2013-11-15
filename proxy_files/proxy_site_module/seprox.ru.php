@@ -4,13 +4,13 @@
  * User: EC
  * Date: 08.05.13
  * Time: 5:33
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
- * Модуль к классу  c_proxy для скачивания списка прокси адресов с сайта seprox.ru
+ * Модуль к классу  cProxy для скачивания списка прокси адресов с сайта seprox.ru
  */
 namespace seprox;
-use get_content\c_get_content as c_get_content;
-use get_content\c_string_work as c_string_work;
+use GetContent\c_get_content as c_get_content;
+use GetContent\c_string_work as c_string_work;
 //return array();
 $url_source="http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_";
 $name_source="seprox.ru";

@@ -4,11 +4,11 @@
  * User: EC
  * Date: 04.07.13
  * Time: 15:00
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace twofreeproxy;
-use get_content\c_get_content as c_get_content;
+use GetContent\c_get_content as c_get_content;
 
 $url_source="http://2freeproxy.com/wp-content/plugins/proxy/load_proxy.php";
 $name_source="2freeproxy.com";

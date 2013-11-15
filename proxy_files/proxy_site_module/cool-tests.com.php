@@ -4,11 +4,11 @@
  * User: EC
  * Date: 14.05.13
  * Time: 3:35
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace cool_tests;
-use get_content\c_get_content as c_get_content;
+use GetContent\c_get_content as c_get_content;
 //return array();
 $url_source="http://www.cool-tests.com/all-working-proxies.php";
 $name_source="cool-tests.com";

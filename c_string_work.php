@@ -3,10 +3,10 @@
  * Class c_string_work
  * Класс для обработки строки и извлечения необходимой информации используя набор фильтров
  * @author  Evgeny Pynykh <bpteam22@gmail.com>
- * @package get_content
+ * @package GetContent
  * @version 2.0
  */
-namespace get_content;
+namespace GetContent;
 class c_string_work
 {
 	/**

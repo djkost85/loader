@@ -4,15 +4,15 @@
  * User: EC
  * Date: 12.05.13
  * Time: 19:05
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Обновление всех списков прокси
  */
-use get_content\c_proxy as c_proxy;
+use GetContent\cProxy as c_proxy;
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
 require_once dirname(__FILE__)."/../../include.php";
-$proxy= new c_proxy();
+$proxy= new cProxy();
 $proxy->update_all_proxy_list(true);
 $end = time();
 $list = $proxy->select_proxy_list($proxy->get_default_list_name());

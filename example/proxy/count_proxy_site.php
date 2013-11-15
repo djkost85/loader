@@ -4,14 +4,14 @@
  * User: ec
  * Date: 26.09.13
  * Time: 20:25
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
-use get_content\c_proxy as c_proxy;
+use GetContent\cProxy as c_proxy;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
-$proxy = new c_proxy();
+$proxy = new cProxy();
 $name = isset($_GET['l']) ? $_GET['l'] : 'all';
 $proxy->select_proxy_list($name);
 $list = $proxy->get_proxy_list();

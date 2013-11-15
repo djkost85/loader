@@ -4,13 +4,13 @@
  * User: EC
  * Date: 08.05.13
  * Time: 5:33
- * Project: get_content
+ * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 // "cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
 namespace cool_proxy;
-use get_content\c_get_content as c_get_content;
-use get_content\c_string_work as c_string_work;
+use GetContent\c_get_content as c_get_content;
+use GetContent\c_string_work as c_string_work;
 $url_source="http://www.cool-proxy.net/proxies/http_proxy_list/page:";
 $name_source="cool-proxy.net";
 $get_cool_proxy_content= new c_get_content();
