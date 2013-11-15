@@ -212,7 +212,6 @@ class c_get_content
 		$this->set_min_size_answer(100);
 		$this->set_type_content("text");
 		$this->set_in_cache(false);
-		$this->set_encoding_answer(false);
 		$this->set_encoding_name("UTF-8");
 		$this->set_check_answer(false);
 		$this->setRedirectCount(0);
@@ -492,10 +491,12 @@ class c_get_content
 				break;
 			case 'text':
 				$this->type_content = 'text';
+				$this->set_encoding_answer(true);
 				return true;
 				break;
 			case 'html':
 				$this->type_content = 'html';
+				$this->set_encoding_answer(true);
 				break;
 			default:
 				break;
