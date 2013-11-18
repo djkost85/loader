@@ -8,38 +8,37 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace samair;
-use GetContent\cGetContent as c_get_content;
-use GetContent\cStringWork as c_string_work;
+
+use GetContent\cGetContent as cGetContent;
+use GetContent\cStringWork as cStringWork;
+
 return array();
-$url_source="http://www.samair.ru/proxy/proxy-01.htm";
-$name_source="samair.ru";
-$get_samair_content= new cGetContent();
-$get_samair_content->set_type_content("text");
-$proxy_samair = array();
-do{
-	$answer_samair = $get_samair_content->get_content($url_source);
-	return $answer_samair;
-	if(!$answer_samair) return $proxy_samair;
-	if(!preg_match('%<script\s*src="(?<js_file>/js/\d+.js)"\s*type="text/javascript"></script>%imsu', $answer_samair, $js_file)) break;
-	$answer_js = $get_samair_content->get_content('http://www.samair.ru'.$js_file);
-//-----------------------------------------
-	if(!preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxy_html>.*)</tr>%imsu',$answer_samair,$matches_html)) break;
-	foreach ($matches_html['proxy_html'] as $proxy_html) {
-	if(cStringWork::is_ip($proxy_address))
-	{
-	    $tmp_array['proxy'] = trim($proxy_address);
-	    $tmp_array["source_proxy"] = $name_source;
-	    $tmp_array["type_proxy"] = 'http';
-	    $proxy_samair['content'][] = $tmp_array;
-	}
+$urlSource = "http://www.samair.ru/proxy/proxy-01.htm";
+$nameSource = "samair.ru";
+$getSamairContent = new cGetContent();
+$getSamairContent->setTypeContent("text");
+$proxySamair = array();
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+do {
+	$answerSamair = $getSamairContent->getContent($urlSource);
+	if (!$answerSamair) return $proxySamair;
+	if (!preg_match('%<script\s*src="(?<jsFile>/js/\d+.js)"\s*type="text/javascript"></script>%imsu', $answerSamair, $jsFile)) break;
+	$answerJs = $getSamairContent->getContent('http://www.samair.ru' . $jsFile);
+	if (!preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxyHtml>.*)</tr>%imsu', $answerSamair, $matchesHtml)) break;
+	foreach ($matchesHtml['proxyHtml'] as $proxyHtml) {
+		if (cStringWork::isIp($proxyAddress)) {
+			$tmpArray['proxy'] = trim($proxyAddress);
+			$proxySamair['content'][] = $tmpArray;
+		}
 	}
 
-	if(preg_match('%<a\s*class="page"\s*href="(?<next>proxy\-\d+.htm)">next</a>%imsu',$answer_samair,$match_next)){
-	$url_source = "http://hidemyass.com".$match_next['next'];
+	if (preg_match('%<a\s*class="page"\s*href="(?<next>proxy\-\d+.htm)">next</a>%imsu', $answerSamair, $matchNext)) {
+		$urlSource = "http://hidemyass.com" . $matchNext['next'];
 	} else {
-	unset($url_source);
+		unset($urlSource);
 	}
-	sleep(rand(1,3));
-}while(isset($url_source));
-unset($answer_samair, $get_samair_content);
-return is_array($proxy_samair)? $proxy_samair : array();
+	sleep(rand(1, 3));
+} while (isset($urlSource));
+unset($answerSamair, $getSamairContent);
+return is_array($proxySamair) ? $proxySamair : array();

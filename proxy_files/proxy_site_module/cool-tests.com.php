@@ -8,26 +8,27 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace cool_tests;
-use GetContent\cGetContent as c_get_content;
+
+use GetContent\cGetContent as cGetContent;
+
 //return array();
-$url_source="http://www.cool-tests.com/all-working-proxies.php";
-$name_source="cool-tests.com";
-$get_cool_tests_content= new cGetContent();
-$get_cool_tests_content->set_encoding_answer(true);
-$get_cool_tests_content->set_encoding_name('UTF-8');
-$get_cool_tests_content->get_content('http://www.cool-tests.com');
-$get_cool_tests_content->set_type_content("html");
-$get_cool_tests_content->set_default_setting(CURLOPT_REFERER,'http://www.cool-tests.com');
-$answer_cool_tests=$get_cool_tests_content->get_content($url_source);
-$proxy_cool_tests_proxy = array();
-if(!$answer_cool_tests) return array();
-if(!preg_match_all("#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu",$answer_cool_tests,$matches_cool_tests)) return array();
-foreach ($matches_cool_tests['ip'] as $value_cool_tests)
-{
-	$tmp_array['proxy']=trim($value_cool_tests);
-	$tmp_array["source_proxy"]=$name_source;
-	$tmp_array["type_proxy"]='http';
-	$proxy_cool_tests_proxy['content'][]=$tmp_array;
+$urlSource = "http://www.cool-tests.com/all-working-proxies.php";
+$nameSource = "cool-tests.com";
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+$getCoolTestsContent = new cGetContent();
+$getCoolTestsContent->setEncodingAnswer(true);
+$getCoolTestsContent->setEncodingName('UTF-8');
+$getCoolTestsContent->getContent('http://www.cool-tests.com');
+$getCoolTestsContent->setTypeContent("html");
+$getCoolTestsContent->setDefaultSetting(CURLOPT_REFERER, 'http://www.cool-tests.com');
+$answerCoolTests = $getCoolTestsContent->getContent($urlSource);
+$proxyCoolTestsProxy = array();
+if (!$answerCoolTests) return array();
+if (!preg_match_all("#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu", $answerCoolTests, $matchesCoolTests)) return array();
+foreach ($matchesCoolTests['ip'] as $valueCoolTests) {
+	$tmpArray['proxy'] = trim($valueCoolTests);
+	$proxyCoolTestsProxy['content'][] = $tmpArray;
 }
-unset($url_source, $name_source, $get_cool_tests_content, $answer_cool_tests, $matches_cool_tests, $value_cool_tests);
-return is_array($proxy_cool_tests_proxy) ? $proxy_cool_tests_proxy : array();
+unset($urlSource, $nameSource, $getCoolTestsContent, $answerCoolTests, $matchesCoolTests, $valueCoolTests);
+return is_array($proxyCoolTestsProxy) ? $proxyCoolTestsProxy : array();

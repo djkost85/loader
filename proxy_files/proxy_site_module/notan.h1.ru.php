@@ -8,25 +8,25 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace notan;
-use GetContent\cGetContent as c_get_content;
+use GetContent\cGetContent as cGetContent;
 
-$name_source="notan.h1.ru";
-$proxy_notan_proxy=array();
+$nameSource="notan.h1.ru";
+$proxyNotanProxy=array();
+$tmpArray["source_proxy"]=$nameSource;
+$tmpArray["type_proxy"]='http';
 for($i=1;$i<=10;$i++){
-	$url_source="http://notan.h1.ru/hack/xwww/proxy".$i.".html";
-	$get_notan_content= new cGetContent();
-	$get_notan_content->set_type_content("html");
-	$answer_notan=$get_notan_content->get_content($url_source);
-	if(!$answer_notan) return $proxy_notan_proxy;
-	if(!preg_match_all('%<TD\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</TD>%ims',$answer_notan,$matches_notan)) return $proxy_notan_proxy;
-	foreach ($matches_notan['ip'] as $value_notan)
+	$urlSource="http://notan.h1.ru/hack/xwww/proxy".$i.".html";
+	$getNotanContent= new cGetContent();
+	$getNotanContent->setTypeContent("html");
+	$answerNotan=$getNotanContent->getContent($urlSource);
+	if(!$answerNotan) return $proxyNotanProxy;
+	if(!preg_match_all('%<TD\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</TD>%ims',$answerNotan,$matchesNotan)) return $proxyNotanProxy;
+	foreach ($matchesNotan['ip'] as $valueNotan)
 	{
-	$tmp_array['proxy']=trim($value_notan);
-	$tmp_array["source_proxy"]=$name_source;
-	$tmp_array["type_proxy"]='http';
-	$proxy_notan_proxy['content'][]=$tmp_array;
+	$tmpArray['proxy']=trim($valueNotan);
+	$proxyNotanProxy['content'][]=$tmpArray;
 	}
 	sleep(rand(1,3));
 }
-unset($name_source, $get_notan_content, $answer_notan, $matches_notan);
-return is_array($proxy_notan_proxy) ? $proxy_notan_proxy : array();
+unset($nameSource, $getNotanContent, $answerNotan, $matchesNotan);
+return is_array($proxyNotanProxy) ? $proxyNotanProxy : array();

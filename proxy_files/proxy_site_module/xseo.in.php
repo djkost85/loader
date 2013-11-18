@@ -8,26 +8,26 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace xseo;
-use GetContent\cGetContent as c_get_content;
-use GetContent\cStringWork as c_string_work;
+use GetContent\cGetContent as cGetContent;
+use GetContent\cStringWork as cStringWork;
 
-$url_source="http://xseo.in/freeproxy";
-$name_source="xseo.in";
-$get_xseo_content= new cGetContent();
-$get_xseo_content->set_type_content("html");
-$get_xseo_content->set_default_setting(CURLOPT_POST,true);
-$get_xseo_content->set_default_setting(CURLOPT_POSTFIELDS,'submit=%CF%EE%EA%E0%E7%E0%F2%FC+%EF%EE+100+%EF%F0%EE%EA%F1%E8+%ED%E0+%F1%F2%F0%E0%ED%E8%F6%E5');
-$answer_xseo=$get_xseo_content->get_content($url_source);
-if(!$answer_xseo) return array();
-if(!$answer_xseo=cStringWork::between_tag($answer_xseo,'<table width="100%" BORDER=0 CELLPADDING=0 CELLSPACING=1>',false)) return array();
-if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims",$answer_xseo,$matches_xseo)) return array();
-$proxy_xseo_proxy=array();
-foreach ($matches_xseo['ip'] as $value_xseo)
+$urlSource="http://xseo.in/freeproxy";
+$nameSource="xseo.in";
+$getXseoContent= new cGetContent();
+$getXseoContent->setTypeContent("html");
+$getXseoContent->setDefaultSetting(CURLOPT_POST,true);
+$getXseoContent->setDefaultSetting(CURLOPT_POSTFIELDS,'submit=%CF%EE%EA%E0%E7%E0%F2%FC+%EF%EE+100+%EF%F0%EE%EA%F1%E8+%ED%E0+%F1%F2%F0%E0%ED%E8%F6%E5');
+$answerXseo=$getXseoContent->getContent($urlSource);
+if(!$answerXseo) return array();
+if(!$answerXseo=cStringWork::betweenTag($answerXseo,'<table width="100%" BORDER=0 CELLPADDING=0 CELLSPACING=1>',false)) return array();
+if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims",$answerXseo,$matchesXseo)) return array();
+$proxyXseoProxy=array();
+$tmpArray["source_proxy"]=$nameSource;
+$tmpArray["type_proxy"]='http';
+foreach ($matchesXseo['ip'] as $value_xseo)
 {
-	$tmp_array['proxy']=trim($value_xseo);
-	$tmp_array["source_proxy"]=$name_source;
-	$tmp_array["type_proxy"]='http';
-	$proxy_xseo_proxy['content'][]=$tmp_array;
+	$tmpArray['proxy']=trim($value_xseo);
+	$proxyXseoProxy['content'][]=$tmpArray;
 }
-unset($get_xseo_content, $answer_xseo);
-return is_array($proxy_xseo_proxy) ? $proxy_xseo_proxy : array();
+unset($getXseoContent, $answerXseo);
+return is_array($proxyXseoProxy) ? $proxyXseoProxy : array();

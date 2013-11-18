@@ -9,31 +9,32 @@
  */
 
 namespace foxtools;
-use GetContent\cGetContent as c_get_content;
-use GetContent\cStringWork as c_string_work;
+
+use GetContent\cGetContent as cGetContent;
+use GetContent\cStringWork as cStringWork;
+
 //return array();
-$url_source="http://foxtools.ru/Proxy?page=";
-$name_source="foxtools.ru";
-$get_foxtools_content= new cGetContent();
-$get_foxtools_content->set_type_content("html");
-$proxy_foxtools = array();
-for($nom=1;$nom<50;$nom++){
-	$url_page = $url_source.$nom;
-	$answer_foxtools=$get_foxtools_content->get_content($url_page);
-	if(!$answer_foxtools) return $proxy_foxtools;
-	$answer_foxtools = cStringWork::between_tag($answer_foxtools,'<table style="width:100%" id="theProxyList">');
-	if(!preg_match_all('%<td\s*style="[^"]*">(?<ip>\d+.\d+.\d+.\d+)</td>\s*<td\s*style="[^"]*">(?<port>\d+)</td>%imsu',$answer_foxtools,$matches_ip))    break;
-	foreach ($matches_ip['ip'] as $key => $proxy_ip) {
-	$proxy_address = $proxy_ip.':'.$matches_ip['port'][$key];
-	if(cStringWork::is_ip($proxy_address))
-	{
-	    $tmp_array['proxy'] = trim($proxy_address);
-	    $tmp_array["source_proxy"] = $name_source;
-	    $tmp_array["type_proxy"] = 'http';
-	    $proxy_foxtools['content'][] = $tmp_array;
+$urlSource = "http://foxtools.ru/Proxy?page=";
+$nameSource = "foxtools.ru";
+$getFoxtoolsContent = new cGetContent();
+$getFoxtoolsContent->setTypeContent("html");
+$proxyFoxtools = array();
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+for ($nom = 1; $nom < 50; $nom++) {
+	$urlPage = $urlSource . $nom;
+	$answerFoxtools = $getFoxtoolsContent->getContent($urlPage);
+	if (!$answerFoxtools) return $proxyFoxtools;
+	$answerFoxtools = cStringWork::betweenTag($answerFoxtools, '<table style="width:100%" id="theProxyList">');
+	if (!preg_match_all('%<td\s*style="[^"]*">(?<ip>\d+.\d+.\d+.\d+)</td>\s*<td\s*style="[^"]*">(?<port>\d+)</td>%imsu', $answerFoxtools, $matchesIp)) break;
+	foreach ($matchesIp['ip'] as $key => $proxyIp) {
+		$proxyAddress = $proxyIp . ':' . $matchesIp['port'][$key];
+		if (cStringWork::isIp($proxyAddress)) {
+			$tmpArray['proxy'] = trim($proxyAddress);
+			$proxyFoxtools['content'][] = $tmpArray;
+		}
 	}
-	}
-	sleep(rand(1,3));
+	sleep(rand(1, 3));
 }
-unset($url_source, $name_source, $get_foxtools_content, $url_page, $answer_foxtools, $matches_ip);
-return is_array($proxy_foxtools) ? $proxy_foxtools : array();
+unset($urlSource, $nameSource, $getFoxtoolsContent, $urlPage, $answerFoxtools, $matchesIp);
+return is_array($proxyFoxtools) ? $proxyFoxtools : array();

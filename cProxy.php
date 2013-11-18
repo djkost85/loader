@@ -905,8 +905,9 @@ class cProxy
 		$proxy = file_get_contents($url);
 		$this->setListType('static');
 		$this->setMethodGetProxy('random');
+		$this->_proxyList = array();
 		foreach(explode("\n",$proxy) as $proxy){
-			$this->_proxyList['content']['proxy'] = $proxy;
+			$this->_proxyList['content'][] = array('proxy' => $proxy);
 		}
 	}
 
@@ -956,7 +957,7 @@ class cProxy
 			$this->_getContent->setDefaultSetting(CURLOPT_POST, true);
 			$this->_getContent->setDefaultSetting(CURLOPT_POSTFIELDS, "proxy=yandex");
 			$this->_getContent->setTypeContent('text');
-			$this->_getContent->setDefaultSetting(CURLOPT_HEADER, false);
+			//$this->_getContent->setDefaultSetting(CURLOPT_HEADER, false);
 			$this->_getContent->setCheckAnswer(false);
 			foreach (array_chunk($arrayProxy, 200) as $valueArrayProxy) {
 				$this->_getContent->setCountMultiCurl(count($valueArrayProxy));

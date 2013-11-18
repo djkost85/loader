@@ -9,41 +9,42 @@
  */
 
 namespace hidemyass;
-use GetContent\cGetContent as c_get_content;
-use GetContent\cStringWork as c_string_work;
+
+use GetContent\cGetContent as cGetContent;
+use GetContent\cStringWork as cStringWork;
+
 //return array();
-$url_source="http://hidemyass.com/proxy-list/";
-$name_source="hidemyass.com";
-$get_hidemyass_content= new cGetContent();
-$get_hidemyass_content->set_type_content("html");
-$proxy_hidemyass = array();
-do{
-	$answer_hidemyass=$get_hidemyass_content->get_content($url_source);
-	if(!$answer_hidemyass) return $proxy_hidemyass;
-	if(preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxy_html>.*)</tr>%imsu',$answer_hidemyass,$matches_html)){
-	foreach ($matches_html['proxy_html'] as $proxy_html) {
-	    preg_match_all('%\.(?<class>[\w_-]+){display\:\s*inline\s*}%imsu',$proxy_html,$matches_class);
-	    $need_class = implode('|',$matches_class['class']);
-	    preg_match_all('%(<(span|div)\s*(style\s*=\s*"\s*display\s*\:\s*inline\s*"|class\s*=\s*"(\d+|'.$need_class.')")\s*>\s*([^<>]+)\s*|</(span|div|style)>\s*([^"<>]+)\s*)%imsu',$proxy_html,$matches_proxy);
-	    preg_match('%</td>\s*<td>\s*(?<port>\d+)\s*</td>%imsu',$proxy_html,$match_port);
-	    $proxy_address = implode('',$matches_proxy[0]).':'.$match_port['port'];
-	    $proxy_address = preg_replace('%<[^<>]*>%imsu','',$proxy_address);
-	    $proxy_address = preg_replace('%\s+%ms','',$proxy_address);
-	    if(cStringWork::is_ip($proxy_address))
-	    {
-	        $tmp_array['proxy'] = trim($proxy_address);
-	        $tmp_array["source_proxy"] = $name_source;
-	        $tmp_array["type_proxy"] = 'http';
-	        $proxy_hidemyass['content'][] = $tmp_array;
-	    }
+$urlSource = "http://hidemyass.com/proxy-list/";
+$nameSource = "hidemyass.com";
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+$getHidemyassContent = new cGetContent();
+$getHidemyassContent->setTypeContent("html");
+$proxyHidemyass = array();
+do {
+	$answerHidemyass = $getHidemyassContent->getContent($urlSource);
+	if (!$answerHidemyass) return $proxyHidemyass;
+	if (preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxyHtml>.*)</tr>%imsu', $answerHidemyass, $matchesHtml)) {
+		foreach ($matchesHtml['proxyHtml'] as $proxyHtml) {
+			preg_match_all('%\.(?<class>[\w_-]+){display\:\s*inline\s*}%imsu', $proxyHtml, $matchesClass);
+			$needClass = implode('|', $matchesClass['class']);
+			preg_match_all('%(<(span|div)\s*(style\s*=\s*"\s*display\s*\:\s*inline\s*"|class\s*=\s*"(\d+|' . $needClass . ')")\s*>\s*([^<>]+)\s*|</(span|div|style)>\s*([^"<>]+)\s*)%imsu', $proxyHtml, $matchesProxy);
+			preg_match('%</td>\s*<td>\s*(?<port>\d+)\s*</td>%imsu', $proxyHtml, $matchPort);
+			$proxyAddress = implode('', $matchesProxy[0]) . ':' . $matchPort['port'];
+			$proxyAddress = preg_replace('%<[^<>]*>%imsu', '', $proxyAddress);
+			$proxyAddress = preg_replace('%\s+%ms', '', $proxyAddress);
+			if (cStringWork::isIp($proxyAddress)) {
+				$tmpArray['proxy'] = trim($proxyAddress);
+				$proxyHidemyass['content'][] = $tmpArray;
+			}
+		}
 	}
-	}
-	if(preg_match('%<a\s*href="(?<next>[^"]+)"\s*class="next">Next%imsu',$answer_hidemyass,$match_next)){
-	    $url_source = "http://hidemyass.com".$match_next['next'];
+	if (preg_match('%<a\s*href="(?<next>[^"]+)"\s*class="next">Next%imsu', $answerHidemyass, $matchNext)) {
+		$urlSource = "http://hidemyass.com" . $matchNext['next'];
 	} else {
-	    unset($url_source);
+		unset($urlSource);
 	}
-	sleep(rand(1,3));
-}while(isset($url_source));
-unset($get_hidemyass_content, $answer_hidemyass);
-return is_array($proxy_hidemyass) ? $proxy_hidemyass : array();
+	sleep(rand(1, 3));
+} while (isset($urlSource));
+unset($getHidemyassContent, $answerHidemyass);
+return is_array($proxyHidemyass) ? $proxyHidemyass : array();

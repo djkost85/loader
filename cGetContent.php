@@ -68,7 +68,7 @@ class cGetContent
 	 * $_descriptorArray[key]['option'][имя опции] = value параметры cURL
 	 * $_descriptorArray[key]['descriptor_key'] уникальный ключ дескриптора для аренды прокси и сохранения cookie
 	 */
-	private $descriptor_array;
+	private $_descriptorArray;
 	/**
 	 * Количество потоков cURL в режиме multi
 	 * @var int
@@ -389,12 +389,14 @@ class cGetContent
 		switch ((bool)$value) {
 			case true:
 				if (is_string($value) && cStringWork::isIp($value)) $this->proxy = $value;
-				elseif (!is_object($this->proxy)) $this->proxy = new cProxy();
-				else return false;
+				elseif(!is_object($this->proxy)) {
+					$this->proxy = new cProxy();
+				} else {
+					$value = true;
+				}
 				break;
 			case false:
-				unset($this->proxy);
-				$this->proxy = NULL;
+				$value = false;
 				break;
 			default:
 				return false;
@@ -921,12 +923,21 @@ class cGetContent
 			else $this->setOptionToDescriptor($descriptor, $keySetting);
 		}
 		unset($keySetting);
-		if ($this->getUseProxy() && !isset($descriptor['option'][CURLOPT_PROXY])) {
+		if ($this->getUseProxy()) {
 			if (is_object($this->proxy)) {
-				if (is_string($proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]))) && cStringWork::isIp($proxyIp))
+				if (
+					is_string($proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL])))
+					&& cStringWork::isIp($proxyIp)
+					){
 					$this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $proxyIp);
-				else $descriptor['option'][CURLOPT_URL] = '';
-			} elseif (is_string($this->proxy)) $this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $this->proxy);
+				} else {
+					$descriptor['option'][CURLOPT_URL] = '';
+				}
+			} elseif (is_string($this->proxy)){
+				$this->setOptionToDescriptor($descriptor, CURLOPT_PROXY, $this->proxy);
+			}
+		} else {
+			unset($descriptor['option'][CURLOPT_PROXY]);
 		}
 		if($this->getUseStaticCookie() && $this->getModeGetContent() == 'single'){
 			$cookieFile = $this->getDirCookie() . $this->getCookieFile() . ".cookie";
@@ -994,6 +1005,9 @@ class cGetContent
 					$descriptor['option'][$option] = "http://webcache.googleusercontent.com/search?q=cache:" . $match['url'];
 					return true;
 				}
+				break;
+			case CURLOPT_PROXY:
+				$this->_useProxy = true;
 				break;
 			case CURLOPT_HTTPHEADER:
 				if (!is_array($value) || !count($value)) unset($descriptor['option'][$option]);

@@ -8,24 +8,25 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace stopinfection;
-use GetContent\cGetContent as c_get_content;
+
+use GetContent\cGetContent as cGetContent;
+
 //return array();
-$url_source="http://stopinfection.narod.ru/Proxy.htm";
-$name_source="cool-tests.com";
-$get_stopinfection_content= new cGetContent();
-$get_stopinfection_content->set_encoding_answer(true);
-$get_stopinfection_content->set_encoding_name('UTF-8');
-$get_stopinfection_content->set_type_content("html");
-$answer_stopinfection=$get_stopinfection_content->get_content($url_source);
-$proxy_stopinfection_proxy = array();
-if(!$answer_stopinfection) return array();
-if(!preg_match_all('#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu',$answer_stopinfection,$matches_stopinfection)) return array();
-foreach ($matches_stopinfection['ip'] as $value_stopinfection)
-{
-	$tmp_array['proxy']=trim($value_stopinfection);
-	$tmp_array["source_proxy"]=$name_source;
-	$tmp_array["type_proxy"]='http';
-	$proxy_stopinfection_proxy['content'][]=$tmp_array;
+$urlSource = "http://stopinfection.narod.ru/Proxy.htm";
+$nameSource = "cool-tests.com";
+$getStopinfectionContent = new cGetContent();
+$getStopinfectionContent->setEncodingAnswer(true);
+$getStopinfectionContent->setEncodingName('UTF-8');
+$getStopinfectionContent->setTypeContent("html");
+$answerStopinfection = $getStopinfectionContent->getContent($urlSource);
+$proxyStopinfectionProxy = array();
+if (!$answerStopinfection) return array();
+if (!preg_match_all('#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu', $answerStopinfection, $matchesStopinfection)) return array();
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+foreach ($matchesStopinfection['ip'] as $valueStopinfection) {
+	$tmpArray['proxy'] = trim($valueStopinfection);
+	$proxyStopinfectionProxy['content'][] = $tmpArray;
 }
-unset($url_source, $name_source, $get_stopinfection_content, $answer_stopinfection, $matches_stopinfection, $value_stopinfection);
-return is_array($proxy_stopinfection_proxy) ? $proxy_stopinfection_proxy : array();
+unset($urlSource, $nameSource, $getStopinfectionContent, $answerStopinfection, $matchesStopinfection, $valueStopinfection);
+return is_array($proxyStopinfectionProxy) ? $proxyStopinfectionProxy : array();

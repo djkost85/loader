@@ -8,3 +8,4 @@
  */
 define('GC_ROOT_DIR',dirname(__FILE__));
 define('EXAMPLE_COM','http://test1.ru/');
+ini_set('display_errors',1);

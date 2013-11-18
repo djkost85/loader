@@ -8,14 +8,14 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Обновление всех списков прокси
  */
-use GetContent\cProxy as c_proxy;
+use GetContent\cProxy as cProxy;
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
 require_once dirname(__FILE__)."/../../include.php";
 $proxy= new cProxy();
-$proxy->update_all_proxy_list(true);
+$proxy->updateAllProxyList(true);
 $end = time();
-$list = $proxy->select_proxy_list($proxy->get_default_list_name());
+$list = $proxy->selectProxyList($proxy->getDefaultListName());
 $count = count($list['content']);
 echo date('[H:i:s Y/m/d]', $end);
 echo $echo = $time = "~".round(($end-$start)/60)." m  count $count";

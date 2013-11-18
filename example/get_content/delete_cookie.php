@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Удаление файлов с cookie которым больше часа
  */
-use GetContent\cGetContent as c_get_content;
+use GetContent\cGetContent as cGetContent;
 require_once dirname(__FILE__)."/../../include.php";
 $get_content=new cGetContent();
-$get_content->clear_cookie(3600);
+$get_content->clearCookie(600);

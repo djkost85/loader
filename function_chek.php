@@ -7,14 +7,14 @@
  * Project: GetContent
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-use GetContent\cGetContent as c_get_content;
-use GetContent\cProxy as c_proxy;
-use GetContent\cStringWork as c_string_work;
+use GetContent\cGetContent as cGetContent;
+use GetContent\cProxy as cProxy;
+use GetContent\cStringWork as cStringWork;
 include_once dirname(__FILE__)."/include.php";
 
 $get_content = new cGetContent();
 $string_work = new cStringWork();
 $proxy = new cProxy();
-$get_content->function_check();
-$string_work->function_check();
-$proxy->function_chek();
+$get_content->functionCheck();
+$string_work->functionCheck();
+$proxy->functionChek();

@@ -8,25 +8,26 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace spys;
-use GetContent\cGetContent as c_get_content;
-use GetContent\cStringWork as c_string_work;
+
+use GetContent\cGetContent as cGetContent;
+use GetContent\cStringWork as cStringWork;
+
 return array();
-$url_source="http://spys.ru/aproxy/";
-$name_source="spys.ru";
-$get_spys_content= new cGetContent();
-$get_spys_content->set_type_content("html");
-$get_spys_content->set_default_setting(CURLOPT_POST,true);
-$get_spys_content->set_default_setting(CURLOPT_POSTFIELDS,'sto=%CF%EE%EA%E0%E7%E0%F2%FC+200');
-$answer_spys=$get_spys_content->get_content($url_source);
-if(!$answer_spys) return array();
-if(!$answer_spys=cStringWork::between_tag($answer_spys,'<table width="100%" BORDER=0 CELLPADDING=1 CELLSPACING=1>')) return array();
-if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims",$answer_spys,$matches_spys)) return array();
-foreach ($matches_spys['ip'] as $value_spys)
-{
-	$tmp_array['proxy']=trim($value_spys);
-	$tmp_array["source_proxy"]=$name_source;
-	$tmp_array["type_proxy"]='http';
-	$proxy_spys_proxy['content'][]=$tmp_array;
+$urlSource = "http://spys.ru/aproxy/";
+$nameSource = "spys.ru";
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+$getSpysContent = new cGetContent();
+$getSpysContent->setTypeContent("html");
+$getSpysContent->setDefaultSetting(CURLOPT_POST, true);
+$getSpysContent->setDefaultSetting(CURLOPT_POSTFIELDS, 'sto=%CF%EE%EA%E0%E7%E0%F2%FC+200');
+$answerSpys = $getSpysContent->get_content($urlSource);
+if (!$answerSpys) return array();
+if (!$answerSpys = cStringWork::between_tag($answerSpys, '<table width="100%" BORDER=0 CELLPADDING=1 CELLSPACING=1>')) return array();
+if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerSpys, $matchesSpys)) return array();
+foreach ($matchesSpys['ip'] as $valueSpys) {
+	$tmpArray['proxy'] = trim($valueSpys);
+	$proxySpysProxy['content'][] = $tmpArray;
 }
-unset($answer_spys, $get_spys_content);
-return is_array($proxy_spys_proxy)? $proxy_spys_proxy : array();
+unset($answerSpys, $getSpysContent);
+return is_array($proxySpysProxy) ? $proxySpysProxy : array();

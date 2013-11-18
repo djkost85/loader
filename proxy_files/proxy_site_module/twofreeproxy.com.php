@@ -8,39 +8,39 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace twofreeproxy;
-use GetContent\cGetContent as c_get_content;
 
-$url_source="http://2freeproxy.com/wp-content/plugins/proxy/load_proxy.php";
-$name_source="2freeproxy.com";
-$proxy_twofreeproxy_proxy = array();
-$get_twofreeproxy_content= new cGetContent();
-$get_twofreeproxy_content->set_type_content("text");
-$http_head=array(
-'Host: 2freeproxy.com',
-'User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0',
-'Accept: application/json, text/javascript, */*; q=0.01',
-'Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
-'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
-'X-Requested-With: XMLHttpRequest',
-'Referer: http://2freeproxy.com/anonymous-proxy.html',
-'Content-Length: 14',
-'Connection: keep-alive',
-'Pragma: no-cache',
-'Cache-Control: no-cache'
+use GetContent\cGetContent as cGetContent;
+
+$urlSource = "http://2freeproxy.com/wp-content/plugins/proxy/load_proxy.php";
+$nameSource = "2freeproxy.com";
+$proxyTwofreeproxyProxy = array();
+$getTwofreeproxyContent = new cGetContent();
+$getTwofreeproxyContent->setTypeContent("text");
+$httpHead = array(
+	'Host: 2freeproxy.com',
+	'User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0',
+	'Accept: application/json, text/javascript, */*; q=0.01',
+	'Accept-Language: ru-RU,ru;q=0.8,en-US;q=0.5,en;q=0.3',
+	'Content-Type: application/x-www-form-urlencoded; charset=UTF-8',
+	'X-Requested-With: XMLHttpRequest',
+	'Referer: http://2freeproxy.com/anonymous-proxy.html',
+	'Content-Length: 14',
+	'Connection: keep-alive',
+	'Pragma: no-cache',
+	'Cache-Control: no-cache'
 );
-$get_twofreeproxy_content->set_default_setting(CURLOPT_HTTPHEADER,$http_head);
-$get_twofreeproxy_content->set_default_setting(CURLOPT_REFERER,'http://2freeproxy.com/anonymous-proxy.html');
-$get_twofreeproxy_content->set_default_setting(CURLOPT_USERAGENT,'Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0');
-$get_twofreeproxy_content->set_default_setting(CURLOPT_POST,true);
-$get_twofreeproxy_content->set_default_setting(CURLOPT_POSTFIELDS,'type=anonymous');
-$answer_twofreeproxy=$get_twofreeproxy_content->get_content($url_source);
-$tmp_proxy_array=array();
-if($answer_twofreeproxy)
-{
-	$tmp_json_proxy=json_decode($answer_twofreeproxy,true);
-	$tmp_proxy_array=explode('<br>',$tmp_json_proxy['proxy']);
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_HTTPHEADER, $httpHead);
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_REFERER, 'http://2freeproxy.com/anonymous-proxy.html');
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0');
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_POST, true);
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_POSTFIELDS, 'type=anonymous');
+$answerTwofreeproxy = $getTwofreeproxyContent->getContent($urlSource);
+$tmpProxyArray = array();
+if ($answerTwofreeproxy) {
+	$tmpJsonProxy = json_decode($answerTwofreeproxy, true);
+	$tmpProxyArray = explode('<br>', $tmpJsonProxy['proxy']);
 }
-$http_head=array(
+$httpHead = array(
 	'Host: 2freeproxy.com',
 	'User-Agent: Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0',
 	'Accept: application/json, text/javascript, */*; q=0.01',
@@ -53,23 +53,21 @@ $http_head=array(
 	'Pragma: no-cache',
 	'Cache-Control: no-cache'
 );
-$get_twofreeproxy_content->set_default_setting(CURLOPT_HTTPHEADER,$http_head);
-$get_twofreeproxy_content->set_default_setting(CURLOPT_REFERER,'http://2freeproxy.com/elite-proxy.html');
-$get_twofreeproxy_content->set_default_setting(CURLOPT_POST,true);
-$get_twofreeproxy_content->set_default_setting(CURLOPT_POSTFIELDS,'type=elite');
-$answer_twofreeproxy=$get_twofreeproxy_content->get_content($url_source);
-$tmp_proxy_array2=array();
-if($answer_twofreeproxy)
-{
-	$tmp_json_proxy=json_decode($answer_twofreeproxy,true);
-	$tmp_proxy_array2=explode('<br>',$tmp_json_proxy['proxy']);
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_HTTPHEADER, $httpHead);
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_REFERER, 'http://2freeproxy.com/elite-proxy.html');
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_POST, true);
+$getTwofreeproxyContent->setDefaultSetting(CURLOPT_POSTFIELDS, 'type=elite');
+$answerTwofreeproxy = $getTwofreeproxyContent->getContent($urlSource);
+$tmpProxyArray2 = array();
+if ($answerTwofreeproxy) {
+	$tmpJsonProxy = json_decode($answerTwofreeproxy, true);
+	$tmpProxyArray2 = explode('<br>', $tmpJsonProxy['proxy']);
 }
-$tmp_proxy_new=array_merge($tmp_proxy_array2,$tmp_proxy_array);
-foreach ($tmp_proxy_new as $value_poststar)
-{
-	$tmp_array['proxy']=trim($value_poststar);
-	$tmp_array["source_proxy"]=$name_source;
-	$tmp_array["type_proxy"]='http';
-	$proxy_twofreeproxy_proxy['content'][]=$tmp_array;
+$tmpProxyNew = array_merge($tmpProxyArray2, $tmpProxyArray);
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+foreach ($tmpProxyNew as $valuePoststar) {
+	$tmpArray['proxy'] = trim($valuePoststar);
+	$proxyTwofreeproxyProxy['content'][] = $tmpArray;
 }
-return is_array($proxy_twofreeproxy_proxy) ? $proxy_twofreeproxy_proxy : array() ;
+return is_array($proxyTwofreeproxyProxy) ? $proxyTwofreeproxyProxy : array();

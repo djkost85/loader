@@ -8,24 +8,24 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 namespace poststar;
-use GetContent\cGetContent as c_get_content;
-use GetContent\cStringWork as c_string_work;
 
-$url_source="http://www.poststar.ru/proxy.htm";
-$name_source="poststar.ru";
-$get_poststar_content= new cGetContent();
-$get_poststar_content->set_type_content("html");
-$answer_poststar=$get_poststar_content->get_content($url_source);
-if(!$answer_poststar) return array();
-if(!$answer_poststar=cStringWork::between_tag($answer_poststar,'<table width="730" border="0" align="center">')) return array();
-if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims",$answer_poststar,$matches_poststar)) return array();
-$proxy_poststar_proxy=array();
-foreach ($matches_poststar['ip'] as $value_poststar)
-{
-	$tmp_array['proxy']=trim($value_poststar);
-	$tmp_array["source_proxy"]=$name_source;
-	$tmp_array["type_proxy"]='http';
-	$proxy_poststar_proxy['content'][]=$tmp_array;
+use GetContent\cGetContent as cGetContent;
+use GetContent\cStringWork as cStringWork;
+
+$urlSource = "http://www.poststar.ru/proxy.htm";
+$nameSource = "poststar.ru";
+$getPoststarContent = new cGetContent();
+$getPoststarContent->setTypeContent("html");
+$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["type_proxy"] = 'http';
+$answerPoststar = $getPoststarContent->getContent($urlSource);
+if (!$answerPoststar) return array();
+if (!$answerPoststar = cStringWork::betweenTag($answerPoststar, '<table width="730" border="0" align="center">')) return array();
+if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerPoststar, $matchesPoststar)) return array();
+$proxyPoststarProxy = array();
+foreach ($matchesPoststar['ip'] as $valuePoststar) {
+	$tmpArray['proxy'] = trim($valuePoststar);
+	$proxyPoststarProxy['content'][] = $tmpArray;
 }
-unset($get_poststar_content, $answer_poststar);
-return is_array($proxy_poststar_proxy)? $proxy_poststar_proxy : array();
+unset($getPoststarContent, $answerPoststar);
+return is_array($proxyPoststarProxy) ? $proxyPoststarProxy : array();

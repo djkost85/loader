@@ -9,39 +9,36 @@
  */
 // "cool-proxy.net"=>"http://cool-proxy.net/proxies/http_proxy_list/page:",
 namespace cool_proxy;
-use GetContent\cGetContent as c_get_content;
-use GetContent\cStringWork as c_string_work;
-$url_source="http://www.cool-proxy.net/proxies/http_proxy_list/page:";
-$name_source="cool-proxy.net";
-$get_cool_proxy_content= new cGetContent();
-$get_cool_proxy_content->set_type_content("html");
-$i=1;
-if(!$content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc")) return array();
-if(preg_match_all('#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<pagenation>\d*)"#iUm', $content, $matches))
-{
-	$count_page=max($matches['pagenation']);
-}
-else return array();
+
+use GetContent\cGetContent as cGetContent;
+use GetContent\cStringWork as cStringWork;
+
+$urlSource = "http://www.cool-proxy.net/proxies/http_proxy_list/page:";
+$nameSource = "cool-proxy.net";
+$getCoolProxyContent = new cGetContent();
+$getCoolProxyContent->setTypeContent("html");
+$i = 1;
+if (!$content = $getCoolProxyContent->getContent($urlSource . $i . "/sort:working_average/direction:asc")) return array();
+if (preg_match_all('#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<pagenation>\d*)"#iUm', $content, $matches)) {
+	$countPage = max($matches['pagenation']);
+} else return array();
 unset($matches);
-$proxy_cool_proxy=array();
-do{
-	if($count_proxy=preg_match_all('#<td\s*style=\"text.align.left.\s*font.weight.bold.\"><script type="text/javascript">document\.write\(Base64\.decode\("(?<ip_base64>.*)"\)\)</script></td>\s*<td>(?<port>\d+)</td>#iUms', $content, $matches))
-	{
-	for($j=0;$j<$count_proxy;$j++)
-	{
-	    $is_ip=base64_decode($matches['ip_base64'][$j]).":".$matches['port'][$j];
-	    if(cStringWork::is_ip($is_ip))
-	    {
-	        $tmp_array['proxy']=trim($is_ip);
-	        $tmp_array["source_proxy"]=$name_source;
-	        $tmp_array["type_proxy"]='http';
-	        $proxy_cool_proxy['content'][]=$tmp_array;
-	    }
-	}
+$proxyCoolProxy = array();
+do {
+	if ($countProxy = preg_match_all('#<td\s*style=\"text.align.left.\s*font.weight.bold.\"><script type="text/javascript">document\.write\(Base64\.decode\("(?<ip_base64>.*)"\)\)</script></td>\s*<td>(?<port>\d+)</td>#iUms', $content, $matches)) {
+		$tmpArray["source_proxy"] = $nameSource;
+		$tmpArray["type_proxy"] = 'http';
+		for ($j = 0; $j < $countProxy; $j++) {
+			$is_ip = base64_decode($matches['ip_base64'][$j]) . ":" . $matches['port'][$j];
+			if (cStringWork::isIp($is_ip)) {
+				$tmpArray['proxy'] = trim($is_ip);
+				$proxyCoolProxy['content'][] = $tmpArray;
+			}
+		}
 	}
 	$i++;
-	sleep(rand(1,3));
-	$content=$get_cool_proxy_content->get_content($url_source.$i."/sort:working_average/direction:asc");
-}while($i<=$count_page);
-unset($url_source, $name_source, $get_cool_proxy_content, $content, $count_proxy);
-return is_array($proxy_cool_proxy) ? $proxy_cool_proxy : array();
+	sleep(rand(1, 3));
+	$content = $getCoolProxyContent->getContent($urlSource . $i . "/sort:working_average/direction:asc");
+} while ($i <= $countPage);
+unset($urlSource, $nameSource, $getCoolProxyContent, $content, $countProxy);
+return is_array($proxyCoolProxy) ? $proxyCoolProxy : array();
