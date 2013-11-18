@@ -974,7 +974,6 @@ class cProxy
 						$goodProxy[] = $infoProxy;
 					}
 				}
-				unset($value);
 			}
 			$this->_getContent->restoreDefaultSettings();
 			if (count($goodProxy)) return $goodProxy;

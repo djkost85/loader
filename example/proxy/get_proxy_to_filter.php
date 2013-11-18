@@ -7,14 +7,14 @@
  * Project: bezagenta.lg.ua
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-use GetContent\cProxy as c_proxy;
+use GetContent\cProxy as cProxy;
 ini_set('display_errors',1);
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
 $proxy = new cProxy();
 $name = 'all';
-$proxy->select_proxy_list($name);
-$list = $proxy->get_proxy_list();
+$proxy->selectProxyList($name);
+$list = $proxy->getProxyList();
 $functionList = array(
 	'cookie',
 	'get',
@@ -29,7 +29,7 @@ if(isset($_GET['filter'])){
 	foreach($functionList as $functionName){
 		if(isset($_GET[$functionName]) && $_GET[$functionName]) $function[$functionName] = $_GET[$functionName];
 	}
-	$proxyList = $proxy->get_proxy_by_function($list['content'],$function);
+	$proxyList = $proxy->getProxyByFunction($list['content'],$function);
 	foreach($proxyList as $ipProxy){
 		$data[] = $ipProxy['proxy'];
 	}

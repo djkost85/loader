@@ -11,16 +11,16 @@
 use GetContent\cGetContent as cGetContent;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(600);
-$get_content = new cGetContent();
-$get_content->setModeGetContent('multi'); // Режим multi
-$get_content->setCountMultiStream(2); // количество запросов к одному url, подразумевается использование для работы с прокси, на случай если прокси не вренет результат, то другой вернет, и выберается самый большой результат
-$get_content->setTypeContent('html'); // Ожидаемый контент html страница
+$getContent = new cGetContent();
+$getContent->setModeGetContent('multi'); // Режим multi
+$getContent->setCountMultiStream(2); // количество запросов к одному url, подразумевается использование для работы с прокси, на случай если прокси не вренет результат, то другой вернет, и выберается самый большой результат
+$getContent->setTypeContent('html'); // Ожидаемый контент html страница
 $url[]="http://ya.ru";
 $url[]="http://vk.com";
 $url[]="http://google.com";
 $url[]="http://bpteam.net";
-$get_content->getContent($url);
-$answer=$get_content->getAnswer();
+$getContent->getContent($url);
+$answer=$getContent->getAnswer();
 var_dump($answer);
 /*
  * $_answer[0] содержимое http://ya.ru
@@ -28,7 +28,7 @@ var_dump($answer);
  * $_answer[2] содержимое http://google.com
  * $_answer[3] содержимое http://bpteam.net
  */
-$answer=$get_content->getAnswer(true);
+$answer=$getContent->getAnswer(true);
 /*
  * $_answer[0][0] содержимое http://ya.ru
  * $_answer[0][1] содержимое http://ya.ru

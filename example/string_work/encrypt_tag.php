@@ -8,11 +8,11 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Тест функций кодирования HTML тегов
  */
-use GetContent\cStringWork as c_string_work;
+use GetContent\cStringWork as cStringWork;
 require_once dirname(__FILE__)."/../../include.php";
 $html=file_get_contents('test.htm');
 $sw= new cStringWork($html);
-$sw->encrypt_tag();
+$sw->encryptTag();
 //echo $sw->getText(); // строка с закодироваными тегами
-$sw->decrypt_tag();
+$sw->decryptTag();
 //echo $sw->getText(); // строка с декодированными тегами

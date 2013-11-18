@@ -11,12 +11,12 @@
 use GetContent\cGetContent as cGetContent;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(600);
-$get_content = new cGetContent();
-$get_content->setModeGetContent('single');// Режим single
+$getContent = new cGetContent();
+$getContent->setModeGetContent('single');// Режим single
 //$_getContent->setTypeContent('html'); // Ожидаемый контент html страница
 $url='http://ya.ru';
-$get_content->setCookieFile('test');
-$answer=$get_content->getContent($url);
+$getContent->setCookieFile('test');
+$answer=$getContent->getContent($url);
 var_dump($answer);
 /*
  * $answert содержимое страницы $url

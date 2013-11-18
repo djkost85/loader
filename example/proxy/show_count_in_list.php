@@ -7,11 +7,11 @@
  * Project: bezagenta.lg.ua
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-use GetContent\cProxy as c_proxy;
+use GetContent\cProxy as cProxy;
 require_once dirname(__FILE__)."/../../include.php";
 $proxy = new cProxy();
-foreach ($proxy->get_all_name_proxy_list() as $name) {
-	$proxy->select_proxy_list($name);
-	$list = $proxy->get_proxy_list();
+foreach ($proxy->getAllNameProxyList() as $name) {
+	$proxy->selectProxyList($name);
+	$list = $proxy->getProxyList();
 	echo $name . '=>' .count($list['content']) . "<br/>\n";
 }

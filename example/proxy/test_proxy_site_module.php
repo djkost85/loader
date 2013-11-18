@@ -8,14 +8,14 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * @info Передать в Get параметр t имя тестируемого модуля.
  */
-use GetContent\cProxy as c_proxy;
+use GetContent\cProxy as cProxy;
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
 $proxy= new cProxy();
 $test_module = isset($_GET['t']) ? $_GET['t'] : 'cool';
-$data=$proxy->test_download_proxy($test_module);
+$data=$proxy->testDownloadProxy($test_module);
 $end = time();
 echo date('[H:i:s Y/m/d]', $end);
 echo '[~'.(($end-$start)/60).' min]';

@@ -12,25 +12,25 @@ use GetContent\cGetContent as cGetContent;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(0);
 
-$url_1[]='http://ya.ru';
-$url_1[]='http://habrahabr.ru';
-$url_1[]='http://google.com';
-$get_content_1=new cGetContent();
-$get_content_1->setUseProxy(true); //Включаем работу через прокси
-$get_content_1->proxy->selectProxyList('all'); // Выбираем список прокси
-$get_content_1->proxy->setMethodGetProxy('random');//Включаем метод получения прокси random
+$url1[]='http://ya.ru';
+$url1[]='http://habrahabr.ru';
+$url1[]='http://google.com';
+$getContent1=new cGetContent();
+$getContent1->setUseProxy(true); //Включаем работу через прокси
+$getContent1->proxy->selectProxyList('all'); // Выбираем список прокси
+$getContent1->proxy->setMethodGetProxy('random');//Включаем метод получения прокси random
 
-$url_2[]='http://bpteam.net';
-$url_2[]='http://radio-t.com';
-$get_content_2=new cGetContent();
-$get_content_2->setUseProxy(true); //Включаем работу через прокси
-$get_content_2->proxy->selectProxyList('all'); // Выбираем список прокси
-$get_content_2->proxy->setMethodGetProxy('random');//Включаем метод получения прокси random
-$get_content_2->setCountMultiStream(2); // Количество запросов к одному url
+$url2[]='http://bpteam.net';
+$url2[]='http://radio-t.com';
+$getContent2=new cGetContent();
+$getContent2->setUseProxy(true); //Включаем работу через прокси
+$getContent2->proxy->selectProxyList('all'); // Выбираем список прокси
+$getContent2->proxy->setMethodGetProxy('random');//Включаем метод получения прокси random
+$getContent2->setCountMultiStream(2); // Количество запросов к одному url
 
-$answer=$get_content_1->getContent($url_1);
-$answer=$get_content_2->getContent($url_2);
-$answer=$get_content_1->getContent($url_1);
-$answer=$get_content_2->getContent($url_2);
-$answer=$get_content_1->getContent($url_2);
-$answer=$get_content_2->getContent($url_1);
+$answer=$getContent1->getContent($url1);
+$answer=$getContent2->getContent($url2);
+$answer=$getContent1->getContent($url1);
+$answer=$getContent2->getContent($url2);
+$answer=$getContent1->getContent($url2);
+$answer=$getContent2->getContent($url1);

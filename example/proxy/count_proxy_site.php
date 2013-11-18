@@ -8,13 +8,13 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
-use GetContent\cProxy as c_proxy;
+use GetContent\cProxy as cProxy;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
 $proxy = new cProxy();
 $name = isset($_GET['l']) ? $_GET['l'] : 'all';
-$proxy->select_proxy_list($name);
-$list = $proxy->get_proxy_list();
+$proxy->selectProxyList($name);
+$list = $proxy->getProxyList();
 
 foreach ($list['content'] as $proxy) {
 	$source[$proxy['source_proxy']][] = $proxy['proxy'];
@@ -28,16 +28,16 @@ foreach ($list['content'] as $proxy) {
 echo "<p>last update : ".date("H:i:s d-m-Y",$list['time'])."</p>";
 echo '<p>------------FUNCTION----------</p>';
 arsort($data);
-foreach ($data as $source_proxy => $proxyes) {
-	echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
+foreach ($data as $sourceProxy => $proxyes) {
+	echo '<p>'.$sourceProxy.':'.count($proxyes).'</p>';
 }
 echo '<p>------------SOURCE----------</p>';
 arsort($source);
-foreach ($source as $source_proxy => $proxyes) {
-		echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
+foreach ($source as $sourceProxy => $proxyes) {
+		echo '<p>'.$sourceProxy.':'.count($proxyes).'</p>';
 }
 echo '<p>------------COUNTRY----------</p>';
 arsort($country);
-foreach ($country as $source_proxy => $proxyes) {
-		echo '<p>'.$source_proxy.':'.count($proxyes).'</p>';
+foreach ($country as $sourceProxy => $proxyes) {
+		echo '<p>'.$sourceProxy.':'.count($proxyes).'</p>';
 }
