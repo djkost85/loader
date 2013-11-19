@@ -205,7 +205,7 @@ class cGetContent
 		$this->setUseProxy(false);
 		$this->setNumberRepeat(0);
 		$this->setMaxNumberRepeat(10);
-		$this->setMinSizeAnswer(100);
+		$this->setMinSizeAnswer(1);
 		$this->setTypeContent("text");
 		$this->setInCache(false);
 		$this->setEncodingAnswer(true);
@@ -370,7 +370,7 @@ class cGetContent
 			CURLOPT_TIMEOUT => 30,
 			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36",
 			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_FOLLOWLOCATION => false,
+			CURLOPT_FOLLOWLOCATION => true,
 			CURLOPT_REFERER => '',
 			CURLOPT_POSTFIELDS => '',
 			CURLOPT_POST => false,
@@ -640,12 +640,12 @@ class cGetContent
 		switch ($val) {
 			case 'single':
 				$this->_modeGetContent = 'single';
-				$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,false);
+				//$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,false);
 				break;
 			case 'multi':
 				$this->_modeGetContent = 'multi';
 				if ($this->getCountMultiCurl() < 1) $this->setCountMultiCurl(1);
-				$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,true);
+				//$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,true);
 				break;
 			default:
 				return false;
@@ -829,14 +829,14 @@ class cGetContent
 			$this->setReferer($url);
 			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
 			$descriptor['info']['header'] = $this->getHeader($answer);
-			if($this->isRedirect()){
+			/*if($this->isRedirect()){
 				if($this->useRedirect()){
-					$answer = $this->getSingleContent(urldecode($descriptor['info']['redirect_url']), $reg);
+					$answer = $this->getSingleContent($descriptor['info']['redirect_url'], $reg);
 				} else {
 					return false;
 				}
 			}
-			$this->setRedirectCount(0);
+			$this->setRedirectCount(0);*/
 			if ($reg && preg_match($reg, $answer)) $regAnswer = true;
 			else $regAnswer = false;
 			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {

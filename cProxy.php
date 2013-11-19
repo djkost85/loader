@@ -376,7 +376,9 @@ class cProxy
 			$this->_getContent->getContent("http://2ip.ru/");
 			$answer = $this->_getContent->getAnswer();
 			$reg = "/<span>\s*Ваш IP адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
-			if (preg_match($reg, $answer, $match) && !isset($match['ip']) || !$match['ip'] || !cStringWork::isIp($match['ip'])) return false;
+			if (preg_match($reg, $answer, $match) && !isset($match['ip']) || !$match['ip'] || !cStringWork::isIp($match['ip'])){
+				exit('NO SERVER IP');
+			}
 			$this->_serverIp = $match['ip'];
 		}
 		return $this->_serverIp;
