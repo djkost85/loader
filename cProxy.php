@@ -908,8 +908,10 @@ class cProxy
 		$this->setListType('static');
 		$this->setMethodGetProxy('random');
 		$this->_proxyList = array();
-		foreach(explode("\n",$proxy) as $proxy){
-			$this->_proxyList['content'][] = array('proxy' => $proxy);
+		if(preg_match_all('#(?<proxy>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})))#ims',$proxy,$matches)){
+			foreach($matches['proxy'] as $findProxy){
+				$this->_proxyList['content'][] = array('proxy' => $findProxy);
+			}
 		}
 	}
 
