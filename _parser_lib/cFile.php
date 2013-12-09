@@ -93,6 +93,38 @@ class cFile {
 		return $this->_own;
 	}
 
+	private function access($function){
+		if($this->getOwn()){
+			$res = $function(func_get_arg(1), func_get_arg(2));
+		} elseif($this->lock()){
+			$res = $function(func_get_arg(1), func_get_arg(2));
+			$this->free();
+		} else {
+			$res = false;
+		}
+		return $res;
+	}
+
+	/**
+	 * Ожидать пока освободиться файл или нет
+	 * @var bool
+	 */
+	private $_waitFree = false;
+
+	/**
+	 * @param boolean $waitFree
+	 */
+	public function setWaitFree($waitFree) {
+		$this->_waitFree = $waitFree;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getWaitFree() {
+		return $this->_waitFree;
+	}
+
 	function __construct($name = null){
 		if($name){
 			$this->open($name);
@@ -116,16 +148,16 @@ class cFile {
 
 	/**
 	 * Блокировка файла от других процессов
-	 * @param bool $waitFree ждать пока освободиться или нет
 	 * @return bool
 	 */
-	public function lock($waitFree = false){
+	public function lock(){
 		if (is_resource($this->getHead())) {
-			if($waitFree){
-				return flock($this->getHead(), LOCK_EX);
+			if($this->getWaitFree()){
+				$this->setOwn(flock($this->getHead(), LOCK_EX));
 			} else {
-				return flock($this->getHead(), LOCK_EX | LOCK_NB);
+				$this->setOwn(flock($this->getHead(), LOCK_EX | LOCK_NB));
 			}
+			return $this->getOwn();
 		} else {
 			return false;
 		}
@@ -134,14 +166,15 @@ class cFile {
 	public function free(){
 		if (is_resource($this->getHead())) {
 			fflush($this->getHead());
-			return flock($this->getHead(), LOCK_UN);
+			$this->setOwn(!flock($this->getHead(), LOCK_UN));
+			return $this->getOwn();
 		} else {
 			return false;
 		}
 	}
 
 	public function write($data){
-		$res = fwrite($this->getHead(),$data);
+		$res = $this->access('fwrite', $this->getHead(), $data);
 		fflush ($this->getHead());
 		return $res;
 	}
@@ -156,7 +189,7 @@ class cFile {
 		$fSize = filesize($this->getName());
 		$data = '';
 		if($fSize){
-			$data = fread($this->getHead(), $fSize);
+			$data = $this->access('fread', $this->getHead(), $fSize);
 		}
 		if (strlen($data) == $fSize && $data !== false) {
 			return $data;
@@ -173,7 +206,7 @@ class cFile {
 	}
 
 	public function clear(){
-		return ftruncate($this->getHead(), 0);
+		return $this->access('ftruncate', $this->getHead(), 0);
 	}
 
 } 

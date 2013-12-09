@@ -17,29 +17,28 @@ $functions = array(
 	'testOpenFile',
 	'testWriteFile',
 	'testReadFile',
-	//'testClearFile',
+	'testClearFile',
 	'testWriteLock',
 	'testReadLock',
 	'testClose',
 	'testCantWriteLock',
 	'testCantReadLock',
-	//'testCantDeleteLock',
+	'testCantDeleteLock',
 	'testCantBlockLock',
-	//'testDeleteLock',
+	'testDeleteLock',
 );
 
 $start = microtime(true);
 echo date("[H:i:s Y/m/d]", $start)."\n<br>\n";
 $echo = '';
 foreach($functions as $function){
-	$echo .= $function;
+	echo $function;
 	if($function()){
-		$echo .= " success \n<br>\n";
+		echo " success \n<br>\n";
 	} else {
-		$echo .= " <b>ERROR</b> \n<br>\n";
+		echo " <b>ERROR</b> \n<br>\n";
 	}
 }
-echo $echo;
 $end = microtime(true);
 echo date('[H:i:s Y/m/d]', $end)."\n<br>\n";
 echo '[~'.($end-$start).']';
@@ -56,7 +55,7 @@ function testOpenFile(){
 
 function testWriteFile(){
 	$file = new cFile(FILE_NAME);
-	return $file->write('hello world');
+	return $file->write('hello world'. microtime(true) . "\n");
 }
 
 function testReadFile(){
@@ -72,7 +71,7 @@ function testClearFile(){
 function testWriteLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$fileBlock->lock();
-	$res = $fileBlock->write('hello');
+	$res = $fileBlock->write("hello ". microtime(true) . "\n");
 	$fileBlock->free();
 	return $res;
 }
@@ -100,7 +99,7 @@ function testCantWriteLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$file = new cFile(FILE_NAME);
 	$fileBlock->lock();
-	$res = $file->write('not hello');
+	$res = $file->write('not hello'. microtime(true) . "\n");
 	$fileBlock->free();
 	return (!$res);
 }
