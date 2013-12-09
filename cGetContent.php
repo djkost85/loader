@@ -213,7 +213,6 @@ class cGetContent
 		$this->setCheckAnswer(false);
 		$this->setRedirectCount(0);
 		$this->setMaxRedirect(10);
-		$this->setReferer('');
 		$this->setUseStaticCookie(false);
 		$this->setModeGetContent('single');
 	}
@@ -318,9 +317,9 @@ class cGetContent
 		return $this->_cookieFile;
 	}
 
-	public function setReferer($val){
+	public function setReferer(&$descriptor,$val){
 		$this->_referer = $val;
-		$this->setDefaultSetting(CURLOPT_REFERER, $this->_referer);
+		$this->setOptionToDescriptor($descriptor, CURLOPT_REFERER, $this->_referer);
 	}
 
 	public function getReferer(){
@@ -370,7 +369,7 @@ class cGetContent
 			CURLOPT_TIMEOUT => 30,
 			CURLOPT_USERAGENT => "Mozilla/5.0 (Windows NT 6.2; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/30.0.1599.101 Safari/537.36",
 			CURLOPT_RETURNTRANSFER => true,
-			CURLOPT_FOLLOWLOCATION => true,
+			CURLOPT_FOLLOWLOCATION => false,
 			CURLOPT_REFERER => '',
 			CURLOPT_POSTFIELDS => '',
 			CURLOPT_POST => false,
@@ -388,11 +387,14 @@ class cGetContent
 	public function setUseProxy($value = false) {
 		switch ((bool)$value) {
 			case true:
-				if (is_string($value) && cStringWork::isIp($value)) $this->proxy = $value;
-				elseif(!is_object($this->proxy)) {
+				if (is_string($value)){
+					if(cStringWork::isIp($value)){
+						$this->proxy = $value;
+					} else {
+						$value = false;
+					}
+				} elseif(!is_object($this->proxy)) {
 					$this->proxy = new cProxy();
-				} else {
-					$value = true;
 				}
 				break;
 			case false:
@@ -640,12 +642,12 @@ class cGetContent
 		switch ($val) {
 			case 'single':
 				$this->_modeGetContent = 'single';
-				//$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,false);
+				$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,false);
 				break;
 			case 'multi':
 				$this->_modeGetContent = 'multi';
 				if ($this->getCountMultiCurl() < 1) $this->setCountMultiCurl(1);
-				//$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,true);
+				$this->setDefaultSetting(CURLOPT_FOLLOWLOCATION,true);
 				break;
 			default:
 				return false;
@@ -823,20 +825,20 @@ class cGetContent
 		$descriptor =& $this->getDescriptor();
 		do {
 			if ($this->getNumberRepeat() > 0) $this->reinitGetContent();
-			$this->setDefaultSetting(CURLOPT_URL, $url);
+			$this->setOptionToDescriptor($descriptor, CURLOPT_URL, $url);
 			$this->setOptionsToDescriptor($descriptor);
 			$answer = $this->execSingleGetContent();
-			$this->setReferer($url);
+			$this->setReferer($descriptor, $url);
 			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
 			$descriptor['info']['header'] = $this->getHeader($answer);
-			/*if($this->isRedirect()){
+			if($this->isRedirect()){
 				if($this->useRedirect()){
 					$answer = $this->getSingleContent($descriptor['info']['redirect_url'], $reg);
 				} else {
 					return false;
 				}
 			}
-			$this->setRedirectCount(0);*/
+			$this->setRedirectCount(0);
 			if ($reg && preg_match($reg, $answer)) $regAnswer = true;
 			else $regAnswer = false;
 			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {

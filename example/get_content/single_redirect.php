@@ -13,7 +13,7 @@ require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(600);
 $getContent = new cGetContent();
 $getContent->setModeGetContent('single');// Режим single
-$url='http://free-lance.dyndns.info/lib3/get_content/example/test/test_query.php';
+$url='http://free-lance.dyndns.info/lib3/get_content/example/test/test_redirect.php';
 $getContent->setCookieFile('test');
 $answer=$getContent->getContent($url);
 var_dump($answer);

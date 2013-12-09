@@ -1082,8 +1082,8 @@ class cProxy
 				$infoProxy['type_proxy'] = '';
 			} else {
 				$infoProxy['proxy'] = $proxy['proxy'];
-				$infoProxy['source_proxy'] = $proxy['source_proxy'];
-				$infoProxy['type_proxy'] = $proxy['type_proxy'];
+				$infoProxy['source_proxy'] = isset($proxy['source_proxy'])?$proxy['source_proxy']:'';
+				$infoProxy['type_proxy'] = isset($proxy['type_proxy'])?$proxy['type_proxy']:'';
 			}
 			$infoProxy['anonym'] = (int)$matches['fun_status'][0];
 			$infoProxy['referer'] = (int)$matches['fun_status'][1];
