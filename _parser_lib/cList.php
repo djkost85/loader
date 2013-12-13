@@ -17,6 +17,24 @@ namespace GetContent;
 class cList {
 
 	/**
+	 * @var int максимальная глубина списка
+	 */
+	private $_maxLevel = 1000;
+
+	/**
+	 * @param int $maxLevel
+	 */
+	public function setMaxLevel($maxLevel) {
+		$this->_maxLevel = $maxLevel;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getMaxLevel() {
+		return $this->_maxLevel;
+	}
+	/**
 	 * @var array
 	 */
 	private $_list;
@@ -63,7 +81,7 @@ class cList {
 
 	public function open($name){
 		$this->_file->open($name);
-		$json = json_decode($this->_file->read(),true);
+		$json = json_decode($this->_file->read(),true,$this->getMaxLevel());
 		if(!$json){
 			return false;
 		}
@@ -71,20 +89,96 @@ class cList {
 		return true;
 	}
 
-	public function find($level, $needle){
-
+	public function save(){
+		$this->_file->lock();
+		$this->_file->clear();
+		$this->_file->write(json_encode($this->getList()));
+		$this->_file->close();
 	}
 
-	public function getLevel($level, $needle){
 
+	public function find($level, $key = 'key', $value = 'value'){
+		$level =& $this->getLevel($level);
+		if(is_array($level) && array_key_exists($key, $level) && $level[$key] == $value){
+			return $level;
+		} else {
+			return false;
+		}
+	}
+	/**
+	 * @param string     $level имя уровня
+	 * @param array|null $levelData поиск в списке
+	 * @return bool
+	 */
+	public function &getLevel($level, &$levelData = null){
+		if($levelData === null){
+			$levelData =& $this->_list;
+		}
+		if(is_array($levelData)){
+			if(array_key_exists($level, $levelData)){
+				return $levelData[$level];
+			} else {
+				foreach($levelData as &$subLevel){
+					$result =& $this->getLevel($level,$subLevel);
+					if($result){
+						return $result;
+					}
+				}
+				return false;
+			}
+		} else {
+			return false;
+		}
 	}
 
-	public function addLevel($name,$parent = false){
-
+	/**
+	 * @param string      $key
+	 * @param bool|string $parent
+	 * @return bool
+	 */
+	public function addLevel($key,$parent = false){
+		if($parent){
+			$level =& $this->getLevel($parent);
+		} else {
+			$level =& $this->_list;
+		}
+		if(!array_key_exists($key, $level)){
+			$level[$key] = array();
+		}
+		return array_key_exists($key, $level);
 	}
 
 	public function getRandom($level){
+		$level =& $this->getLevel($level);
+		if(is_array($level)){
+			return $level[array_rand($level,1)];
+		} else {
+			return false;
+		}
+	}
 
+	public function push($level, $data){
+		$level =& $this->getLevel($level);
+		if($level){
+			$level[] = $data;
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public function write($level, $key, $value){
+		$level =& $this->getLevel($level);
+		$level[$key] = $value;
+	}
+
+	public function getValue($level, $key){
+		$level =& $this->getLevel($level);
+		if(is_array($level) && array_key_exists($key, $level)){
+			return $level[$key];
+		} else {
+			return false;
+		}
 	}
 
 } 
