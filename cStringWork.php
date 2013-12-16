@@ -28,24 +28,6 @@ class cStringWork
 	}
 
 	/**
-	 * функция для проверки доступа к необходимым ресурсам системы
-	 */
-	public function functionCheck() {
-		echo "cStringWork->functionCheck {</br>\n";
-		$mess = '';
-		if (!is_dir(GC_ROOT_DIR . "/strin_work_files")) {
-			$mess .= "Warning: folder for class files does not exist</br>\n";
-		} else {
-			if (!is_readable(GC_ROOT_DIR . "/strin_work_files")) {
-				$mess .= "Warning: folder for the cookie does not have the necessary rights to use</br>\n";
-			}
-		}
-		if ($mess) echo $mess . " To work correctly, correct the above class cStringWork requirements</br>\n ";
-		else echo "cStringWork ready</br>\n";
-		echo "cStringWork->functionCheck }</br>\n";
-	}
-
-	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
 	 * @param string $text      разбиваемый текст
 	 * @param int    $partSize размер части

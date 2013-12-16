@@ -49,7 +49,7 @@ class cList {
 	/**
 	 * @return array
 	 */
-	public function getList() {
+	public function &getList() {
 		return $this->_list;
 	}
 	/**
@@ -87,12 +87,15 @@ class cList {
 	}
 	public function open($name){
 		$this->_file->open($name);
+		return $this->read();
+	}
+	public function read(){
 		$json = json_decode($this->_file->read(),true,$this->getMaxLevel());
 		if(!$json){
 			return false;
 		}
 		$this->setList($json);
-		return true;
+		return $this->getList();
 	}
 
 	public function save(){
@@ -100,6 +103,21 @@ class cList {
 		$this->_file->clear();
 		$this->_file->write(json_encode($this->getList()));
 		$this->_file->close();
+	}
+
+	public function update(){
+		$this->_file->lock();
+		$newList = $this->getList();
+		$oldList = $this->read();
+		if(is_array($newList) && is_array($oldList)){
+			$newList = array_merge($newList, $oldList);
+			$this->setList($newList);
+			$this->save();
+			return true;
+		} else {
+			$this->_file->free();
+			return false;
+		}
 	}
 
 
