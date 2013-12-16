@@ -79,6 +79,12 @@ class cList {
 		}
 	}
 
+
+	public function create($name){
+		$this->_file->open($name);
+		$this->clear();
+		$this->save();
+	}
 	public function open($name){
 		$this->_file->open($name);
 		$json = json_decode($this->_file->read(),true,$this->getMaxLevel());
@@ -170,6 +176,10 @@ class cList {
 	public function write($level, $key, $value){
 		$level =& $this->getLevel($level);
 		$level[$key] = $value;
+	}
+
+	public function clear(){
+		$this->setList(array());
 	}
 
 	public function getValue($level, $key){
