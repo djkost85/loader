@@ -121,7 +121,7 @@ class cList {
 	}
 
 
-	public function find($level, $key = 'key', $value = 'value'){
+	public function &find($level, $key = 'key', $value = 'value'){
 		$level =& $this->getLevel($level);
 		if(is_array($level) && array_key_exists($key, $level) && $level[$key] == $value){
 			return $level;
@@ -172,7 +172,7 @@ class cList {
 		return array_key_exists($key, $level);
 	}
 
-	public function getRandom($level){
+	public function &getRandom($level){
 		$level =& $this->getLevel($level);
 		if(is_array($level)){
 			return $level[array_rand($level,1)];
@@ -191,16 +191,20 @@ class cList {
 		}
 	}
 
-	public function write($level, $key, $value){
+	public function write($level, $value, $key = null){
 		$level =& $this->getLevel($level);
-		$level[$key] = $value;
+		if(isset($key)){
+			$level[$key] = $value;
+		} else {
+			$this->push($level, $value);
+		}
 	}
 
 	public function clear(){
-		$this->setList(array());
+		$this->setList(array( "/" => array() ));
 	}
 
-	public function getValue($level, $key){
+	public function &getValue($level, $key){
 		$level =& $this->getLevel($level);
 		if(is_array($level) && array_key_exists($key, $level)){
 			return $level[$key];
