@@ -120,11 +120,31 @@ class cList {
 		}
 	}
 
+	public function delete(){
+		return $this->_file->delete();
+	}
 
-	public function &find($level, $key = 'key', $value = 'value'){
+	public function &findByValue($level, $value){
 		$level =& $this->getLevel($level);
-		if(is_array($level) && array_key_exists($key, $level) && $level[$key] == $value){
-			return $level;
+		$keys = array();
+		if(is_array($level)) {
+			foreach($level as $key => $data){
+				if($data == $value || (is_array($data) && in_array($value, $data))){
+					$keys[] = $key;
+				}
+			}
+		}
+		return $keys;
+	}
+
+	public function &findByKey($level, $key){
+		$level =& $this->getLevel($level);
+		if(is_array($level)){
+			if(array_key_exists($key, $level)){
+				return $level[$key];
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
