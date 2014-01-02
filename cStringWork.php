@@ -263,4 +263,46 @@ class cStringWork
 		return key($weights);
 	}
 
+	public function transcriptionRusToEng($text){
+		$abc = array(
+			'А' => 'A',
+			'Б' => 'B',
+			'В' => 'V',
+			'Г' => 'G',
+			'Д' => 'D',
+			'Е' => 'E',
+			'Ё' => 'Yo',
+			'Ж' => 'Zh',
+			'З' => 'Z',
+			'И' => 'I',
+			'Й' => 'Y',
+			'К' => 'K',
+			'Л' => 'L',
+			'М' => 'M',
+			'Н' => 'N',
+			'О' => 'O',
+			'П' => 'P',
+			'Р' => 'R',
+			'С' => 'S',
+			'Т' => 'T',
+			'У' => 'U',
+			'Ф' => 'F',
+			'Х' => 'H',
+			'Ц' => 'C',
+			'Ч' => 'Ch',
+			'Ш' => 'Sh',
+			'Щ' => 'Sch',
+			'Ъ' => '\'',
+			'Ы' => 'Y',
+			'Ь' => '\'',
+			'Э' => 'E',
+			'Ю' => 'Yu',
+			'Я' => 'Ya',
+		);
+		foreach($abc as $rus => $eng){
+			$text = preg_replace('%'.preg_quote('%',$rus).'%smu',$eng,$text);
+			$text = preg_replace('%'.preg_quote('%',$rus).'%ismu',strtolower($eng),$text);
+		}
+		return $text;
+	}
 }
