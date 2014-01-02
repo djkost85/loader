@@ -49,7 +49,7 @@ class cList {
 	/**
 	 * @return array
 	 */
-	public function getList() {
+	public function &getList() {
 		return $this->_list;
 	}
 	/**
@@ -87,12 +87,15 @@ class cList {
 	}
 	public function open($name){
 		$this->_file->open($name);
+		return $this->read();
+	}
+	public function read(){
 		$json = json_decode($this->_file->read(),true,$this->getMaxLevel());
 		if(!$json){
 			return false;
 		}
 		$this->setList($json);
-		return true;
+		return $this->getList();
 	}
 
 	public function save(){
@@ -102,11 +105,46 @@ class cList {
 		$this->_file->close();
 	}
 
+	public function update(){
+		$this->_file->lock();
+		$newList = $this->getList();
+		$oldList = $this->read();
+		if(is_array($newList) && is_array($oldList)){
+			$newList = array_merge($newList, $oldList);
+			$this->setList($newList);
+			$this->save();
+			return true;
+		} else {
+			$this->_file->free();
+			return false;
+		}
+	}
 
-	public function find($level, $key = 'key', $value = 'value'){
+	public function delete(){
+		return $this->_file->delete();
+	}
+
+	public function &findByValue($level, $value){
 		$level =& $this->getLevel($level);
-		if(is_array($level) && array_key_exists($key, $level) && $level[$key] == $value){
-			return $level;
+		$keys = array();
+		if(is_array($level)) {
+			foreach($level as $key => $data){
+				if($data == $value || (is_array($data) && in_array($value, $data))){
+					$keys[] = $key;
+				}
+			}
+		}
+		return $keys;
+	}
+
+	public function &findByKey($level, $key){
+		$level =& $this->getLevel($level);
+		if(is_array($level)){
+			if(array_key_exists($key, $level)){
+				return $level[$key];
+			} else {
+				return false;
+			}
 		} else {
 			return false;
 		}
@@ -154,7 +192,7 @@ class cList {
 		return array_key_exists($key, $level);
 	}
 
-	public function getRandom($level){
+	public function &getRandom($level){
 		$level =& $this->getLevel($level);
 		if(is_array($level)){
 			return $level[array_rand($level,1)];
@@ -173,16 +211,20 @@ class cList {
 		}
 	}
 
-	public function write($level, $key, $value){
+	public function write($level, $value, $key = null){
 		$level =& $this->getLevel($level);
-		$level[$key] = $value;
+		if(isset($key)){
+			$level[$key] = $value;
+		} else {
+			$this->push($level, $value);
+		}
 	}
 
 	public function clear(){
-		$this->setList(array());
+		$this->setList(array( "/" => array() ));
 	}
 
-	public function getValue($level, $key){
+	public function &getValue($level, $key){
 		$level =& $this->getLevel($level);
 		if(is_array($level) && array_key_exists($key, $level)){
 			return $level[$key];
