@@ -55,6 +55,7 @@ function write(){
 	$list = new cList();
 	$list->open(FILE_NAME);
 	$list->write('/',$value, $key);
+	$list->update();
 	$test = $list->getValue('/', $key);
 	return $test === $value;
 }
@@ -96,7 +97,7 @@ function findByKey(){
 	$value = 'test';
 	$list = new cList();
 	$list->open(FILE_NAME);
-	return ($list->findByKey($level, $key) == $value);
+	return ($list->findByKey($level, $key) == $value || in_array( $value, $list->findByKey($level, $key)));
 }
 
 function push(){
@@ -105,13 +106,14 @@ function push(){
 	$list = new cList();
 	$list->open(FILE_NAME);
 	$list->push($levelName, $testData);
-	return $this->findByValue($levelName, $testData[2]);
+	$list->update();
+	return $list->findByValue($levelName, $testData[2]);
 }
 
 function getRandom(){
 
-	$levelName = 'new_level';
-	$testData = array(1,2,3,4,5,6,7,8,'test');
+	$levelName = 'sub_level';
+	$testData = array(array(1,2,3,4,5,6,7,8),'test');
 	$list = new cList();
 	$list->open(FILE_NAME);
 	return in_array($list->getRandom($levelName), $testData) !== false ? true : false;

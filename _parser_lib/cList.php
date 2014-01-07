@@ -17,6 +17,25 @@ namespace GetContent;
 class cList {
 
 	/**
+	 * @var string корневой уровень списка
+	 */
+	private $_mainLevel = "/";
+
+	/**
+	 * @param string $mainLevel
+	 */
+	public function setMainLevel($mainLevel) {
+		$this->_mainLevel = $mainLevel;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getMainLevel() {
+		return $this->_mainLevel;
+	}
+
+	/**
 	 * @var int максимальная глубина списка
 	 */
 	private $_maxLevel = 1000;
@@ -102,7 +121,7 @@ class cList {
 		$this->_file->lock();
 		$this->_file->clear();
 		$this->_file->write(json_encode($this->getList()));
-		$this->_file->close();
+		$this->_file->free();
 	}
 
 	public function update(){
@@ -110,7 +129,7 @@ class cList {
 		$newList = $this->getList();
 		$oldList = $this->read();
 		if(is_array($newList) && is_array($oldList)){
-			$newList = array_merge($newList, $oldList);
+			$newList = $newList + $oldList;
 			$this->setList($newList);
 			$this->save();
 			return true;
@@ -151,7 +170,7 @@ class cList {
 	}
 	/**
 	 * @param string     $level имя уровня
-	 * @param array|null $levelData поиск в списке
+	 * @param array|null $levelData данные в которфх ищем необходимый уровень
 	 * @return bool
 	 */
 	public function &getLevel($level, &$levelData = null){
@@ -163,8 +182,8 @@ class cList {
 				return $levelData[$level];
 			} else {
 				foreach($levelData as &$subLevel){
-					$result =& $this->getLevel($level,$subLevel);
-					if($result){
+					@$result =& $this->getLevel($level,$subLevel);
+					if($result !== false){
 						return $result;
 					}
 				}
@@ -180,12 +199,9 @@ class cList {
 	 * @param bool|string $parent
 	 * @return bool
 	 */
-	public function addLevel($key,$parent = false){
-		if($parent){
-			$level =& $this->getLevel($parent);
-		} else {
-			$level =& $this->_list;
-		}
+	public function addLevel($key,$parent = null){
+		$parent = $parent ? $parent : $this->getMainLevel();
+		$level =& $this->getLevel($parent);
 		if(!array_key_exists($key, $level)){
 			$level[$key] = array();
 		}
@@ -203,7 +219,7 @@ class cList {
 
 	public function push($level, $data){
 		$level =& $this->getLevel($level);
-		if($level){
+		if(is_array($level)){
 			$level[] = $data;
 			return true;
 		} else {
@@ -211,17 +227,17 @@ class cList {
 		}
 	}
 
-	public function write($level, $value, $key = null){
-		$level =& $this->getLevel($level);
-		if(isset($key)){
-			$level[$key] = $value;
+	public function write($level, $value, $key = false){
+		$levelData =& $this->getLevel($level);
+		if($key !== false){
+			$levelData[$key] = $value;
 		} else {
 			$this->push($level, $value);
 		}
 	}
 
 	public function clear(){
-		$this->setList(array( "/" => array() ));
+		$this->setList(array( $this->getMainLevel() => array() ));
 	}
 
 	public function &getValue($level, $key){

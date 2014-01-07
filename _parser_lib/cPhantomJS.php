@@ -18,7 +18,7 @@ namespace GetContent;
  */
 class cPhantomJS {
 
-	public function genPageToFile($url,$to){
+	public function genPageToFile($url,$file){
 
 	}
 

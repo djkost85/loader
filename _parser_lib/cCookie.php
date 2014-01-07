@@ -162,23 +162,13 @@ class cCookie {
 	}
 
 	/**
-	 * @param string $cookie
-	 */
-	public function phantomJSToCurl($cookie){
-
-	}
-
-	/**
-	 * @param string $cookie
-	 */
-	public function curlToPhantomJS($cookie){
-
-	}
-
-	/**
 	 * @param string $url
 	 */
 	public function getCookieForUrl($url){
+
+	}
+
+	public function getCookieForKey($key){
 
 	}
 
