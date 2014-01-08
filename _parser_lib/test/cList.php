@@ -21,7 +21,8 @@ $functions = array(
 	'findByKey',
 	'push',
 	'getRandom',
-	'delete',
+	'deleteLevel',
+	'deleteList',
 );
 
 $start = microtime(true);
@@ -120,8 +121,17 @@ function getRandom(){
 
 }
 
-function delete(){
+function deleteLevel(){
+	$parentLevel = 'new_level';
+	$subLevel = 'sub_level';
 	$list = new cList();
 	$list->open(FILE_NAME);
-	return $list->delete();
+	$list->deleteLevel($subLevel, $parentLevel);
+	return !$list->getLevel($subLevel);
+}
+
+function deleteList(){
+	$list = new cList();
+	$list->open(FILE_NAME);
+	return $list->deleteList();
 }

@@ -139,7 +139,7 @@ class cList {
 		}
 	}
 
-	public function delete(){
+	public function deleteList(){
 		return $this->_file->delete();
 	}
 
@@ -175,7 +175,7 @@ class cList {
 	 */
 	public function &getLevel($level, &$levelData = null){
 		if($levelData === null){
-			$levelData =& $this->_list;
+			$levelData =& $this->getList();
 		}
 		if(is_array($levelData)){
 			if(array_key_exists($level, $levelData)){
@@ -207,6 +207,17 @@ class cList {
 		}
 		return array_key_exists($key, $level);
 	}
+	public function deleteLevel($level, $parent = false){
+		if($parent){
+			$parent =& $this->getLevel($parent);
+			$parent[$level] = false;
+		} else {
+			$level =& $this->getLevel($level);
+			if($level){
+				$level = false;
+			}
+		}
+	}
 
 	public function &getRandom($level){
 		$level =& $this->getLevel($level);
@@ -236,8 +247,10 @@ class cList {
 		}
 	}
 
-	public function clear(){
-		$this->setList(array( $this->getMainLevel() => array() ));
+	public function clear($level = false){
+		if(!$level) $level = $this->getMainLevel();
+		$levelData =& $this->getLevel($level);
+		$levelData = array();
 	}
 
 	public function &getValue($level, $key){
