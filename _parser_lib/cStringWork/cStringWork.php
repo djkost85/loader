@@ -163,26 +163,26 @@ class cStringWork
 	 * fragment массив ссылок на HTML якоря [Имя якоря]=Значение
 	 */
 	public static function parseUrl($url) {
-		$arrayUrl = parse_url($url);
-		preg_match('#(?<domain>[^\.]+.\w+)$#ims', $arrayUrl['host'], $match);
-		$arrayUrl['domain'] = $match['domain'];
-		if (isset($arrayUrl['query'])) {
-			$arrayQuery = explode("&", $arrayUrl['query']);
-			unset($arrayUrl['query']);
+		$partUrl = parse_url($url);
+		preg_match('#(?<domain>[^\.]+.\w+)$#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
+		$partUrl['domain'] = $match['domain'];
+		if (isset($partUrl['query'])) {
+			$arrayQuery = explode("&", $partUrl['query']);
+			unset($partUrl['query']);
 			foreach ($arrayQuery as $value) {
 				$partQuery = explode("=", $value);
-				$arrayUrl['query'][$partQuery[0]] = $partQuery[1];
+				$partUrl['query'][$partQuery[0]] = $partQuery[1];
 			}
 		}
-		if (isset($arrayUrl['fragment'])) {
-			$arrayFragment = explode("&", $arrayUrl['fragment']);
-			unset($arrayUrl['fragment']);
+		if (isset($partUrl['fragment'])) {
+			$arrayFragment = explode("&", $partUrl['fragment']);
+			unset($partUrl['fragment']);
 			foreach ($arrayFragment as $value) {
 				$partFragment = explode("=", $value);
-				$arrayUrl['fragment'][$partFragment[0]] = (isset($partFragment[1]) ? $partFragment[1] : '');
+				$partUrl['fragment'][$partFragment[0]] = (isset($partFragment[1]) ? $partFragment[1] : '');
 			}
 		}
-		return $arrayUrl;
+		return $partUrl;
 	}
 
 	/**

@@ -19,20 +19,20 @@ class cList {
 	/**
 	 * @var string корневой уровень списка
 	 */
-	private $_mainLevel = "/";
+	private $_mainLevelName = "/";
 
 	/**
-	 * @param string $mainLevel
+	 * @param string $mainLevelName
 	 */
-	public function setMainLevel($mainLevel) {
-		$this->_mainLevel = $mainLevel;
+	public function setMainLevelName($mainLevelName) {
+		$this->_mainLevelName = $mainLevelName;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getMainLevel() {
-		return $this->_mainLevel;
+	public function getMainLevelName() {
+		return $this->_mainLevelName;
 	}
 
 	/**
@@ -183,44 +183,45 @@ class cList {
 			} else {
 				foreach($levelData as &$subLevel){
 					@$result =& $this->getLevel($level,$subLevel);
-					if($result !== false){
+					if($result !== null){
 						return $result;
 					}
 				}
-				return false;
+				return null;
 			}
 		} else {
-			return false;
+			return null;
 		}
 	}
 
 	/**
-	 * @param string      $key
-	 * @param bool|string $parent
+	 * @param string      $levelName
+	 * @param bool|string $parentName
 	 * @return bool
 	 */
-	public function addLevel($key,$parent = null){
-		$parent = $parent ? $parent : $this->getMainLevel();
-		$level =& $this->getLevel($parent);
-		if(!array_key_exists($key, $level)){
-			$level[$key] = array();
+	public function addLevel($levelName,$parentName = null){
+		$parentName = $parentName ? $parentName : $this->getMainLevelName();
+		$level =& $this->getLevel($parentName);
+		if(!array_key_exists($levelName, $level)){
+			$level[$levelName] = array();
 		}
-		return array_key_exists($key, $level);
+		return array_key_exists($levelName, $level);
 	}
-	public function deleteLevel($level, $parent = false){
-		if($parent){
-			$parent =& $this->getLevel($parent);
-			$parent[$level] = false;
+	public function deleteLevel($levelName, $parentName = false){
+		if($parentName){
+			$parent =& $this->getLevel($parentName);
+			$parent[$levelName] = null;
 		} else {
-			$level =& $this->getLevel($level);
+			$level =& $this->getLevel($levelName);
 			if($level){
-				$level = false;
+				$level = null;
 			}
 		}
+		$this->update();
 	}
 
-	public function &getRandom($level){
-		$level =& $this->getLevel($level);
+	public function &getRandom($levelName){
+		$level =& $this->getLevel($levelName);
 		if(is_array($level)){
 			return $level[array_rand($level,1)];
 		} else {
@@ -228,8 +229,8 @@ class cList {
 		}
 	}
 
-	public function push($level, $data){
-		$level =& $this->getLevel($level);
+	public function push($levelName, $data){
+		$level =& $this->getLevel($levelName);
 		if(is_array($level)){
 			$level[] = $data;
 			return true;
@@ -238,19 +239,23 @@ class cList {
 		}
 	}
 
-	public function write($level, $value, $key = false){
-		$levelData =& $this->getLevel($level);
+	public function write($levelName, $value, $key = false){
+		$levelData =& $this->getLevel($levelName);
 		if($key !== false){
 			$levelData[$key] = $value;
 		} else {
-			$this->push($level, $value);
+			$this->push($levelName, $value);
 		}
 	}
 
-	public function clear($level = false){
-		if(!$level) $level = $this->getMainLevel();
-		$levelData =& $this->getLevel($level);
-		$levelData = array();
+	public function clear($levelName = false){
+		if(!$levelName){
+			$list =& $this->getList();
+			$list[$this->getMainLevelName()] = array();
+		} else {
+			$levelData =& $this->getLevel($levelName);
+			$levelData = array();
+		}
 	}
 
 	public function &getValue($level, $key){

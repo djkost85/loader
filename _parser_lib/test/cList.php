@@ -7,7 +7,7 @@
  * Project: get_content
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-require_once dirname(__FILE__) . '/../include.php';
+require_once dirname(__FILE__) . '/cnfg.php';
 use GetContent\cList as cList;
 
 define('FILE_NAME', dirname(__FILE__).'/tmp/testCFile.txt');
@@ -22,26 +22,10 @@ $functions = array(
 	'push',
 	'getRandom',
 	'deleteLevel',
-	'deleteList',
+	//'deleteList',
 );
 
-$start = microtime(true);
-echo date("[H:i:s Y/m/d]", $start)."\n<br>\n";
-$echo = '';
-foreach($functions as $function){
-	echo $function;
-	$echo .= $function;
-	if($function()){
-		echo " success \n<br>\n";
-		$echo .= " success \n<br>\n";
-	} else {
-		echo " <b>ERROR</b> \n<br>\n";
-		$echo .= " <b>ERROR</b> \n<br>\n";
-	}
-}
-$end = microtime(true);
-echo date('[H:i:s Y/m/d]', $end)."\n<br>\n";
-echo '[~'.($end-$start).']';
+runTest($functions);
 
 function create(){
 	$list = new cList();

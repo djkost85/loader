@@ -75,6 +75,18 @@ class cCookie {
 		return $this->_name;
 	}
 
+	public function getFileName($prefix = ''){
+		return $this->getDir() . '/' . $this->getName() . $prefix . '.cookie';
+	}
+
+	public function getFileCurlName(){
+		return $this->getFileName('-curl');
+	}
+
+	public function getFilePhantomJSName(){
+		return $this->getFileName('-phantomjs');
+	}
+
 	/**
 	 * @param bool|string $name
 	 */
@@ -91,7 +103,7 @@ class cCookie {
 	 */
 	public function open($name){
 		$this->setName($name);
-		$this->_list->open($this->getDir() . '/' . $this->getName());
+		$this->_list->open($this->getFileName());
 	}
 
 	/**
@@ -107,14 +119,16 @@ class cCookie {
 	public function create($name, $value, $domain, $path = '/', $expires = false, $httponly = false, $secure = false, $tailmatch = true){
 		$cookie['name']     = $name;
 		$cookie['value']    = $value;
-		$cookie['tailmatch']= $tailmatch;
+		$cookie['tailmatch']= $tailmatch ? $tailmatch : true;
 		$cookie['domain']   = $domain;
 		$cookie['path']     = $path;
 		$cookie['expires']  = $expires ? $expires : date('l, d-M-y H:i:s e', time() + 86400);
-		$cookie['httponly'] = $httponly;
-		$cookie['secure']   = $secure;
+		$cookie['httponly'] = $httponly ? $httponly : false;
+		$cookie['secure']   = $secure ? $secure : false;
 		$urlData = cStringWork::parseUrl($domain);
+		$this->_list->addLevel($urlData['domain']);
 		$this->_list->write($urlData['domain'], $cookie, $name);
+		$this->_list->update();
 	}
 
 	/**
@@ -153,6 +167,22 @@ class cCookie {
 		return $cookies;
 	}
 
+	public function fromFileCurl(){
+		$text = file_get_contents($this->getFileCurlName());
+		$cookies = $this->fromCurl($text);
+		foreach($cookies as $cookie){
+			$this->create($cookie['name'],
+			              $cookie['value'],
+			              $cookie['domain'],
+			              $cookie['path'],
+			              $cookie['expires'],
+			              $cookie['httponly'],
+			              $cookie['secure'],
+			              $cookie['tailmatch']);
+		}
+		return $cookies;
+	}
+
 	/**
 	 * @param string $text
 	 */
@@ -160,6 +190,21 @@ class cCookie {
 
 	}
 
+	public function fromFilePhantomJS(){
+		$text = file_get_contents($this->getFilePhantomJSName());
+		$cookies = $this->fromPhantomJS($text);
+		foreach($cookies as $cookie){
+			$this->create($cookie['name'],
+			              $cookie['value'],
+			              $cookie['domain'],
+			              $cookie['path'],
+			              $cookie['expires'],
+			              $cookie['httponly'],
+			              $cookie['secure'],
+			              $cookie['tailmatch']);
+		}
+		return $cookies;
+	}
 	/**
 	 * @param string $text
 	 * @return array
@@ -212,7 +257,7 @@ class cCookie {
 	}
 
 	/**
-	 * @param array $cookie
+	 * @param $cookie
 	 * @return string
 	 */
 	public static function toCurl($cookie){
@@ -226,6 +271,14 @@ class cCookie {
 		       $cookie['value'];
 	}
 
+	public function toFileCurl($url){
+		$cookies = $this->getActualCookies($url);
+		$str = "\n\n\n\n";
+		foreach($cookies as $cookie){
+			$str .= $this->toCurl($cookie) . "\n";
+		}
+		return file_put_contents($this->getFileCurlName(), $str);
+	}
 	/**
 	 * @param array $cookie
 	 */
@@ -233,19 +286,31 @@ class cCookie {
 
 	}
 
+	public function toFilePhantomJS(){
+
+	}
+
 	/**
 	 * @param string $url
+	 * @return bool
 	 */
-	public function getCookiesForUrl($url){
-
+	public function getCookies($url){
+		$urlData = cStringWork::parseUrl($url);
+		return $this->_list->getLevel($urlData['domain']);
 	}
 
-	public function getCookiesForKey($key){
-
+	public function getActualCookies($url){
+		$cookies = $this->getCookies($url);
+		foreach($cookies as $key => $cookie){
+			if(!$this->checkExpires($cookie['expires'])){
+				unset($cookies[$key]);
+			}
+		}
+		return $cookies;
 	}
 
 	/**
-	 * Проверяет актуальность cookie
+	 * Проверяет актуальность
 	 * @param string $date
 	 * @return bool
 	 */

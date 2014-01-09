@@ -125,8 +125,8 @@ class cStringWork
 	public static function betweenTag($text = "", $startTag = '<div class="xxx">', $withoutTag = true) {
 		if (!preg_match('#<(?<tag>\w+)[^>]*>#im', $startTag, $tag)) return false;
 		if (preg_match('#<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>#im', $startTag)) {
-			preg_match_all("#(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))#im", $startTag, $matches);
-			$reg = "#<" . preg_quote($tag["tag"]) . "\s*";
+			preg_match_all('#(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))#im', $startTag, $matches);
+			$reg = "#<" . preg_quote($tag["tag"]) . '\s*';
 			foreach ($matches['parametr'] as $value) $reg .= "[^>]*" . preg_quote($value) . "[^>]*";
 			$reg .= ">#im";
 			if (!preg_match($reg, $text, $match)) return false;
@@ -208,7 +208,7 @@ class cStringWork
 	 * @return bool
 	 */
 	public static function isIp($str) {
-		if (preg_match("#^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$#i", $str)) return true;
+		if (preg_match('#^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$#i', $str)) return true;
 		else return false;
 	}
 
