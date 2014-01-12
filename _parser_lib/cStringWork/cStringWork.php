@@ -87,8 +87,9 @@ class cStringWork
 	 * @return bool|string
 	 */
 	public static function getDomainName($url) {
-		$url_data = cStringWork::parseUrl($url);
-		return $url_data['host'];
+		$partUrl = cStringWork::parseUrl($url);
+		preg_match('#(?<domain>[^\.]+.\w+)$#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
+		return $match['domain'];
 	}
 
 	public function getCryptTagArray() {
@@ -164,8 +165,6 @@ class cStringWork
 	 */
 	public static function parseUrl($url) {
 		$partUrl = parse_url($url);
-		preg_match('#(?<domain>[^\.]+.\w+)$#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
-		$partUrl['domain'] = $match['domain'];
 		if (isset($partUrl['query'])) {
 			$arrayQuery = explode("&", $partUrl['query']);
 			unset($partUrl['query']);
@@ -269,5 +268,18 @@ class cStringWork
 			$text = preg_replace('%'.preg_quote('%',$rus).'%ismu',strtolower($eng),$text);
 		}
 		return $text;
+	}
+
+	public static function getBiggestString($a) {
+		$bigA = 0;
+		$bigKey = 0;
+		foreach ($a as $key => $value) {
+			$thisA = strlen($value);
+			if ($thisA > $bigA) {
+				$bigA = $thisA;
+				$bigKey = $key;
+			}
+		}
+		return $a[$bigKey];
 	}
 }

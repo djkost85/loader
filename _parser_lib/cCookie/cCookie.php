@@ -125,9 +125,9 @@ class cCookie {
 		$cookie['expires']  = $expires ? $expires : date('l, d-M-y H:i:s e', time() + 86400);
 		$cookie['httponly'] = $httponly ? $httponly : false;
 		$cookie['secure']   = $secure ? $secure : false;
-		$urlData = cStringWork::parseUrl($domain);
-		$this->_list->addLevel($urlData['domain']);
-		$this->_list->write($urlData['domain'], $cookie, $name);
+		$domain = cStringWork::getDomainName($domain);
+		$this->_list->addLevel($domain);
+		$this->_list->write($domain, $cookie, $name);
 		$this->update();
 	}
 
@@ -145,11 +145,21 @@ class cCookie {
 	 * @param bool|string $name
 	 */
 	public function delete($url, $name = false){
-		$urlData = cStringWork::parseUrl($url);
+		$domain = cStringWork::getDomainName($url);
 		if($name){
-			$this->_list->deleteLevel($name, $urlData['domain']);
+			$this->_list->deleteLevel($name, $domain);
 		} else {
-			$this->_list->deleteLevel($urlData['domain']);
+			$this->_list->deleteLevel($domain);
+		}
+	}
+
+	public function deleteOldCookieFile($storageTime = 172800){
+		$fileList = glob($this->getDir() . "/*.cookie");
+		foreach ($fileList as $value) {
+			$fileInfo = stat($value);
+			if ($fileInfo['ctime'] < time() - $storageTime){
+				unlink($value);
+			}
 		}
 	}
 
@@ -305,9 +315,8 @@ class cCookie {
 	 * @return bool
 	 */
 	public function getCookies($url){
-		$urlData = cStringWork::parseUrl($url);
 		$this->update();
-		return $this->_list->getLevel($urlData['domain']);
+		return $this->_list->getLevel(cStringWork::getDomainName($url));
 	}
 
 	public function getActualCookies($url){
