@@ -128,9 +128,18 @@ class cCookie {
 		$urlData = cStringWork::parseUrl($domain);
 		$this->_list->addLevel($urlData['domain']);
 		$this->_list->write($urlData['domain'], $cookie, $name);
-		$this->_list->update();
+		$this->update();
 	}
 
+	public function creates($cookies){
+		foreach($cookies as $cookie){
+			$this->create($cookie['name'], $cookie['value'], $cookie['domain'], $cookie['path'], $cookie['expires'], $cookie['httponly'], $cookie['secure'], $cookie['tailmatch']);
+		}
+	}
+
+	public function update(){
+		$this->_list->update();
+	}
 	/**
 	 * @param string      $url
 	 * @param bool|string $name
@@ -153,7 +162,7 @@ class cCookie {
 		$count = count($lines);
 		$cookies = array();
 		for($i = 4 ; $i < $count ; $i++){
-			$fields = explode("\t", $lines[$i]);
+			$fields = array_map('trim', explode("\t", $lines[$i]));
 			$cookie['name']     = $fields[5];
 			$cookie['value']    = $fields[6];
 			$cookie['tailmatch']= $fields[1] == 'TRUE';
@@ -162,7 +171,7 @@ class cCookie {
 			$cookie['expires']  = date('l, d-M-y H:i:s e', $fields[4]);
 			$cookie['httponly'] = (bool)preg_match('%^\#HttpOnly_%ims', $lines[$i]);
 			$cookie['secure']   = $fields[3] == 'TRUE';
-			$cookies[] = $cookie;
+			$cookies[$cookie['name']] = $cookie;
 		}
 		return $cookies;
 	}
@@ -271,12 +280,13 @@ class cCookie {
 		       $cookie['value'];
 	}
 
-	public function toFileCurl($url){
-		$cookies = $this->getActualCookies($url);
+	public function toFileCurl($cookies){
 		$str = "\n\n\n\n";
+		$cookiesLines = array();
 		foreach($cookies as $cookie){
-			$str .= $this->toCurl($cookie) . "\n";
+			$cookiesLines[] = $this->toCurl($cookie);
 		}
+		$str .= implode("\n",$cookiesLines);
 		return file_put_contents($this->getFileCurlName(), $str);
 	}
 	/**
@@ -286,7 +296,7 @@ class cCookie {
 
 	}
 
-	public function toFilePhantomJS(){
+	public function toFilePhantomJS($cookies){
 
 	}
 
@@ -296,6 +306,7 @@ class cCookie {
 	 */
 	public function getCookies($url){
 		$urlData = cStringWork::parseUrl($url);
+		$this->update();
 		return $this->_list->getLevel($urlData['domain']);
 	}
 

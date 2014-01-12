@@ -111,7 +111,7 @@ class cList {
 	public function read(){
 		$json = json_decode($this->_file->read(),true,$this->getMaxLevel());
 		if(!$json){
-			return false;
+			return array();
 		}
 		$this->setList($json);
 		return $this->getList();
