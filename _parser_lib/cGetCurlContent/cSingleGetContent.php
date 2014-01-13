@@ -14,7 +14,7 @@ namespace GetContent;
 
 class cSingleGetContent extends cGetCurlContent{
 
-	private $_redirectCount;
+	private $_redirectCount = 10;
 
 	/**
 	 * @param mixed $redirectCount
