@@ -56,7 +56,7 @@ abstract class cGetCurlContent{
 
 	public $defaultOptions = array(
 		CURLOPT_HEADER => true,
-		CURLOPT_TIMEOUT => 30,
+		CURLOPT_TIMEOUT => 10,
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => false,
 		CURLOPT_REFERER => '',
@@ -234,7 +234,7 @@ abstract class cGetCurlContent{
 	protected $_encodingName = 'utf-8';
 
 	/**
-	 * @param $encodingName
+	 * @param string $encodingName
 	 */
 	public function setEncodingName($encodingName) {
 		$this->_encodingName = $encodingName;
@@ -388,11 +388,16 @@ abstract class cGetCurlContent{
 
 	public function setOptions(&$descriptor, $options = array()){
 		foreach ($this->defaultOptions as $keySetting => $value) {
-			if (isset($options[$keySetting])) $this->setOption($descriptor, $keySetting, $options[$keySetting]);
-			elseif(isset($descriptor['option'][$keySetting])) $this->setOption($descriptor,$keySetting,$descriptor['option'][$keySetting]);
-			else $this->setOption($descriptor, $keySetting);
+			if (isset($options[$keySetting])){
+				$this->setOption($descriptor, $keySetting, $options[$keySetting]);
+			}
+			elseif(isset($descriptor['option'][$keySetting])) {
+				$this->setOption($descriptor,$keySetting,$descriptor['option'][$keySetting]);
+			}
+			else {
+				$this->setOption($descriptor, $keySetting);
+			}
 		}
-		unset($keySetting);
 		if ($this->getUseProxy()) {
 			if (is_object($this->proxy)) {
 				$proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]));
@@ -404,16 +409,13 @@ abstract class cGetCurlContent{
 			} elseif (is_string($this->proxy)){
 				$this->setOption($descriptor, CURLOPT_PROXY, $this->proxy);
 			}
-		} else {
+		} elseif(isset($descriptor['option'][CURLOPT_PROXY])) {
 			unset($descriptor['option'][CURLOPT_PROXY]);
 		}
-		if($this->getUseStaticCookie()){
-			$cookieFile = $this->_cookie->getFileCurlName($this->getStaticCookieFileName());
-		} else {
-			$cookieFile = $this->_cookie->getFileCurlName($descriptor['descriptor_key']);
-		}
+		$cookieFile = $this->_cookie->getFileCurlName($this->getUseStaticCookie() ? $this->getStaticCookieFileName() : $descriptor['descriptor_key']);
 		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $cookieFile);
 		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $cookieFile);
+		$this->setOption($descriptor, CURLOPT_USERAGENT, $this->getRandomUserAgent());
 		return curl_setopt_array($descriptor['descriptor'], $descriptor['option']);
 	}
 
@@ -426,7 +428,7 @@ abstract class cGetCurlContent{
 				if (!$value) {
 					unset($descriptor['option'][$option]);
 					$this->setOption($descriptor, CURLOPT_POST, false);
-				} else{
+				} else {
 					$this->setOption($descriptor, CURLOPT_POST, true);
 				}
 				break;
@@ -457,22 +459,24 @@ abstract class cGetCurlContent{
 	}
 
 	protected function checkAnswerValid($answer, $curlData) {
-		if (!$this->checkHttpCode($curlData['http_code'])) return false;
-		if (($curlData['size_download'] < $curlData['download_content_length'] && $curlData['download_content_length'] != -1) || $curlData['size_download'] < $this->getMinSizeAnswer()) return false;
+		if (!$this->checkHttpCode($curlData['http_code'])
+			|| ($curlData['size_download'] < $curlData['download_content_length'] && $curlData['download_content_length'] != -1)
+			|| $curlData['size_download'] < $this->getMinSizeAnswer()) {
+			return false;
+		}
 		switch ($this->getTypeContent()) {
 			case 'file':
-				if ($this->mimeType($curlData['content_type'], 'file')) return true;
+				return ($this->mimeType($curlData['content_type'], 'file'));
 				break;
 			case 'img':
-				if ($this->mimeType($curlData['content_type'], 'img')) return true;
+				return ($this->mimeType($curlData['content_type'], 'img'));
 				break;
 			case 'html':
-				if ($this->mimeType($curlData['content_type'], 'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims', $answer)) return true;
+				return ($this->mimeType($curlData['content_type'], 'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims', $answer));
 				break;
 			default:
-				break;
+				return false;
 		}
-		return false;
 	}
 
 	private function mimeType($mime, $type) {
@@ -481,12 +485,10 @@ abstract class cGetCurlContent{
 				return true;
 				break;
 			case 'img':
-				if (preg_match('#image/(gif|p?jpeg|png|svg\+xml|tiff|vnd\.microsoft\.icon|vnd\.wap\.wbmp)#i', $mime)) return true;
-				else return false;
+				return preg_match('%image/(gif|p?jpeg|png|svg\+xml|tiff|vnd\.microsoft\.icon|vnd\.wap\.wbmp)%i', $mime);
 				break;
 			case 'html':
-				if (preg_match('#text/html#i', $mime)) return true;
-				else return false;
+				return preg_match('%text/html%i', $mime);
 				break;
 		}
 		return false;

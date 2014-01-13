@@ -14,4 +14,6 @@ require_once ROOT_DIR."/cCookie/cCookie.php";
 require_once ROOT_DIR."/cStringWork/cStringWork.php";
 require_once ROOT_DIR . "/cGetContent/cGetContent.php";
 require_once ROOT_DIR . "/cGetCurlContent/cGetCurlContent.php";
+require_once ROOT_DIR . "/cGetCurlContent/cSingleGetContent.php";
+require_once ROOT_DIR . "/cGetCurlContent/cMultiGetContent.php";
 require_once ROOT_DIR . "/cProxy/cProxy.php";
