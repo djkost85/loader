@@ -9,6 +9,7 @@
  */
 require_once dirname(__FILE__) . '/cnfg.php';
 use GetContent\cList as cList;
+echo "cList<br/>\n";
 
 define('FILE_NAME', dirname(__FILE__).'/tmp/testCFile.txt');
 

@@ -29,7 +29,7 @@ class cStringWork
 		if (strlen($text) > $partSize) {
 			for ($i = 0; ($i < $offset || $offset == 0) && $text; $i++) {
 				$partText = substr($text, 0, $partSize);
-				preg_match('#^(.*\.)[^\.]*$#i', $partText, $match);
+				preg_match('%^(.*\.)[^\.]*$%i', $partText, $match);
 				if (strlen($match[1]) == 0) break;
 				$dividedTextArray[] = $match[1];
 				$text = trim(str_replace($match[1], "", $text));
@@ -46,14 +46,14 @@ class cStringWork
 	 * @param array  $repTextArray массив регулярных выражений для выполнения
 	 * @return string
 	 */
-	public static function clearNote($text = "", $repTextArray = array('/\s+/')) {
+	public static function clearNote($text = "", $repTextArray = array('%\s+%')) {
 		if (is_string($repTextArray)) $text = preg_replace($repTextArray, " ", $text);
 		elseif (is_array($repTextArray)) foreach ($repTextArray as $value) $text = preg_replace($value, " ", $text);
 		return $text;
 	}
 
 	/**
-	 * Заменяет HTML код  на хеши, чтоб при пропуске через спец программы не потерять теги(синонимайзей, переводчик)
+	 * Заменяет HTML код  на хеши, чтоб при пропуске через спец программы(синонимайзей, переводчик) не потерять теги
 	 * @param string $text шифруемый текст
 	 * @param string $reg  регулярное выражение для поиска шифруемых данных
 	 * @return string
@@ -104,17 +104,17 @@ class cStringWork
 	 * @return string
 	 */
 	public static function betweenTag($text, $startTag = '<div class="xxx">', $withoutTag = true) {
-		if (!preg_match('#<(?<tag>\w+)[^>]*>#im', $startTag, $tag)) return false;
-		if (preg_match('#<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>#im', $startTag)) {
-			preg_match_all('#(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))#im', $startTag, $matches);
-			$reg = '#<' . preg_quote($tag["tag"]) . '\s*';
+		if (!preg_match('%<(?<tag>\w+)[^>]*>%im', $startTag, $tag)) return false;
+		if (preg_match('%<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>%im', $startTag)) {
+			preg_match_all('%(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))%im', $startTag, $matches);
+			$reg = '%<' . preg_quote($tag["tag"]) . '\s*';
 			foreach ($matches['parametr'] as $value) $reg .= '[^>]*' . preg_quote($value) . '[^>]*';
-			$reg .= '>#im';
+			$reg .= '>%im';
 			if (!preg_match($reg, $text, $match)) return false;
 			$startTag = $match[0];
 		} else {
-			preg_match('/<(?<tag>[^\s]+)[^>]*>/i', $startTag, $tag);
-			preg_match('/<(?<tag>' . preg_quote($tag[1]) . ')[^>]*>/i', $text, $tag);
+			preg_match('%<(?<tag>[^\s]+)[^>]*>%i', $startTag, $tag);
+			preg_match('%<(?<tag>' . preg_quote($tag[1]) . ')[^>]*>%i', $text, $tag);
 		}
 		unset($match);
 		unset($matches);
@@ -125,7 +125,7 @@ class cStringWork
 		$text = substr($text, strpos($text, $startTag));
 		$countOpenTag = 0;
 		$posEnd = 0;
-		$countTag = 2 * preg_match_all('#' . preg_quote($openTag, '#') . '#ims', $text, $matches);
+		$countTag = 2 * preg_match_all('%' . preg_quote($openTag, '%') . '%ims', $text, $matches);
 		for ($i = 0; $i < $countTag; $i++) {
 			$posOpenTag = strpos($text, $openTag, $posEnd);
 			$posCloseTag = strpos($text, $closeTag, $posEnd);
@@ -190,7 +190,7 @@ class cStringWork
 	 * @return bool
 	 */
 	public static function isIp($str) {
-		if (preg_match('#^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$#i', $str)) return true;
+		if (preg_match('%^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$%i', $str)) return true;
 		else return false;
 	}
 
@@ -227,7 +227,7 @@ class cStringWork
 		return key($weights);
 	}
 
-	public function transcriptionRusToEng($text){
+	public function transcriptRusToEng($text){
 		$abc = array(
 			'А' => 'A',
 			'Б' => 'B',

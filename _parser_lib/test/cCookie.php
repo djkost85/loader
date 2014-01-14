@@ -8,6 +8,7 @@
  */
 require_once dirname(__FILE__) . '/cnfg.php';
 use GetContent\cCookie as cCookie;
+echo "cCookie<br/>\n";
 
 define('FILE_NAME', 'testCookies');
 $functions = array(

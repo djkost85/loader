@@ -12,9 +12,7 @@ namespace GetContent;
 
 //use GetContent\cStringWork;
 
-require_once dirname(__FILE__) . "/cGetCurlContent.php";
-
-class cMultiGetContent extends cGetCurlContent{
+class cMultiCurl extends cCurl{
 
 	public $descriptorArray;
 
@@ -113,7 +111,7 @@ class cMultiGetContent extends cGetCurlContent{
 		}
 	}
 
-	public function getContent($url = array(), $checkRegEx = '##'){
+	public function 	getContent($url = array(), $checkRegEx = '##'){
 		if(is_string($url)){
 			$url = array($url);
 		}

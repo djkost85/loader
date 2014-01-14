@@ -14,7 +14,7 @@ namespace GetContent;
 //use GetContent\cProxy as cProxy;
 //use GetContent\cCookie as cCookie;
 
-abstract class cGetCurlContent{
+abstract class cCurl{
 
 	protected $_url;
 	protected $_answer;
@@ -444,16 +444,12 @@ abstract class cGetCurlContent{
 	}
 
 	protected function getHeader(&$answer){
-		$header = '';
+		$header = array();
 		if($answer){
-			do{
-				if(preg_match("%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums",$answer,$data)){
+				while(preg_match("%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums",$answer,$data)){
 					$header[] = $data['head'];
 					$answer = trim(preg_replace('%'.preg_quote($data['head'],'%').'%ims', '', $answer));
-				} else {
-					break;
 				}
-			}while(true);
 		}
 		return $header;
 	}
@@ -472,14 +468,14 @@ abstract class cGetCurlContent{
 				return ($this->mimeType($curlData['content_type'], 'img'));
 				break;
 			case 'html':
-				return ($this->mimeType($curlData['content_type'], 'html') && preg_match('#<\s*/\s*(html|body)[^<>]*>#ims', $answer));
+				return ($this->mimeType($curlData['content_type'], 'html') && preg_match('%<\s*/\s*(html|body)[^<>]*>%ims', $answer));
 				break;
 			default:
 				return false;
 		}
 	}
 
-	private function mimeType($mime, $type) {
+	public function mimeType($mime, $type) {
 		switch ($type) {
 			case 'file':
 				return true;

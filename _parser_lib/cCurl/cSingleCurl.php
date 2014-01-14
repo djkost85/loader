@@ -12,7 +12,7 @@ namespace GetContent;
 
 
 
-class cSingleGetContent extends cGetCurlContent{
+class cSingleCurl extends cCurl{
 
 	private $_redirectCount = 10;
 
@@ -73,7 +73,7 @@ class cSingleGetContent extends cGetCurlContent{
 		if (!$this->getSaveOption()) unset($descriptor['option']);
 	}
 
-	public function getContent($url = '', $checkRegEx = '##'){
+	public function getContent($url = '', $checkRegEx = '%%'){
 		$descriptor =& $this->getDescriptor();
 		do {
 			if ($this->getNumRepeat() > 0) $this->reinit();
@@ -91,8 +91,7 @@ class cSingleGetContent extends cGetCurlContent{
 				}
 			}
 			$this->setRedirectCount(0);
-			if ($checkRegEx && preg_match($checkRegEx, $answer)) $regAnswer = true;
-			else $regAnswer = false;
+			$regAnswer = ($checkRegEx && preg_match($checkRegEx, $answer));
 			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {
 				$this->endRepeat();
 				break;

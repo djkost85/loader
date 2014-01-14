@@ -9,6 +9,7 @@
  */
 require_once dirname(__FILE__) . '/cnfg.php';
 use GetContent\cFile as cFile;
+echo "cFile<br/>\n";
 
 define('FILE_NAME', dirname(__FILE__).'/tmp/testCFile.txt');
 

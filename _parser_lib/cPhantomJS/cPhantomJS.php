@@ -18,6 +18,8 @@ namespace GetContent;
  */
 class cPhantomJS {
 
+	private $answer;
+
 	public function genPageToFile($url,$file){
 
 	}
@@ -34,5 +36,10 @@ class cPhantomJS {
 
 	}
 
+	private function exec($comand){
+		$output = array();
+
+		//exec();
+	}
 
 } 
