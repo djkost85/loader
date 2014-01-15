@@ -111,7 +111,7 @@ class cMultiCurl extends cCurl{
 		}
 	}
 
-	public function 	getContent($url = array(), $checkRegEx = '##'){
+	public function getContent($url = array(), $checkRegEx = '##'){
 		if(is_string($url)){
 			$url = array($url);
 		}
@@ -133,33 +133,32 @@ class cMultiCurl extends cCurl{
 					$j++;
 				}
 			}
-			foreach ($descriptorArray as $key => $value){
+			foreach ($descriptorArray as $key => &$value){
 				$this->setOptions($descriptorArray[$key]);
 			}
 			unset($value);
 			$answer = $this->exec();
-			foreach ($answer as $key => $value) {
+			foreach ($answer as $key => &$value) {
 				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
 				$descriptorArray[$key]['info']['header'] = $this->getHeader($value);
 				$keyGoodAnswer = ($urlDescriptors[$key] * $countMultiStream) + $key % $countMultiStream;
 				if ($checkRegEx && preg_match($checkRegEx, $value)) $regAnswer = true;
 				else $regAnswer = false;
-				if (!isset($goodAnswer[$keyGoodAnswer]) && (!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
-
-					if (isset($url[$urlDescriptors[$key]])) unset($url[$urlDescriptors[$key]]);
-					$goodAnswer[$keyGoodAnswer] = $value;
-				} elseif ($this->getUseProxy() && is_object($this->proxy)) {
-					$this->proxy->removeProxyInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
+				if ((!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
+					unset($url[$urlDescriptors[$key]]);
+					$goodAnswer[$keyGoodAnswer] = $this->prepareContent($value);
+				} else{
+					$value = false;
+					if ($this->getUseProxy() && is_object($this->proxy)) {
+						$this->proxy->removeProxyInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
+					}
 				}
 			}
-			if (count($url) == 0) {
+			if (!$url) {
 				$this->endRepeat();
 				break;
 			}
 		} while ($this->repeat());
-		foreach ($goodAnswer as &$value){
-			$value = $this->prepareContent($value);
-		}
 		$tmpAnswer = array();
 		$j = 0;
 		foreach ($copyUrl as $keyUrl => $valueUrl) {

@@ -26,7 +26,7 @@ abstract class cCurl{
 
 	protected $_checkAnswer = false;
 
-	public function setCheckAnswer($value = true) {
+	public function setCheckAnswer($value) {
 		$this->_checkAnswer = $value;
 	}
 
@@ -37,14 +37,12 @@ abstract class cCurl{
 	protected $_referer;
 
 	/**
-	 * @param      $val
 	 * @param bool|resource $descriptor
+	 * @param               $newReferer
 	 */
-	public function setReferer($val, &$descriptor = false){
-		$this->_referer = $val;
-		if($descriptor){
-			$this->setOption($descriptor, CURLOPT_REFERER, $this->_referer);
-		}
+	public function setReferer(&$descriptor, $newReferer){
+		$this->_referer = $newReferer;
+		$this->setOption($descriptor, CURLOPT_REFERER, $this->_referer);
 	}
 
 	/**
@@ -59,7 +57,7 @@ abstract class cCurl{
 		CURLOPT_TIMEOUT => 10,
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => false,
-		CURLOPT_REFERER => '',
+		CURLOPT_REFERER => 'http://google.com',
 		CURLOPT_POSTFIELDS => '',
 		CURLOPT_POST => false,
 		CURLOPT_FRESH_CONNECT => true,
@@ -323,10 +321,33 @@ abstract class cCurl{
 		return $this->proxy;
 	}
 
+	private function setOptionProxy(&$descriptor){
+		if ($this->getUseProxy()) {
+			if (is_object($this->proxy)) {
+				$proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]));
+				if (is_string($proxyIp) && cStringWork::isIp($proxyIp)){
+					$this->setOption($descriptor, CURLOPT_PROXY, $proxyIp);
+				} else {
+					$descriptor['option'][CURLOPT_URL] = false;
+				}
+			} elseif (is_string($this->proxy)){
+				$this->setOption($descriptor, CURLOPT_PROXY, $this->proxy);
+			}
+		} elseif(isset($descriptor['option'][CURLOPT_PROXY])) {
+			unset($descriptor['option'][CURLOPT_PROXY]);
+		}
+	}
+
 	/**
 	 * @var cCookie
 	 */
 	protected $_cookie;
+
+	private function setOptionCookie(&$descriptor){
+		$this->_cookie->setName($this->getUseStaticCookie() ? $this->getStaticCookieFileName() : $descriptor['descriptor_key']);
+		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
+		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
+	}
 
 	protected $_useStaticCookie = false;
 
@@ -364,6 +385,8 @@ abstract class cCurl{
 	function __construct(){
 		$this->setUserAgentList('desktop');
 		$this->_cookie = new cCookie();
+		$this->init();
+		$this->setUserAgentList('desktop');
 	}
 
 	public abstract function getContent($url = '', $checkRegEx = '##');
@@ -398,23 +421,8 @@ abstract class cCurl{
 				$this->setOption($descriptor, $keySetting);
 			}
 		}
-		if ($this->getUseProxy()) {
-			if (is_object($this->proxy)) {
-				$proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]));
-				if (is_string($proxyIp) && cStringWork::isIp($proxyIp)){
-					$this->setOption($descriptor, CURLOPT_PROXY, $proxyIp);
-				} else {
-					$descriptor['option'][CURLOPT_URL] = false;
-				}
-			} elseif (is_string($this->proxy)){
-				$this->setOption($descriptor, CURLOPT_PROXY, $this->proxy);
-			}
-		} elseif(isset($descriptor['option'][CURLOPT_PROXY])) {
-			unset($descriptor['option'][CURLOPT_PROXY]);
-		}
-		$cookieFile = $this->_cookie->getFileCurlName($this->getUseStaticCookie() ? $this->getStaticCookieFileName() : $descriptor['descriptor_key']);
-		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $cookieFile);
-		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $cookieFile);
+		$this->setOptionProxy($descriptor);
+		$this->setOptionCookie($descriptor);
 		$this->setOption($descriptor, CURLOPT_USERAGENT, $this->getRandomUserAgent());
 		return curl_setopt_array($descriptor['descriptor'], $descriptor['option']);
 	}
@@ -463,15 +471,12 @@ abstract class cCurl{
 		switch ($this->getTypeContent()) {
 			case 'file':
 				return ($this->mimeType($curlData['content_type'], 'file'));
-				break;
 			case 'img':
 				return ($this->mimeType($curlData['content_type'], 'img'));
-				break;
 			case 'html':
 				return ($this->mimeType($curlData['content_type'], 'html') && preg_match('%<\s*/\s*(html|body)[^<>]*>%ims', $answer));
-				break;
 			default:
-				return false;
+				return true;
 		}
 	}
 
@@ -479,15 +484,13 @@ abstract class cCurl{
 		switch ($type) {
 			case 'file':
 				return true;
-				break;
 			case 'img':
 				return preg_match('%image/(gif|p?jpeg|png|svg\+xml|tiff|vnd\.microsoft\.icon|vnd\.wap\.wbmp)%i', $mime);
-				break;
 			case 'html':
-				return preg_match('%text/html%i', $mime);
-				break;
+				return (preg_match('%text/html%i', $mime));
+			default:
+				return true;
 		}
-		return false;
 	}
 
 	/**

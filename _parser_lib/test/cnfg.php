@@ -6,6 +6,7 @@
  * Time: 12:01
  * Email: bpteam22@gmail.com
  */
+ini_set('default_charset', 'utf-8');
 ini_set('display_errors',1);
 error_reporting(E_ALL);
 require_once dirname(__FILE__) . '/../include.php';
@@ -19,6 +20,7 @@ function runTest($functions){
 			echo " success \n<br>\n";
 		} else {
 			echo " <b>ERROR</b> \n<br>\n";
+			exit();
 		}
 	}
 	$end = microtime(true);

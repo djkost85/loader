@@ -54,7 +54,9 @@ class cSingleCurl extends cCurl{
 
 	public function init(){
 		$descriptor =& $this->getDescriptor();
-		if (!isset($descriptor['descriptor_key'])) $descriptor['descriptor_key'] = microtime(1) . mt_rand();
+		if (!isset($descriptor['descriptor_key']) || !$descriptor['descriptor_key']){
+			$descriptor['descriptor_key'] = microtime(1) . mt_rand();
+		}
 		$descriptor['descriptor'] = curl_init();
 	}
 
@@ -95,8 +97,11 @@ class cSingleCurl extends cCurl{
 			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {
 				$this->endRepeat();
 				break;
-			} elseif ($this->getUseProxy() && is_object($this->proxy)) {
-				$this->proxy->removeProxyInList($descriptor['option'][CURLOPT_PROXY]);
+			} else {
+				$answer = false;
+				if ($this->getUseProxy() && is_object($this->proxy)) {
+					$this->proxy->removeProxyInList($descriptor['option'][CURLOPT_PROXY]);
+				}
 			}
 		} while ($this->repeat());
 		$this->_answer = $this->prepareContent($answer);

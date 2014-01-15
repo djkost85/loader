@@ -13,6 +13,7 @@ echo "cSingleCurl<br/>\n";
 
 $functions = array(
 	'init',
+	'getRandomUserAgent',
 	'setOption',
 	'setOptions',
 	'getContent',
@@ -26,9 +27,13 @@ runTest($functions);
 
 function init(){
 	$gc = new cSingleCurl();
-	$gc->init();
 	$descriptor =& $gc->getDescriptor();
 	return is_resource($descriptor['descriptor']);
+}
+
+function getRandomUserAgent(){
+	$gc = new cSingleCurl();
+	return in_array($gc->getRandomUserAgent(), $gc->getUserAgentList());
 }
 
 function setOption(){
@@ -77,9 +82,10 @@ function mimeType(){
 
 function checkAnswerValid() {
 	$gc = new cSingleCurl();
+	$gc->setCheckAnswer(true);
 	$gc->setMinSizeAnswer(1000);
 	$answerTrue = $gc->getContent('ya.ru');
-	$gc->setMinSizeAnswer(strlen($answerTrue) + 100);
+	$gc->setMinSizeAnswer(strlen($answerTrue) + 100000);
 	$answerFalse = $gc->getContent('ya.ru');
 	return $answerTrue && !(bool)$answerFalse;
 }
