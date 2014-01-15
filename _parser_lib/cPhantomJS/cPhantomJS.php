@@ -39,7 +39,7 @@ class cPhantomJS {
 	private function exec($comand){
 		$output = array();
 
-		//exec();
+		exec();
 	}
 
 } 

@@ -104,7 +104,7 @@ class cSingleCurl extends cCurl{
 				}
 			}
 		} while ($this->repeat());
-		$this->_answer = $this->prepareContent($answer);
+		$this->setAnswer($this->prepareContent($answer));
 		$this->reinit();
 		return $this->getAnswer();
 	}

@@ -10,7 +10,6 @@
 
 namespace GetContent;
 
-//use GetContent\cStringWork;
 
 class cMultiCurl extends cCurl{
 
@@ -63,6 +62,7 @@ class cMultiCurl extends cCurl{
 	function __construct(){
 		$this->defaultOptions[CURLOPT_FOLLOWLOCATION] = true;
 		$this->setCountDescriptor();
+		parent::__construct();
 	}
 
 	public function init(){
@@ -84,11 +84,12 @@ class cMultiCurl extends cCurl{
 		$descriptorArray =& $this->getDescriptorArray();
 		do {
 			curl_multi_exec($descriptor['descriptor'], $running);
-			usleep(100);
+			usleep(10);
 		} while ($running > 0);
 		$answer = array();
-		foreach ($descriptorArray as $key => $value) $answer[$key] = curl_multi_getcontent($descriptorArray[$key]['descriptor']);
-		unset($value);
+		foreach ($descriptorArray as $key => $value){
+			$answer[$key] = curl_multi_getcontent($descriptorArray[$key]['descriptor']);
+		}
 		return $answer;
 	}
 
@@ -136,7 +137,6 @@ class cMultiCurl extends cCurl{
 			foreach ($descriptorArray as $key => &$value){
 				$this->setOptions($descriptorArray[$key]);
 			}
-			unset($value);
 			$answer = $this->exec();
 			foreach ($answer as $key => &$value) {
 				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
@@ -159,14 +159,15 @@ class cMultiCurl extends cCurl{
 				break;
 			}
 		} while ($this->repeat());
-		$tmpAnswer = array();
+		$completeAnswer = array();
 		$j = 0;
 		foreach ($copyUrl as $keyUrl => $valueUrl) {
 			for ($i = 0; $i < $countMultiStream; $i++) {
-				if (isset($goodAnswer[$j])) $tmpAnswer[$keyUrl][$i] = $goodAnswer[$j];
+				if (isset($goodAnswer[$j])) $completeAnswer[$keyUrl][$i] = $goodAnswer[$j];
 				$j++;
 			}
 		}
+		$this->setAnswer($completeAnswer);
 		$this->reinit();
 		return $this->getAnswer();
 	}

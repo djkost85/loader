@@ -6,7 +6,7 @@
  * Time: 14:22
  * Email: bpteam22@gmail.com
  */
-
+namespace cStringCurlTest;
 require_once dirname(__FILE__) . '/cnfg.php';
 use GetContent\cSingleCurl as cSingleCurl;
 echo "cSingleCurl<br/>\n";
@@ -61,7 +61,8 @@ function setOptions(){
 
 function getContent(){
 	$gc = new cSingleCurl();
-	$answer = $gc->getContent('ya.ru', '%yandex%ims');
+	$gc->getContent('ya.ru', '%yandex%ims');
+	$answer = $gc->getAnswer();
 	return preg_match('%yandex%ims', $answer);
 }
 
@@ -81,15 +82,29 @@ function mimeType(){
 }
 
 function checkAnswerValid() {
+	$url = 'ya.ru';
 	$gc = new cSingleCurl();
 	$gc->setCheckAnswer(true);
 	$gc->setMinSizeAnswer(1000);
-	$answerTrue = $gc->getContent('ya.ru');
+	$gc->getContent($url);
+	$answerTrue = $gc->getAnswer();
 	$gc->setMinSizeAnswer(strlen($answerTrue) + 100000);
-	$answerFalse = $gc->getContent('ya.ru');
+	$gc->getContent($url);
+	$answerFalse = $gc->getAnswer();
 	return $answerTrue && !(bool)$answerFalse;
 }
 
 function prepareContent(){
-	return false;
+	$url = 'vk.com';
+	$withoutEncoding = 'windows-1251';
+	$needEncoding = 'UTF-8';
+	$gc = new cSingleCurl();
+	$gc->setEncodingAnswer(false);
+	$gc->getContent($url);
+	$encoding1 = \GetContent\cStringWork::getEncodingName($gc->getAnswer());
+	$gc->setEncodingAnswer(true);
+	$gc->setEncodingName($needEncoding);
+	$gc->getContent($url);
+	$encoding2 = \GetContent\cStringWork::getEncodingName($gc->getAnswer());
+	return $encoding1 == $withoutEncoding && $needEncoding == $encoding2;
 }

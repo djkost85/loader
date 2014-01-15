@@ -17,6 +17,23 @@ class cStringWork
 	 * @var array
 	 */
 	private $_cryptTagArray;
+
+	private static $_encodingDetection = array('UTF-8', 'windows-1251' , 'koi8-r', 'iso8859-5');
+
+	/**
+	 * @param array $encodingDetection
+	 */
+	public static function setEncodingDetection($encodingDetection) {
+		self::$_encodingDetection = $encodingDetection;
+	}
+
+	/**
+	 * @return array
+	 */
+	public static function getEncodingDetection() {
+		return self::$_encodingDetection;
+	}
+
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
 	 * @param string $text      разбиваемый текст
@@ -79,17 +96,6 @@ class cStringWork
 			$text = preg_replace("#" . preg_quote($this->_cryptTagArray['hash'][$key], '#') . "#ms", $this->_cryptTagArray['tag'][$key], $text);
 		}
 		return $text;
-	}
-
-	/**
-	 * Вытаскивает доменное имя из url
-	 * @param string $url исходный адрес
-	 * @return bool|string
-	 */
-	public static function getDomainName($url) {
-		$partUrl = cStringWork::parseUrl($url);
-		preg_match('#(?<domain>[^\.]+.\w+)$#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
-		return $match['domain'];
 	}
 
 	public function getCryptTagArray() {
@@ -185,6 +191,17 @@ class cStringWork
 	}
 
 	/**
+	 * Вытаскивает доменное имя из url
+	 * @param string $url исходный адрес
+	 * @return bool|string
+	 */
+	public static function getDomainName($url) {
+		$partUrl = cStringWork::parseUrl($url);
+		preg_match('#(?<domain>[^\.]+.\w+)#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
+		return $match['domain'];
+	}
+
+	/**
 	 * Проверяет строку на соответствие шаблону ip адреса с портом
 	 * @param $str
 	 * @return bool
@@ -202,22 +219,23 @@ class cStringWork
 	 * @url    https://github.com/m00t/detect_encoding
 	 */
 	public static function getEncodingName($text) {
-		if (mb_detect_encoding($text, array('UTF-8'), true) == 'UTF-8') return 'UTF-8';
+		if (mb_detect_encoding($text, array('UTF-8'), true) == 'UTF-8') {
+			return 'UTF-8';
+		}
+		$encodingDetection = array('windows-1251' , 'koi8-r', 'iso8859-5');
 		$weights = array();
 		$specters = array();
-		$possibleEncodings = array('windows-1251', 'koi8-r', 'iso8859-5');
-		foreach ($possibleEncodings as $encoding) {
+		foreach ($encodingDetection as $encoding) {
 			$weights[$encoding] = 0;
 			$specters[$encoding] = require dirname(__FILE__) . '/specters/' . $encoding . '.php';
 		}
 		foreach (str_split($text, 2) as $key) {
-			foreach ($possibleEncodings as $encoding) {
+			foreach ($encodingDetection as $encoding) {
 				if (isset($specters[$encoding][$key])) {
 					$weights[$encoding] += $specters[$encoding][$key];
 				}
 			}
 		}
-		unset($key);
 		$sumWeight = array_sum($weights);
 		foreach ($weights as $encoding => $weight) {
 			if (!$sumWeight) $weights[$encoding] = 0;

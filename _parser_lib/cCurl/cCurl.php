@@ -10,14 +10,18 @@
 
 namespace GetContent;
 
-//use GetContent\cStringWork as cStringWork;
-//use GetContent\cProxy as cProxy;
-//use GetContent\cCookie as cCookie;
 
 abstract class cCurl{
 
 	protected $_url;
 	protected $_answer;
+
+	protected function setAnswer($newAnswer){
+		$this->_answer = $newAnswer;
+	}
+
+	public abstract function getAnswer();
+
 	public $descriptor;
 
 	public function &getDescriptor() {
@@ -245,6 +249,22 @@ abstract class cCurl{
 		return $this->_encodingName;
 	}
 
+	protected $_encodingAnswerName;
+
+	/**
+	 * @param mixed $encodingAnswerName
+	 */
+	public function setEncodingAnswerName($encodingAnswerName) {
+		$this->_encodingAnswerName = $encodingAnswerName;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getEncodingAnswerName() {
+		return $this->_encodingAnswerName;
+	}
+
 	protected $_saveOption = false;
 
 	/**
@@ -386,7 +406,10 @@ abstract class cCurl{
 		$this->setUserAgentList('desktop');
 		$this->_cookie = new cCookie();
 		$this->init();
-		$this->setUserAgentList('desktop');
+	}
+
+	function __destruct(){
+		$this->_cookie->deleteOldCookieFile(86400);
 	}
 
 	public abstract function getContent($url = '', $checkRegEx = '##');
@@ -396,8 +419,6 @@ abstract class cCurl{
 	protected abstract function exec();
 
 	protected abstract function close();
-
-	public abstract function getAnswer();
 
 	public function setOption(&$descriptor, $option, $value = null){
 		if ($value === null){
@@ -653,9 +674,12 @@ abstract class cCurl{
 	protected function encodingAnswerText($text) {
 		if ($this->getEncodingAnswer()) {
 			$to = $this->getEncodingName();
-			$from = cStringWork::getEncodingName($text);
-			if ($from != $to) $text = iconv($from, $to, $text);
-			return $text;
-		} else return $text;
+			$this->setEncodingAnswerName(cStringWork::getEncodingName($text));
+			$from = $this->getEncodingAnswerName();
+			if ($from != $to){
+				$text = iconv($from, $to, $text);
+			}
+		}
+		return $text;
 	}
 }
