@@ -6,7 +6,7 @@
  * Time: 14:22
  * Email: bpteam22@gmail.com
  */
-namespace cStringCurlTest;
+
 require_once dirname(__FILE__) . '/cnfg.php';
 use GetContent\cSingleCurl as cSingleCurl;
 echo "cSingleCurl<br/>\n";

@@ -197,7 +197,7 @@ class cStringWork
 	 */
 	public static function getDomainName($url) {
 		$partUrl = cStringWork::parseUrl($url);
-		preg_match('#(?<domain>[^\.]+.\w+)#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
+		preg_match('#(?<domain>[^\.]+.\w+)($|/)#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
 		return $match['domain'];
 	}
 

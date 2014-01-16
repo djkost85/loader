@@ -106,14 +106,14 @@ class cList {
 	}
 	public function open($name){
 		$this->_file->open($name);
+		if(!$this->read()){
+			$this->create($name);
+		}
 		return $this->read();
 	}
-	public function read(){
+	public function &read(){
 		$json = json_decode($this->_file->read(),true,$this->getMaxLevel());
-		if(!$json){
-			return array();
-		}
-		$this->setList($json);
+		$this->setList($json ? $json : array());
 		return $this->getList();
 	}
 
@@ -187,11 +187,10 @@ class cList {
 						return $result;
 					}
 				}
-				return null;
 			}
-		} else {
-			return null;
 		}
+		$null = null;
+		return $null;
 	}
 
 	/**
@@ -263,7 +262,7 @@ class cList {
 		if(is_array($level) && array_key_exists($key, $level)){
 			return $level[$key];
 		} else {
-			return false;
+			return null;
 		}
 	}
 
