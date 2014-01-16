@@ -38,7 +38,7 @@ abstract class cCurl{
 		return $this->_checkAnswer;
 	}
 
-	protected $_referer;
+	protected $_referer = 'http://google.com/';
 
 	/**
 	 * @param bool|resource $descriptor
@@ -61,7 +61,7 @@ abstract class cCurl{
 		CURLOPT_TIMEOUT => 10,
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => false,
-		CURLOPT_REFERER => 'http://google.com',
+		CURLOPT_REFERER => 'http://google.com/',
 		CURLOPT_POSTFIELDS => '',
 		CURLOPT_POST => false,
 		CURLOPT_FRESH_CONNECT => true,
