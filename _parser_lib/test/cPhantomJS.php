@@ -9,7 +9,7 @@
 
 require_once dirname(__FILE__) . '/cnfg.php';
 use GetContent\cPhantomJS as cPhantomJS;
-echo "cPhantomJS<br/>\n";
+//echo "cPhantomJS<br/>\n";
 
 $functions = array(
 	'test',
