@@ -4,6 +4,6 @@
 var page = require('webpage').create();
 page.viewportSize = { width: require('system').args[3], height: require('system').args[4] };
 page.open(require('system').args[1], function () {
-    console.log(page.renderBase64(require('system').args[2]));
+    console.log(page.content);
     phantom.exit();
 });

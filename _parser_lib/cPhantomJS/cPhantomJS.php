@@ -147,6 +147,7 @@ class cPhantomJS {
 		'proxy' => null, // 192.168.1.42:8080
 		'proxy-type' => null, // http|socks5|none
 		'proxy-auth' => null, // username:password
+		'local-to-remote-url-access' => 'true',
 	);
 
 	/**
@@ -232,24 +233,23 @@ class cPhantomJS {
 		$this->setPhantomFilesPath(dirname(__FILE__));
 	}
 
-	public function fromUrl($url){
-
+	public function renderText($path, $screenWidth = 1280, $screenHeight = 720){
+		$this->setArguments(array($path, $screenWidth, $screenHeight));
+		$this->setScriptName('renderText');
+		$data = $this->exec();
+		return $data;
 	}
 
-	public function screenShotFromUrl($url, $format = 'PNG', $width = 600, $height = 600){
-		$this->setArguments(array($url, $format, $width, $height));
-		$this->setScriptName('screenShotFromUrl');
+	public function renderImage($path, $screenWidth = 1280, $screenHeight = 720, $formatImg = 'PNG'){
+		$this->setArguments(array($path, $screenWidth, $screenHeight, $formatImg));
+		$this->setScriptName('renderImage');
 		$data = $this->exec();
 		$pic = base64_decode($data);
 		return $pic;
 	}
 
-	public function fromFile($fileName){
+	public function renderPdf($path, $leafWidth = 1280, $leafHeight = 720){
 
-	}
-
-	public function screenShotFromFile($fileName, $format = 'PNG', $width = 600, $height = 600){
-		return $this->screenShotFromUrl($fileName, $format, $width, $height);
 	}
 
 	private function exec(){
@@ -288,7 +288,7 @@ class cPhantomJS {
 	}
 
 	public function test(){
-		header ("Content-type: image/png");
-		echo $this->screenShotFromFile('c:\Users\EC_l\Downloads\test.htm', 'png', 1024, 768);
+		//header ("Content-type: image/png");
+		echo $this->renderText('http://sinoptik.ua');
 	}
 } 
