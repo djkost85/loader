@@ -335,7 +335,7 @@ abstract class cCurl{
 	}
 
 	/**
-	 * @return mixed
+	 * @return string|cProxy
 	 */
 	public function getProxy() {
 		return $this->proxy;

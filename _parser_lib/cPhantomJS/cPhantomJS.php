@@ -236,8 +236,12 @@ class cPhantomJS {
 
 	}
 
-	public function screenShotFromUrl($url){
-		//$this->setArguments(array($url, ))
+	public function screenShotFromUrl($url, $format = 'PNG', $width = 600, $height = 600){
+		$this->setArguments(array($url, $format, $width, $height));
+		$this->setScriptName('screenShotFromUrl');
+		$data = $this->exec();
+		$pic = base64_decode($data);
+		return $pic;
 	}
 
 	public function fromFile($fileName){
@@ -250,9 +254,9 @@ class cPhantomJS {
 
 	private function exec(){
 		$output = array();
-		var_dump($this->createCommand());
+		//var_dump($this->createCommand());
 		exec($this->createCommand(), $output);
-		return $output;
+		return implode("\n", $output);
 	}
 
 	private function createCommand(){
@@ -284,7 +288,7 @@ class cPhantomJS {
 	}
 
 	public function test(){
-		$this->setScriptName('hello');
-		var_dump($this->exec());
+		header ("Content-type: image/png");
+		echo $this->screenShotFromUrl('http://google.com', 'png', 1024, 768);
 	}
 } 
