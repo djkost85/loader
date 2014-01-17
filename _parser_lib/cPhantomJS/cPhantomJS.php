@@ -248,8 +248,8 @@ class cPhantomJS {
 
 	}
 
-	public function screenShotFromFile($fileName){
-
+	public function screenShotFromFile($fileName, $format = 'PNG', $width = 600, $height = 600){
+		return $this->screenShotFromUrl($fileName, $format, $width, $height);
 	}
 
 	private function exec(){
@@ -289,6 +289,6 @@ class cPhantomJS {
 
 	public function test(){
 		header ("Content-type: image/png");
-		echo $this->screenShotFromUrl('http://google.com', 'png', 1024, 768);
+		echo $this->screenShotFromFile('c:\Users\EC_l\Downloads\test.htm', 'png', 1024, 768);
 	}
 } 
