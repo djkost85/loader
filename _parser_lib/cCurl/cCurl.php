@@ -97,7 +97,7 @@ abstract class cCurl{
 	 * @param string $type
 	 */
 	public function setUserAgentList($type = 'desktop') {
-		$this->_userAgentList = require dirname(__FILE__) . "/user_agent_$type.php";
+		$this->_userAgentList = require dirname(__FILE__) . DIRECTORY_SEPARATOR . "user_agent_$type.php";
 	}
 
 	/**

@@ -29,6 +29,10 @@ class cPhantomJS {
 		return $this->_answer;
 	}
 
+	private function getFullPathInPhantomFiles($dirName){
+		return $this->getPhantomFilesPath() . DIRECTORY_SEPARATOR . $dirName . DIRECTORY_SEPARATOR;
+	}
+
 	private $_dirForFile = 'files';
 
 	/**
@@ -42,7 +46,7 @@ class cPhantomJS {
 	 * @return string
 	 */
 	public function getDirForFile() {
-		return $this->_dirForFile;
+		return $this->getFullPathInPhantomFiles($this->_dirForFile);
 	}
 	private $_dirForScript = 'script';
 
@@ -57,7 +61,7 @@ class cPhantomJS {
 	 * @return string
 	 */
 	public function getDirForScript() {
-		return $this->_dirForScript;
+		return $this->getFullPathInPhantomFiles($this->_dirForScript);
 	}
 	private $_dirForStorage = 'storage';
 
@@ -72,7 +76,7 @@ class cPhantomJS {
 	 * @return string
 	 */
 	public function getDirForStorage() {
-		return $this->_dirForStorage;
+		return $this->getFullPathInPhantomFiles($this->_dirForStorage);
 	}
 
 	private $_phantomFilesPath;
@@ -231,36 +235,45 @@ class cPhantomJS {
 	function __construct($phantomExePath){
 		$this->setPhantomExePath($phantomExePath);
 		$this->setPhantomFilesPath(dirname(__FILE__));
+		$this->setDefaultOption('local-storage-path', $this->getDirForStorage());
 	}
 
-	public function renderText($path, $screenWidth = 1280, $screenHeight = 720){
-		$this->setArguments(array($path, $screenWidth, $screenHeight));
+	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
+		$this->setArguments(array($path, $screenWidthPx, $screenHeightPx));
 		$this->setScriptName('renderText');
 		$data = $this->exec();
 		return $data;
 	}
 
-	public function renderImage($path, $screenWidth = 1280, $screenHeight = 720, $formatImg = 'PNG'){
-		$this->setArguments(array($path, $screenWidth, $screenHeight, $formatImg));
+	public function renderImage($path, $screenWidthPx = 1280, $screenHeightPx = 720, $formatImg = 'PNG'){
+		$this->setArguments(array($path, $screenWidthPx, $screenHeightPx, $formatImg));
 		$this->setScriptName('renderImage');
 		$data = $this->exec();
 		$pic = base64_decode($data);
 		return $pic;
 	}
 
-	public function renderPdf($path, $leafWidth = 1280, $leafHeight = 720){
-
+	public function renderPdf($path, $fileName = 'MyPdf.pdf', $format = 'A4', $orientation = 'portrait', $marginCm = 1){
+		$fileName = $this->getDirForFile() . $fileName;
+		$this->setArguments(array($path, $fileName, $format, $orientation, $marginCm . 'cm'));
+		$this->setScriptName('renderPdf');
+		return $this->exec();
 	}
 
+	/**
+	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845
+	 * @return string
+	 */
 	private function exec(){
 		$output = array();
-		//var_dump($this->createCommand());
-		exec($this->createCommand(), $output);
-		return implode("\n", $output);
+		$return_val = null;
+		echo $this->createCommand();
+		exec($this->createCommand(), $output, $return_val);
+		return $output ? implode("\n", $output) : $return_val;
 	}
 
 	private function createCommand(){
-		return $this->getPhantomExePath() . ' ' . $this->createOptions() . ' ' . $this->createScriptName() . ' ' . $this->createArguments();
+		return $this->createPhantomExePath() . ' ' . $this->createOptions() . ' ' . $this->createScriptName() . ' ' . $this->createArguments();
 	}
 
 	private function createOptions(){
@@ -280,15 +293,19 @@ class cPhantomJS {
 	}
 
 	private function prepareArgument($argument){
-		return "'" . str_replace('\'','\\\'',$argument) . "'";
+		return "'" . escapeshellcmd($argument) . "'";
 	}
 
 	private function createScriptName(){
-		return $this->getPhantomFilesPath() . '/' . $this->getDirForScript() . '/' . $this->getScriptName() . '.js';
+		return "'" . $this->getDirForScript() . $this->getScriptName() . '.js' . "'";
+	}
+
+	private function createPhantomExePath(){
+		return $this->getPhantomExePath();
 	}
 
 	public function test(){
-		//header ("Content-type: image/png");
-		echo $this->renderText('http://sinoptik.ua');
+		//header ("Content-type: application/pdf"); //image/png
+		echo $this->renderPdf('http://sinoptik.ua');
 	}
 } 
