@@ -404,6 +404,7 @@ abstract class cCurl{
 
 	function __construct(){
 		$this->setUserAgentList('desktop');
+		$this->setDefaultOption(CURLOPT_USERAGENT, $this->getRandomUserAgent());
 		$this->_cookie = new cCookie();
 		$this->init();
 	}
@@ -444,7 +445,6 @@ abstract class cCurl{
 		}
 		$this->setOptionProxy($descriptor);
 		$this->setOptionCookie($descriptor);
-		$this->setOption($descriptor, CURLOPT_USERAGENT, $this->getRandomUserAgent());
 		return curl_setopt_array($descriptor['descriptor'], $descriptor['option']);
 	}
 

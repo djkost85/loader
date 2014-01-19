@@ -232,10 +232,20 @@ class cPhantomJS {
 		return $this->_arguments;
 	}
 
+	private $_cookie;
+
+	public function setCookieFile($name){
+		$this->_cookie = new cCookie($name);
+		$this->setDefaultOption('cookies-file', $this->_cookie->getFilePhantomJSName());
+	}
+
+
 	function __construct($phantomExePath){
 		$this->setPhantomExePath($phantomExePath);
+		$this->setKey(microtime(1) . mt_rand());
 		$this->setPhantomFilesPath(dirname(__FILE__));
 		$this->setDefaultOption('local-storage-path', $this->getDirForStorage());
+		$this->setCookieFile($this->getKey());
 	}
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
@@ -260,6 +270,11 @@ class cPhantomJS {
 		return $this->exec();
 	}
 
+	public function getCookie(){
+		$this->setScriptName('getCookie');
+		return $this->exec();
+	}
+
 	/**
 	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845
 	 * @return string
@@ -267,7 +282,7 @@ class cPhantomJS {
 	private function exec(){
 		$output = array();
 		$return_val = null;
-		echo $this->createCommand();
+		//echo $this->createCommand();
 		exec($this->createCommand(), $output, $return_val);
 		return $output ? implode("\n", $output) : $return_val;
 	}
@@ -305,7 +320,17 @@ class cPhantomJS {
 	}
 
 	public function test(){
-		//header ("Content-type: application/pdf"); //image/png
-		echo $this->renderPdf('http://sinoptik.ua');
+		//header ("Content-type: image/png"); //image/png
+		$this->setCookieFile('testPhantom');
+		//var_dump($this->getCookie());
+		$this->renderImage('http://sinoptik.ua');
+		$this->renderImage('http://vk.com');
+		$this->renderImage('http://ya.ru');
+		$this->renderImage('http://google.com');
+		$this->renderImage('http://market.yandex.ru');
+		$this->renderImage('http://ukr.net');
+		$this->renderImage('http://github.com');
+		echo $this->renderText('http://test1.ru/test.php');
+		echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
 	}
 } 

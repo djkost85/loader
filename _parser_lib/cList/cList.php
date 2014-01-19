@@ -170,8 +170,8 @@ class cList {
 	}
 	/**
 	 * @param string     $level имя уровня
-	 * @param array|null $levelData данные в которфх ищем необходимый уровень
-	 * @return bool
+	 * @param array|null $levelData данные в которых ищем необходимый уровень
+	 * @return array|null
 	 */
 	public function &getLevel($level, &$levelData = null){
 		if($levelData === null){
@@ -206,18 +206,6 @@ class cList {
 		}
 		return array_key_exists($levelName, $level);
 	}
-	public function deleteLevel($levelName, $parentName = false){
-		if($parentName){
-			$parent =& $this->getLevel($parentName);
-			$parent[$levelName] = null;
-		} else {
-			$level =& $this->getLevel($levelName);
-			if($level){
-				$level = null;
-			}
-		}
-		$this->update();
-	}
 
 	public function &getRandom($levelName){
 		$level =& $this->getLevel($levelName);
@@ -247,14 +235,20 @@ class cList {
 		}
 	}
 
-	public function clear($levelName = false){
+	public function clear($levelName = false, $parentName = false){
 		if(!$levelName){
 			$list =& $this->getList();
 			$list[$this->getMainLevelName()] = array();
+		} elseif($parentName) {
+			$parent =& $this->getLevel($parentName);
+			$parent[$levelName] = array();
 		} else {
-			$levelData =& $this->getLevel($levelName);
-			$levelData = array();
+			$level =& $this->getLevel($levelName);
+			if($level){
+				$level = array();
+			}
 		}
+		$this->update();
 	}
 
 	public function &getValue($level, $key){
