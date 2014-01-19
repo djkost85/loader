@@ -216,13 +216,16 @@ class cCookie {
 	 */
 	public static function fromPhantomJS($text){
 		$lines = explode("\n", $text);
-		$regexCookieDelimiter = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?(?:\\\\{2}|(\\\\x\w{2}){1,2}|\w|\W|\_|\\\\x\w){1})';
-		$regexCookieLine = "%^cookies=\"\@Variant\($regexCookieDelimiter{2}QList\\<QNetworkCookie\\>$regexCookieDelimiter{3}(?<cookie_str>.*)\)\"\s*$%ims";
+		var_dump($lines[1]);
+		$regexCookieDelimiter = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?(?:\\\\{2}|(\\\\x\w{2}){1,2}|\w|\_|\\\\x\w|\\\w|\W){1})';
+		$regexCookieLine = "%^cookies=\"\@Variant\($regexCookieDelimiter{2}QList\\<QNetworkCookie\\>$regexCookieDelimiter{3}(?<cookie_str>.+)\)\"\s*$%ims";
 		if(!preg_match($regexCookieLine, $lines[1], $match)){
 			return array();
 		}
 		$cookieDelimiter = 'REPLACE_COOKIE_DELIMITER';
+		var_dump($match['cookie_str']);
 		$text = preg_replace("%$regexCookieDelimiter%ims", $cookieDelimiter, $match['cookie_str']);
+		var_dump($text);
 		$cookiesLines = explode($cookieDelimiter, $text);
 		$parametres = array('expires', 'domain', 'path');
 		$cookies = array();
@@ -353,13 +356,22 @@ class cCookie {
 	}
 
 	public function toFilePhantomJS($cookies){
-		$start = "[General]\ncookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList\\0\\0\\0\\0\\x1\\0\\0\\0\\x4\\0\\0\\0P";
+		$countCookiesFlag = array(
+			'x1','x2','x3','x4','x5',
+			'x6','a','b','t','n',
+			'v','f','r','xe','xf',
+			'x10','x11','x12','x13','x14',
+			'x15','x16','x17','x18','x19',
+			'x1a','x1b','x1c','x1d','x1e',
+			'x1f');
+		$keyCountCookie = count($cookies) - 1;
+		$start = "[General]\ncookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0\\x1\\0\\0\\0\\{$countCookiesFlag[$keyCountCookie]}\\0\\0\\0M";
 		$end = ")\"\n";
 		$cookiesLines = array();
 		foreach($cookies as $cookie){
 			$cookiesLines[] = $this->toPhantomJS($cookie);
 		}
-		$str = $start . implode("\\0\\0\\0P",$cookiesLines) . $end;
+		$str = $start . implode("\\0\\0\\0Q",$cookiesLines) . $end;
 		return file_put_contents($this->getFilePhantomJSName(), $str);
 	}
 
