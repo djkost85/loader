@@ -7,22 +7,23 @@
  * Email: bpteam22@gmail.com
  */
 
-require_once dirname(__FILE__) . '/cnfg.php';
+require_once dirname(__FILE__) . '/cnfg_test.php';
 use GetContent\cCookie as cCookie;
 echo "cCookie<br/>\n";
 
 define('FILE_NAME','testCookies');
 
 $functions = array(
-	'open',
+	/*'open',
 	'create',
 	'fromCurl',
 	'toCurl',
 	'toFileCurl',
 	'fromFileCurl',
-	'fromPhantomJS',
+	'fromPhantomJS',*/
+	'fromFilePhantomJS',/*
 	'toPhantomJS',
-	'toFilePhantomJS',
+	'toFilePhantomJS',*/
 	//'delete',
 );
 

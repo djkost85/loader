@@ -8,6 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 define('ROOT_DIR', dirname(__FILE__));
+require_once ROOT_DIR . "/cnfg.php";
 require_once ROOT_DIR . "/cFile/cFile.php";
 require_once ROOT_DIR . "/cList/cList.php";
 require_once ROOT_DIR . "/cCookie/cCookie.php";

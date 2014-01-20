@@ -7,7 +7,7 @@
  * Project: get_content
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-require_once dirname(__FILE__) . '/cnfg.php';
+require_once dirname(__FILE__) . '/cnfg_test.php';
 use GetContent\cFile as cFile;
 echo "cFile<br/>\n";
 

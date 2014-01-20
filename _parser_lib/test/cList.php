@@ -7,7 +7,7 @@
  * Project: get_content
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-require_once dirname(__FILE__) . '/cnfg.php';
+require_once dirname(__FILE__) . '/cnfg_test.php';
 use GetContent\cList as cList;
 echo "cList<br/>\n";
 
@@ -111,7 +111,7 @@ function deleteLevel(){
 	$subLevel = 'sub_level';
 	$list = new cList();
 	$list->open(FILE_NAME);
-	$list->deleteLevel($subLevel, $parentLevel);
+	$list->clear($subLevel, $parentLevel);
 	return !$list->getLevel($subLevel);
 }
 

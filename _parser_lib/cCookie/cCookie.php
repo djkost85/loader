@@ -88,6 +88,13 @@ class cCookie {
 	}
 
 	/**
+	 * @return mixed
+	 */
+	public static function getGmtOffset() {
+		return ((int)date('O')/100 * 3600);
+	}
+
+	/**
 	 * @param bool|string $name
 	 */
 	function __construct($name = false){
@@ -123,13 +130,12 @@ class cCookie {
 	 * @param bool        $tailmatch флаг точного совпадения доменного имени сайта
 	 */
 	public function create($name, $value, $domain, $path = '/', $expires = false, $httponly = false, $secure = false, $tailmatch = true){
-		$gmtOffset = ((int)date('O')/100 * 3600);
 		$cookie['name']     = $name;
 		$cookie['value']    = $value;
 		$cookie['tailmatch']= (bool)$tailmatch;
 		$cookie['domain']   = $domain;
 		$cookie['path']     = $path;
-		$cookie['expires']  = $expires ? $expires : date('D, d-M-y H:i:s', time() + 86400 - $gmtOffset) . ' GMT';
+		$cookie['expires']  = $expires ? $expires : date('D, d-M-y H:i:s', time() + 86400 - self::getGmtOffset()) . ' GMT';
 		$cookie['httponly'] = (bool)$httponly;
 		$cookie['secure']   = (bool)$secure;
 		$domain = cStringWork::getDomainName($domain);
@@ -140,7 +146,7 @@ class cCookie {
 
 	public function creates($cookies){
 		foreach($cookies as $cookie){
-			$this->create($cookie['name'], $cookie['value'], $cookie['domain'], $cookie['path'], $cookie['expires'], $cookie['httponly'], $cookie['secure'], $cookie['tailmatch']);
+			@$this->create($cookie['name'], $cookie['value'], $cookie['domain'], $cookie['path'], $cookie['expires'], $cookie['httponly'], $cookie['secure'], $cookie['tailmatch']);
 		}
 	}
 
@@ -175,7 +181,6 @@ class cCookie {
 	 * @return array
 	 */
 	public static function fromCurl($text){
-		$gmtOffset = ((int)date('O')/100 * 3600);
 		$lines = explode("\n", $text);
 		$count = count($lines);
 		$cookies = array();
@@ -186,7 +191,7 @@ class cCookie {
 			$cookie['tailmatch']= $fields[1] == 'TRUE';
 			$cookie['domain']   = preg_replace('%^\#HttpOnly_%ims', '', $fields[0]);
 			$cookie['path']     = $fields[2];
-			$cookie['expires']  = date('D, d-M-y H:i:s', $fields[4] - $gmtOffset) . " GMT";
+			$cookie['expires']  = date('D, d-M-y H:i:s', $fields[4] - self::getGmtOffset()) . " GMT";
 			$cookie['httponly'] = (bool)preg_match('%^\#HttpOnly_%ims', $lines[$i]);
 			$cookie['secure']   = $fields[3] == 'TRUE';
 			$cookies[$cookie['name']] = $cookie;
@@ -197,16 +202,7 @@ class cCookie {
 	public function fromFileCurl(){
 		$text = file_get_contents($this->getFileCurlName());
 		$cookies = $this->fromCurl($text);
-		foreach($cookies as $cookie){
-			$this->create($cookie['name'],
-			              $cookie['value'],
-			              $cookie['domain'],
-			              $cookie['path'],
-			              $cookie['expires'],
-			              $cookie['httponly'],
-			              $cookie['secure'],
-			              $cookie['tailmatch']);
-		}
+		$this->creates($cookies);
 		return $cookies;
 	}
 
@@ -215,52 +211,24 @@ class cCookie {
 	 * @return array
 	 */
 	public static function fromPhantomJS($text){
-		$lines = explode("\n", $text);
-		var_dump($lines[1]);
-		$regexCookieDelimiter = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?(?:\\\\{2}|(\\\\x\w{2}){1,2}|\w|\_|\\\\x\w|\\\w|\W){1})';
-		$regexCookieLine = "%^cookies=\"\@Variant\($regexCookieDelimiter{2}QList\\<QNetworkCookie\\>$regexCookieDelimiter{3}(?<cookie_str>.+)\)\"\s*$%ims";
-		if(!preg_match($regexCookieLine, $lines[1], $match)){
-			return array();
-		}
-		$cookieDelimiter = 'REPLACE_COOKIE_DELIMITER';
-		var_dump($match['cookie_str']);
-		$text = preg_replace("%$regexCookieDelimiter%ims", $cookieDelimiter, $match['cookie_str']);
-		var_dump($text);
-		$cookiesLines = explode($cookieDelimiter, $text);
-		$parametres = array('expires', 'domain', 'path');
+		$phantomCookies = json_decode($text, true);
 		$cookies = array();
-		foreach ($cookiesLines as $cookieLine) {
-			$cookie = array();
-			if(preg_match('%(?<name>\w+)\s*=\s*(?<value>[^;]+)%ims', $cookieLine, $match)){
-				$cookie['name'] = trim($match['name']);
-				$cookie['value'] = trim($match['value']);
-			} else {
-				continue;
-			}
-			foreach($parametres as $param){
-				if(preg_match('%' . $param . '\s*=\s*(?<val>[^;]+)%i', $cookieLine, $match)){
-					$cookie[$param] = trim($match['val']);
-				}
-			}
-			$cookie['secure'] = (bool)preg_match('%;\s*secure\s*(;|$)%i', $cookieLine);
-			$cookie['httponly'] = (bool)preg_match('%;\s*httponly\s*(;|$)%i', $cookieLine);
+		foreach ($phantomCookies as $cookie) {
+			$cookie['expires'] = date('D, d-M-y H:i:s', $cookie['expiry'] - self::getGmtOffset()) . ' GMT';
 			$cookies[$cookie['name']] = $cookie;
 		}
 		return $cookies;
 	}
 
 	public function fromFilePhantomJS(){
-		$text = file_get_contents($this->getFilePhantomJSName());
-		$cookies = $this->fromPhantomJS($text);
-		foreach($cookies as $cookie){
-			$this->create($cookie['name'],
-			              $cookie['value'],
-			              $cookie['domain'],
-			              $cookie['path'],
-			              $cookie['expires'],
-			              $cookie['httponly'],
-			              $cookie['secure']);
-		}
+		/**
+		 * @var cPhantomJS
+		 */
+		$phantom = new cPhantomJS(PHANTOMJS_EXE);
+		$phantom->setCookieFile($this->getName());
+		$cookies = $phantom->getCookie();
+		$cookies = $this->fromPhantomJS($cookies);
+		$this->creates($cookies);
 		return $cookies;
 	}
 	/**
@@ -342,37 +310,21 @@ class cCookie {
 	}
 
 	/**
-	 * @param array $cookie
-	 * @return string
+	 * @param array $cookies
+	 * @return array
 	 */
-	public function toPhantomJS($cookie){
-		return ($cookie['name'] . '=' . $cookie['value'] . ';' .
-		       ' expires=' . $cookie['expires'] . ';' .
-		       ($cookie['secure'] ?' secure;' : '') .
-		       ($cookie['httponly'] ?' HttpOnly;' : '') .
-		       ' domain=' . $cookie['domain'] . ';' .
-		       ' path=' . $cookie['path']
-		);
+	public function toPhantomJS($cookies){
+		return array_values($cookies);
 	}
 
 	public function toFilePhantomJS($cookies){
-		$countCookiesFlag = array(
-			'x1','x2','x3','x4','x5',
-			'x6','a','b','t','n',
-			'v','f','r','xe','xf',
-			'x10','x11','x12','x13','x14',
-			'x15','x16','x17','x18','x19',
-			'x1a','x1b','x1c','x1d','x1e',
-			'x1f');
-		$keyCountCookie = count($cookies) - 1;
-		$start = "[General]\ncookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0\\x1\\0\\0\\0\\{$countCookiesFlag[$keyCountCookie]}\\0\\0\\0M";
-		$end = ")\"\n";
-		$cookiesLines = array();
-		foreach($cookies as $cookie){
-			$cookiesLines[] = $this->toPhantomJS($cookie);
-		}
-		$str = $start . implode("\\0\\0\\0Q",$cookiesLines) . $end;
-		return file_put_contents($this->getFilePhantomJSName(), $str);
+		/**
+		 * @var cPhantomJS
+		 */
+		$phantom = new cPhantomJS(PHANTOMJS_EXE);
+		$phantom->setCookieFile($this->getName());
+		$cookies = $this->toPhantomJS($cookies);
+		return $phantom->addCookie($cookies);
 	}
 
 	/**

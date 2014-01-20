@@ -7,7 +7,7 @@
  * Email: bpteam22@gmail.com
  */
 
-require_once dirname(__FILE__) . '/cnfg.php';
+require_once dirname(__FILE__) . '/cnfg_test.php';
 use GetContent\cPhantomJS as cPhantomJS;
 //echo "cPhantomJS<br/>\n";
 
@@ -18,5 +18,5 @@ $functions = array(
 //runTest($functions);
 
 
-	$phantom = new cPhantomJS('C:\phantomjs\phantomjs.exe');
+	$phantom = new cPhantomJS(PHANTOMJS_EXE);
 	$phantom->test();

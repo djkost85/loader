@@ -278,8 +278,14 @@ class cPhantomJS {
 		return $this->exec();
 	}
 
-	public function setCookie($cookies){
-
+	/**
+	 * @param string $cookies
+	 * @return string
+	 */
+	public function addCookie($cookies){
+		$this->setArguments($cookies);
+		$this->setScriptName('addCookie');
+		return $this->exec();
 	}
 
 	/**
@@ -335,11 +341,11 @@ class cPhantomJS {
 		$this->renderImage('http://ya.ru');
 		$this->renderImage('http://google.com');
 		$this->renderImage('http://market.yandex.ru');
-		$this->renderImage('http://ukr.net');
-		$this->renderImage('http://github.com');*/
+		$this->renderImage('http://ukr.net');*/
+		$this->renderImage('http://github.com');
 		echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
-		echo $this->renderText('http://test1.ru/test.php');
-		var_dump($this->_cookie->fromFilePhantomJS());
-		echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
+		//echo $this->renderText('http://test1.ru/test.php');
+		//var_dump($this->_cookie->fromFilePhantomJS());
+		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
 	}
 } 
