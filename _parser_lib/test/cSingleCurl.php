@@ -23,20 +23,20 @@ $functions = array(
 	'prepareContent',
 );
 
-runTest($functions);
+runTest($functions, 'cSingleCurl_');
 
-function init(){
+function cSingleCurl_init(){
 	$gc = new cSingleCurl();
 	$descriptor =& $gc->getDescriptor();
 	return is_resource($descriptor['descriptor']);
 }
 
-function getRandomUserAgent(){
+function cSingleCurl_getRandomUserAgent(){
 	$gc = new cSingleCurl();
 	return in_array($gc->getRandomUserAgent(), $gc->getUserAgentList());
 }
 
-function setOption(){
+function cSingleCurl_setOption(){
 	$gc = new cSingleCurl();
 	$descriptor=& $gc->getDescriptor();
 	$gc->setOption($descriptor, CURLOPT_TIMEOUT, 5);
@@ -46,7 +46,7 @@ function setOption(){
 	return $check1 && $check2;
 }
 
-function setOptions(){
+function cSingleCurl_setOptions(){
 	$options = array(
 		CURLOPT_TIMEOUT => 20,
 		CURLOPT_POSTFIELDS => 'qwer=1234&asdf=5678',
@@ -59,21 +59,21 @@ function setOptions(){
 	       && $descriptor['option'][CURLOPT_POSTFIELDS] == $options[CURLOPT_POSTFIELDS];
 }
 
-function getContent(){
+function cSingleCurl_getContent(){
 	$gc = new cSingleCurl();
 	$gc->getContent('ya.ru', '%yandex%ims');
 	$answer = $gc->getAnswer();
 	return preg_match('%yandex%ims', $answer);
 }
 
-function getHeader(){
+function cSingleCurl_getHeader(){
 	$gc = new cSingleCurl();
 	$gc->getContent('ya.ru', '%yandex%ims');
 	$descriptor = $gc->getDescriptor();
 	return $descriptor['info']['header'];
 }
 
-function mimeType(){
+function cSingleCurl_mimeType(){
 	$gc = new cSingleCurl();
 	return $gc->mimeType('audio/mpeg', 'file')
 	       && $gc->mimeType('image/png', 'img')
@@ -81,7 +81,7 @@ function mimeType(){
 	       && !$gc->mimeType('image/png', 'html');
 }
 
-function checkAnswerValid() {
+function cSingleCurl_checkAnswerValid() {
 	$url = 'ya.ru';
 	$gc = new cSingleCurl();
 	$gc->setCheckAnswer(true);
@@ -94,7 +94,7 @@ function checkAnswerValid() {
 	return $answerTrue && !(bool)$answerFalse;
 }
 
-function prepareContent(){
+function cSingleCurl_prepareContent(){
 	$url = 'vk.com';
 	$withoutEncoding = 'windows-1251';
 	$needEncoding = 'UTF-8';

@@ -18,20 +18,36 @@ namespace GetContent;
  */
 class cCookie {
 
+
+	private $_phantomjsExe = PHANTOMJS_EXE;
+
+	/**
+	 * @param string $phantomjsExe
+	 */
+	public function setPhantomjsExe($phantomjsExe) {
+		$this->_phantomjsExe = $phantomjsExe;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getPhantomjsExe() {
+		return $this->_phantomjsExe;
+	}
 	/**
 	 * @var string
 	 */
 	private $_dir;
 
 	/**
-	 * @param mixed $dir
+	 * @param string $dir
 	 */
 	public function setDir($dir) {
 		$this->_dir = $dir;
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function getDir() {
 		return $this->_dir;
@@ -186,15 +202,17 @@ class cCookie {
 		$cookies = array();
 		for($i = 4 ; $i < $count ; $i++){
 			$fields = array_map('trim', explode("\t", $lines[$i]));
-			$cookie['name']     = $fields[5];
-			$cookie['value']    = $fields[6];
-			$cookie['tailmatch']= $fields[1] == 'TRUE';
-			$cookie['domain']   = preg_replace('%^\#HttpOnly_%ims', '', $fields[0]);
-			$cookie['path']     = $fields[2];
-			$cookie['expires']  = date('D, d-M-y H:i:s', $fields[4] - self::getGmtOffset()) . " GMT";
-			$cookie['httponly'] = (bool)preg_match('%^\#HttpOnly_%ims', $lines[$i]);
-			$cookie['secure']   = $fields[3] == 'TRUE';
-			$cookies[$cookie['name']] = $cookie;
+			if(is_array($fields) && isset($fields[5])){
+				$cookie['name']     = $fields[5];
+				$cookie['value']    = $fields[6];
+				$cookie['tailmatch']= $fields[1] == 'TRUE';
+				$cookie['domain']   = preg_replace('%^\#HttpOnly_%ims', '', $fields[0]);
+				$cookie['path']     = $fields[2];
+				$cookie['expires']  = date('D, d-M-y H:i:s', $fields[4] - self::getGmtOffset()) . " GMT";
+				$cookie['httponly'] = (bool)preg_match('%^\#HttpOnly_%ims', $lines[$i]);
+				$cookie['secure']   = $fields[3] == 'TRUE';
+				$cookies[$cookie['name']] = $cookie;
+			}
 		}
 		return $cookies;
 	}
@@ -224,7 +242,7 @@ class cCookie {
 		/**
 		 * @var cPhantomJS
 		 */
-		$phantom = new cPhantomJS(PHANTOMJS_EXE);
+		$phantom = new cPhantomJS($this->getPhantomjsExe());
 		$phantom->setCookieFile($this->getName());
 		$cookies = $phantom->getCookie();
 		$cookies = $this->fromPhantomJS($cookies);
@@ -314,17 +332,25 @@ class cCookie {
 	 * @return array
 	 */
 	public function toPhantomJS($cookies){
-		return array_values($cookies);
+		$newCookies = array();
+		foreach($cookies as $cookie){
+			unset($cookie['tailmatch']);
+			$newCookies[] = $cookie;
+		}
+		return $newCookies;
 	}
 
 	public function toFilePhantomJS($cookies){
 		/**
 		 * @var cPhantomJS
 		 */
-		$phantom = new cPhantomJS(PHANTOMJS_EXE);
+		$phantom = new cPhantomJS($this->getPhantomjsExe());
 		$phantom->setCookieFile($this->getName());
-		$cookies = $this->toPhantomJS($cookies);
-		return $phantom->addCookie($cookies);
+		if(!isset($cookies['name'])){
+			$cookies = $this->toPhantomJS($cookies);
+		}
+		$jsonCookies = json_encode($cookies);
+		return $phantom->addCookie($jsonCookies);
 	}
 
 	/**
@@ -334,6 +360,19 @@ class cCookie {
 	public function getCookies($url){
 		$this->update();
 		return $this->_list->getLevel(cStringWork::getDomainName($url));
+	}
+
+	public function getAllCookies(){
+		$allCookies = array();
+		$cookies = $this->_list->getLevel($this->_list->getMainLevelName());
+		if(is_array($cookies)){
+			foreach ($cookies as $cookie) {
+				if(is_array($cookie)){
+					$allCookies = array_merge($allCookies, $cookie);
+				}
+			}
+		}
+		return $allCookies;
 	}
 
 	public function getActualCookies($url){

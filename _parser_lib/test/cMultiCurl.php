@@ -18,9 +18,9 @@ $functions = array(
 	'prepareContent',
 );
 
-runTest($functions);
+runTest($functions, 'cMultiCurl_');
 
-function init(){
+function cMultiCurl_init(){
 	$gc = new cMultiCurl();
 	$descriptor =& $gc->getDescriptor();
 	$gc->setCountStream(2);
@@ -30,7 +30,7 @@ function init(){
 	       && is_resource($descriptorArray[1]['descriptor']);
 }
 
-function getContent(){
+function cMultiCurl_getContent(){
 	$url = array(
 		'vk.com',
 		'ya.ru'
@@ -41,7 +41,7 @@ function getContent(){
 	return preg_match('%vk\.me%ims', $answer[0]) && preg_match('%yandex%ims', $answer[1]);
 }
 
-function checkAnswerValid() {
+function cMultiCurl_checkAnswerValid() {
 	$url = array('ya.ru','ya.ru');
 	$gc = new cMultiCurl();
 	$gc->setCheckAnswer(true);
@@ -54,7 +54,7 @@ function checkAnswerValid() {
 	return $answerTrue[1] && (!isset($answerFalse[1]) || !$answerFalse[1]);
 }
 
-function prepareContent(){
+function cMultiCurl_prepareContent(){
 	$url = array('vk.com');
 	$originalEncoding = 'windows-1251';
 	$needEncoding = 'UTF-8';

@@ -26,16 +26,16 @@ $functions = array(
 	//'deleteList',
 );
 
-runTest($functions);
+runTest($functions, 'cList_');
 
-function create(){
+function cList_create(){
 	$list = new cList();
 	$list->create(FILE_NAME);
 	$level =& $list->getLevel('/');
 	return (file_exists(FILE_NAME) && is_array($level));
 }
 
-function write(){
+function cList_write(){
 	$key = 'name';
 	$value = 'Nafanya';
 	$list = new cList();
@@ -46,7 +46,7 @@ function write(){
 	return $test === $value;
 }
 
-function addLevel(){
+function cList_addLevel(){
 	$levelName = 'new_level';
 	$testData = 'test';
 	$list = new cList();
@@ -57,7 +57,7 @@ function addLevel(){
 	return ($list->getLevel($levelName) && in_array($testData, $list->getLevel($levelName)));
 }
 
-function addSubLevel(){
+function cList_addSubLevel(){
 	$parentLevel = 'new_level';
 	$subLevel = 'sub_level';
 	$testData = 'test';
@@ -69,7 +69,7 @@ function addSubLevel(){
 	return ($list->getLevel($subLevel) && in_array($testData, $list->getLevel($subLevel)));
 }
 
-function findByValue(){
+function cList_findByValue(){
 	$levelName = 'new_level';
 	$testData = 'test';
 	$list = new cList();
@@ -77,7 +77,7 @@ function findByValue(){
 	return $list->findByValue($levelName, $testData);
 }
 
-function findByKey(){
+function cList_findByKey(){
 	$level = 'new_level';
 	$key = 'sub_level';
 	$value = 'test';
@@ -86,7 +86,7 @@ function findByKey(){
 	return ($list->findByKey($level, $key) == $value || in_array( $value, $list->findByKey($level, $key)));
 }
 
-function push(){
+function cList_push(){
 	$levelName = 'sub_level';
 	$testData = array(1,2,3,4,5,6,7,8);
 	$list = new cList();
@@ -96,7 +96,7 @@ function push(){
 	return $list->findByValue($levelName, $testData[2]);
 }
 
-function getRandom(){
+function cList_getRandom(){
 
 	$levelName = 'sub_level';
 	$testData = array(array(1,2,3,4,5,6,7,8),'test');
@@ -106,7 +106,7 @@ function getRandom(){
 
 }
 
-function deleteLevel(){
+function cList_deleteLevel(){
 	$parentLevel = 'new_level';
 	$subLevel = 'sub_level';
 	$list = new cList();
@@ -115,7 +115,7 @@ function deleteLevel(){
 	return !$list->getLevel($subLevel);
 }
 
-function deleteList(){
+function cList_deleteList(){
 	$list = new cList();
 	$list->open(FILE_NAME);
 	return $list->deleteList();

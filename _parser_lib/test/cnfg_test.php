@@ -12,7 +12,7 @@ error_reporting(E_ALL);
 require_once dirname(__FILE__) . '/../include.php';
 
 
-function runTest($functions){
+function runTest($functions, $prefix = ''){
 	$start = microtime(true);
 	echo date("[H:i:s Y/m/d]", $start)."\n<br>\n";
 	echo "<table border='1' cellpadding='2'>";
@@ -20,7 +20,8 @@ function runTest($functions){
 		echo "<tr>";
 		echo "<td> $function </td>";
 		$funStart = microtime(true);
-		if($function()){
+		$nameFunction = $prefix.$function;
+		if($nameFunction()){
 			echo "<td> success </td>";
 		} else {
 			echo "<td> <b> ERROR </b> </td>";

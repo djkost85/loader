@@ -29,35 +29,35 @@ $functions = array(
 	'testDeleteLock',
 );
 
-runTest($functions);
+runTest($functions, 'cFile_');
 
-function testCreateFile(){
+function cFile_testCreateFile(){
 	$file = new cFile(FILE_NAME);
 	$file->open(FILE_NAME);
 	return file_exists(FILE_NAME);
 }
 
-function testOpenFile(){
+function cFile_testOpenFile(){
 	$file = new cFile(FILE_NAME);
 	return $file->open(FILE_NAME);
 }
 
-function testWriteFile(){
+function cFile_testWriteFile(){
 	$file = new cFile(FILE_NAME);
 	return $file->write('hello world'. microtime(true) . "\n");
 }
 
-function testReadFile(){
+function cFile_testReadFile(){
 	$file = new cFile(FILE_NAME);
 	return ($file->read() !== false);
 }
 
-function testClearFile(){
+function cFile_testClearFile(){
 	$file = new cFile(FILE_NAME);
 	return ($file->clear() !== false);
 }
 
-function testWriteLock(){
+function cFile_testWriteLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$fileBlock->lock();
 	$res = $fileBlock->write("hello ". microtime(true) . "\n");
@@ -65,7 +65,7 @@ function testWriteLock(){
 	return $res;
 }
 
-function testReadLock(){
+function cFile_testReadLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$fileBlock->lock();
 	$res = $fileBlock->read();
@@ -73,18 +73,18 @@ function testReadLock(){
 	return $res;
 }
 
-function testDeleteLock(){
+function cFile_testDeleteLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$fileBlock->lock();
 	return $fileBlock->delete();
 }
 
-function testClose(){
+function cFile_testClose(){
 	$file = new cFile(FILE_NAME);
 	return $file->close();
 }
 
-function testCantWriteLock(){
+function cFile_testCantWriteLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$file = new cFile(FILE_NAME);
 	$fileBlock->lock();
@@ -93,7 +93,7 @@ function testCantWriteLock(){
 	return (!$res);
 }
 
-function testCantReadLock(){
+function cFile_testCantReadLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$file = new cFile(FILE_NAME);
 	$fileBlock->lock();
@@ -102,7 +102,7 @@ function testCantReadLock(){
 	return (!$res);
 }
 
-function testCantDeleteLock(){
+function cFile_testCantDeleteLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$file = new cFile(FILE_NAME);
 	$fileBlock->lock();
@@ -111,7 +111,7 @@ function testCantDeleteLock(){
 	return (!$res);
 }
 
-function testCantBlockLock(){
+function cFile_testCantBlockLock(){
 	$fileBlock = new cFile(FILE_NAME);
 	$file = new cFile(FILE_NAME);
 	$fileBlock->lock();

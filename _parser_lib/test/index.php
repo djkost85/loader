@@ -5,3 +5,6 @@
 <a href="cMultiCurl.php">cMultiCurl</a><br/>
 <a href="cPhantomJS.php">cPhantomJS</a><br/>
 
+<br/><br/><br/><br/><br/>
+
+<a href="all.php">ALL</a>
