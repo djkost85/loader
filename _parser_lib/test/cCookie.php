@@ -14,17 +14,17 @@ echo "cCookie<br/>\n";
 define('FILE_NAME','testCookies');
 
 $functions = array(
-	'open',
-	'create',
-	'fromCurl',
-	'toCurl',
-	'toFileCurl',
-	'fromFileCurl',
+	//'open',
+	//'create',
+	//'fromCurl',
+	//'toCurl',
+	//'toFileCurl',
+	//'fromFileCurl',
 	//'toPhantomJS',
-	//'toFilePhantomJS',
+	'toFilePhantomJS',
 	//'fromPhantomJS',
 	//'fromFilePhantomJS',
-	'delete',
+	//'delete',
 );
 
 runTest($functions, 'cCookie_');

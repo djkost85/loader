@@ -229,24 +229,52 @@ class cCookie {
 	 * @return array
 	 */
 	public static function fromPhantomJS($text){
-		$phantomCookies = json_decode($text, true);
+		$lines = explode("\n", $text);
+		var_dump($lines[1]);
+		$regexCookieDelimiter = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?(?:\\\\{2}|(\\\\x\w{2}){1,2}|\w|\_|\\\\x\w|\\\w|\W){1})';
+		$regexCookieLine = "%^cookies=\"\@Variant\($regexCookieDelimiter{2}QList\\<QNetworkCookie\\>$regexCookieDelimiter{3}(?<cookie_str>.+)\)\"\s*$%ims";
+		if(!preg_match($regexCookieLine, $lines[1], $match)){
+			return array();
+		}
+		$cookieDelimiter = 'REPLACE_COOKIE_DELIMITER';
+		var_dump($match['cookie_str']);
+		$text = preg_replace("%$regexCookieDelimiter%ims", $cookieDelimiter, $match['cookie_str']);
+		var_dump($text);
+		$cookiesLines = explode($cookieDelimiter, $text);
+		$parametres = array('expires', 'domain', 'path');
 		$cookies = array();
-		foreach ($phantomCookies as $cookie) {
-			$cookie['expires'] = date('D, d-M-y H:i:s', $cookie['expiry'] - self::getGmtOffset()) . ' GMT';
+		foreach ($cookiesLines as $cookieLine) {
+			$cookie = array();
+			if(preg_match('%(?<name>\w+)\s*=\s*(?<value>[^;]+)%ims', $cookieLine, $match)){
+				$cookie['name'] = trim($match['name']);
+				$cookie['value'] = trim($match['value']);
+			} else {
+				continue;
+			}
+			foreach($parametres as $param){
+				if(preg_match('%' . $param . '\s*=\s*(?<val>[^;]+)%i', $cookieLine, $match)){
+					$cookie[$param] = trim($match['val']);
+				}
+			}
+			$cookie['secure'] = (bool)preg_match('%;\s*secure\s*(;|$)%i', $cookieLine);
+			$cookie['httponly'] = (bool)preg_match('%;\s*httponly\s*(;|$)%i', $cookieLine);
 			$cookies[$cookie['name']] = $cookie;
 		}
 		return $cookies;
 	}
 
 	public function fromFilePhantomJS(){
-		/**
-		 * @var cPhantomJS
-		 */
-		$phantom = new cPhantomJS($this->getPhantomjsExe());
-		$phantom->setCookieFile($this->getName());
-		$cookies = $phantom->getCookie();
-		$cookies = $this->fromPhantomJS($cookies);
-		$this->creates($cookies);
+		$text = file_get_contents($this->getFilePhantomJSName());
+		$cookies = $this->fromPhantomJS($text);
+		foreach($cookies as $cookie){
+			$this->create($cookie['name'],
+			              $cookie['value'],
+			              $cookie['domain'],
+			              $cookie['path'],
+			              $cookie['expires'],
+			              $cookie['httponly'],
+			              $cookie['secure']);
+		}
 		return $cookies;
 	}
 	/**
@@ -334,23 +362,34 @@ class cCookie {
 	public function toPhantomJS($cookies){
 		$newCookies = array();
 		foreach($cookies as $cookie){
-			unset($cookie['tailmatch']);
-			$newCookies[] = $cookie;
+			$newCookies[] = ($cookie['name'] . '=' . $cookie['value'] . ';' .
+			                ' expires=' . $cookie['expires'] . ';' .
+			                ($cookie['secure'] ?' secure;' : '') .
+			                ($cookie['httponly'] ?' HttpOnly;' : '') .
+			                ' domain=' . $cookie['domain'] . ';' .
+			                ' path=' . $cookie['path']
+			);
 		}
 		return $newCookies;
 	}
 
 	public function toFilePhantomJS($cookies){
-		/**
-		 * @var cPhantomJS
-		 */
-		$phantom = new cPhantomJS($this->getPhantomjsExe());
-		$phantom->setCookieFile($this->getName());
-		if(!isset($cookies['name'])){
-			$cookies = $this->toPhantomJS($cookies);
-		}
-		$jsonCookies = json_encode($cookies);
-		return $phantom->addCookie($jsonCookies);
+		$countCookiesFlag = array(
+			'x1','x2','x3','x4','x5',
+			'x6','a','b','t','n',
+			'v','f','r','xe','xf',
+			'x10','x11','x12','x13','x14',
+			'x15','x16','x17','x18','x19',
+			'x1a','x1b','x1c','x1d','x1e',
+			'x1f');
+		$keyCountCookie = count($cookies) - 1;
+		$start = "[General]
+cookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0\\x1\\0\\0\\0\\" . $countCookiesFlag[$keyCountCookie];
+		$end = ")\"
+";
+		$cookiesLines = $this->toPhantomJS($cookies);
+		$str = $start . implode("\\0\\0\\0\\x10",$cookiesLines) . $end;
+		return file_put_contents($this->getFilePhantomJSName(), $str);
 	}
 
 	/**
