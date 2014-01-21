@@ -290,23 +290,13 @@ class cPhantomJS {
 
 	/**
 	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845
-	 * @param bool $saveCookie
 	 * @return string
 	 */
-	private function exec($saveCookie = true){
+	private function exec(){
 		$output = array();
 		$return_val = null;
-		/*echo $this->createCommand();
-		exit;
-		if($saveCookie){
-			$this->_cookie->toFilePhantomJS($this->_cookie->getAllCookies());
-		}
-*/
+		echo $this->createCommand();
 		exec($this->createCommand(), $output, $return_val);
-/*
-		if($saveCookie){
-			$this->_cookie->fromFilePhantomJS();
-		}*/
 		return $output ? implode("\n", $output) : $return_val;
 	}
 
