@@ -30,7 +30,7 @@ class cPhantomJS {
 	}
 
 	private function getFullPathInPhantomFiles($dirName){
-		return $this->getPhantomFilesPath() . DIRECTORY_SEPARATOR . $dirName . DIRECTORY_SEPARATOR;
+		return $this->getPhantomFilesPath() . DIRECTORY_SEPARATOR . $dirName;
 	}
 
 	private $_dirForFile = 'files';
@@ -267,7 +267,7 @@ class cPhantomJS {
 	}
 
 	public function renderPdf($path, $fileName = 'MyPdf.pdf', $format = 'A4', $orientation = 'portrait', $marginCm = 1){
-		$fileName = $this->getDirForFile() . $fileName;
+		$fileName = $this->getDirForFile() . DIRECTORY_SEPARATOR . $fileName;
 		$this->setArguments(array($path, $fileName, $format, $orientation, $marginCm . 'cm'));
 		$this->setScriptName('renderPdf');
 		return $this->exec();
@@ -283,7 +283,7 @@ class cPhantomJS {
 	 * @return string
 	 */
 	public function addCookie($cookies){
-		$this->setArguments(array($cookies));
+		$this->setArguments(array($cookies, $this->getDirForScript()));
 		$this->setScriptName('addCookie');
 		return $this->exec(false);
 	}
@@ -296,17 +296,17 @@ class cPhantomJS {
 	private function exec($saveCookie = true){
 		$output = array();
 		$return_val = null;
-		echo $this->createCommand();
+		/*echo $this->createCommand();
 		exit;
 		if($saveCookie){
 			$this->_cookie->toFilePhantomJS($this->_cookie->getAllCookies());
 		}
-
+*/
 		exec($this->createCommand(), $output, $return_val);
-
+/*
 		if($saveCookie){
 			$this->_cookie->fromFilePhantomJS();
-		}
+		}*/
 		return $output ? implode("\n", $output) : $return_val;
 	}
 
@@ -335,7 +335,7 @@ class cPhantomJS {
 	}
 
 	private function createScriptName(){
-		return "'" . $this->getDirForScript() . $this->getScriptName() . '.js' . "'";
+		return "'" . $this->getDirForScript() . DIRECTORY_SEPARATOR . $this->getScriptName() . '.js' . "'";
 	}
 
 	private function createPhantomExePath(){
@@ -352,8 +352,8 @@ class cPhantomJS {
 		$this->renderImage('http://google.com');
 		$this->renderImage('http://market.yandex.ru');
 		$this->renderImage('http://ukr.net');*/
-		$this->renderImage('http://github.com');
-		echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
+		$this->renderText('http://github.com');
+		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
 		//echo $this->renderText('http://test1.ru/test.php');
 		//var_dump($this->_cookie->fromFilePhantomJS());
 		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
