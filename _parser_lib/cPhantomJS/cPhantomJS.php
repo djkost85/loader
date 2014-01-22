@@ -295,7 +295,7 @@ class cPhantomJS {
 	private function exec(){
 		$output = array();
 		$return_val = null;
-		echo $this->createCommand();
+		//echo $this->createCommand();
 		exec($this->createCommand(), $output, $return_val);
 		return $output ? implode("\n", $output) : $return_val;
 	}
@@ -336,15 +336,15 @@ class cPhantomJS {
 		//header ("Content-type: image/png"); //image/png
 		$this->setCookieFile('testCookies');
 		//var_dump($this->getCookie());
-		$this->renderImage('http://sinoptik.ua');
+		/*$this->renderImage('http://sinoptik.ua');
 		$this->renderImage('http://vk.com');
 		$this->renderImage('http://ya.ru');
 		$this->renderImage('http://google.com');
 		$this->renderImage('http://market.yandex.ru');
 		$this->renderImage('http://ukr.net');
-		$this->renderText('http://github.com');
+		$this->renderText('http://github.com');*/
 		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
-		//echo $this->renderText('http://test1.ru/get_content-php-curl-proxy/_parser_lib/test/testCookie.php');
+		$this->_cookie->genPhantomJSCountCookieNumber();
 		//var_dump($this->_cookie->fromFilePhantomJS());
 		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
 	}

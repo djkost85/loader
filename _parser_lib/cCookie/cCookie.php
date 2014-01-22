@@ -18,22 +18,6 @@ namespace GetContent;
  */
 class cCookie {
 
-
-	private $_phantomjsExe = PHANTOMJS_EXE;
-
-	/**
-	 * @param string $phantomjsExe
-	 */
-	public function setPhantomjsExe($phantomjsExe) {
-		$this->_phantomjsExe = $phantomjsExe;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getPhantomjsExe() {
-		return $this->_phantomjsExe;
-	}
 	/**
 	 * @var string
 	 */
@@ -109,6 +93,9 @@ class cCookie {
 	public static function getGmtOffset() {
 		return ((int)date('O')/100 * 3600);
 	}
+
+	private static $_regExCookieDelimiterPhantomJS = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?((\\\\{2})|((\\\\x\w{2}){1,2})|(\w)|(\_)|(\\\\x\w)|(\\\\\w)|(\W)|(\\\\\W)){1})';
+	private static $_phantomCookieCountSymbol = array(0 => '\0',  1 => '\x1', 2 => '\x2', 3 => '\x3', 4 => '\x4', 5 => '\x5', 6 => '\x6', 7 => '\a', 8 => '\b', 9 => '\t', 10 => '\n', 11 => '\v', 12 => '\f', 13 => '\r', 14 => '\xe', 15 => '\xf', 16 => '\x10', 17 => '\x11', 18 => '\x12', 19 => '\x13', 20 => '\x14', 21 => '\x15', 22 => '\x16', 23 => '\x17', 24 => '\x18', 25 => '\x19', 26 => '\x1a', 27 => '\x1b', 28 => '\x1c', 29 => '\x1d', 30 => '\x1e', 31 => '\x1f', 32 => ' ', 33 => '!', 34 => '\"', 35 => '#', 36 => '$', 37 => '%', 38 => '&', 39 => '\'', 40 => '(', 41 => ')', 42 => '*', 43 => '+', 44 => ',', 45 => '-', 46 => '.', 47 => '/', 48 => '\x30', 49 => '\x31', 50 => '\x32',);
 
 	/**
 	 * @param bool|string $name
@@ -230,8 +217,7 @@ class cCookie {
 	 */
 	public static function fromPhantomJS($text){
 		$lines = explode("\n", $text);
-		var_dump($lines[1]);
-		$regexCookieDelimiter = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?(?:\\\\{2}|(\\\\x\w{2}){1,2}|\w|\_|\\\\x\w|\\\w|\W){1})';
+		$regexCookieDelimiter = self::$_regExCookieDelimiterPhantomJS;
 		$regexCookieLine = "%^cookies=\"\@Variant\($regexCookieDelimiter{2}QList\\<QNetworkCookie\\>$regexCookieDelimiter{3}(?<cookie_str>.+)\)\"\s*$%ims";
 		if(!preg_match($regexCookieLine, $lines[1], $match)){
 			return array();
@@ -356,40 +342,36 @@ class cCookie {
 	}
 
 	/**
-	 * @param array $cookies
-	 * @return array
+	 * @param array $cookie
+	 * @return string
 	 */
-	public function toPhantomJS($cookies){
-		$newCookies = array();
-		foreach($cookies as $cookie){
-			$newCookies[] = ($cookie['name'] . '=' . $cookie['value'] . ';' .
-			                ' expires=' . $cookie['expires'] . ';' .
-			                ($cookie['secure'] ?' secure;' : '') .
-			                ($cookie['httponly'] ?' HttpOnly;' : '') .
-			                ' domain=' . $cookie['domain'] . ';' .
-			                ' path=' . $cookie['path']
-			);
-		}
-		return $newCookies;
+	public function toPhantomJS($cookie){
+		return ($cookie['name'] . '=' . $cookie['value'] . ';' .
+		                ' expires=' . $cookie['expires'] . ';' .
+		                ($cookie['secure'] ?' secure;' : '') .
+		                ($cookie['httponly'] ?' HttpOnly;' : '') .
+		                ' domain=' . $cookie['domain'] . ';' .
+		                ' path=' . $cookie['path']
+		);
 	}
 
 	public function toFilePhantomJS($cookies){
-		$countCookiesFlag = array(
-			'x1','x2','x3','x4','x5',
-			'x6','a','b','t','n',
-			'v','f','r','xe','xf',
-			'x10','x11','x12','x13','x14',
-			'x15','x16','x17','x18','x19',
-			'x1a','x1b','x1c','x1d','x1e',
-			'x1f');
-		$keyCountCookie = count($cookies) - 1;
+		$keyCountCookie = is_array($cookies) ? count($cookies) : 0;
 		$start = "[General]
-cookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0\\x1\\0\\0\\0\\" . $countCookiesFlag[$keyCountCookie];
+cookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0\\x1\\0\\0\\0" . chr($keyCountCookie);
 		$end = ")\"
 ";
-		$cookiesLines = $this->toPhantomJS($cookies);
-		$str = $start . implode("\\0\\0\\0\\x10",$cookiesLines) . $end;
+		$str = '';
+		foreach($cookies as $cookie){
+			$cookieStr = $this->toPhantomJS($cookie);
+			$str .= "\\0\\0\\0" . chr(mb_strlen($cookieStr));
+		}
+		$str = $start . $str . $end;
 		return file_put_contents($this->getFilePhantomJSName(), $str);
+	}
+
+	private function getPhantomJsNumber($count){
+
 	}
 
 	/**
@@ -430,5 +412,49 @@ cookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0
 	 */
 	private function checkExpiresCookie($date){
 		return (time() > strtotime($date));
+	}
+
+	/**
+	 * Генерирует массив с ключами которым обозначает phantomJS количество cookie или длинну строки cookie
+	 * @param bool   $symbolCount Генерация количества cookies[true] или длинны сроки[false].
+	 * @param string $urlCheck    проверочный url для генерации
+	 */
+	public function genPhantomJSCountCookieNumber($symbolCount = true, $urlCheck = 'http://test1.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php'){
+
+		$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
+		$cookieName = 'zzz_generatorCountCookieNumber';
+		$phantomJS->setCookieFile($cookieName);
+		$this->setName($cookieName);
+		$regEx = self::$_regExCookieDelimiterPhantomJS;
+		$regexCookieCountSymbol = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?(?<symbol>(\\\\{2})|((\\\\x\w{2}){1,2})|(\w)|(\_)|(\\\\x\w)|(\\\\\w)|(\W)|(\\\\\W)){1})';
+		$regexCookieLine = "%^cookies=\"?\@Variant\($regEx{2}QList\\<QNetworkCookie\\>{$regEx}{$regexCookieCountSymbol}{$regEx}(?<cookie_str>.*)\)\"?\s*$%ims";
+		echo "array(";
+		if($symbolCount){
+			$countCookie = 50;
+			for($i=0;$i<=$countCookie;$i++){
+				$phantomJS->renderText($urlCheck . '?countCookie='.$i);
+				$text = file_get_contents($this->getFilePhantomJSName());
+				if(preg_match($regexCookieLine, $text, $match)){
+					echo " " . $i . " => '" . $match['symbol'] . "',";
+				} else {
+					echo "preg_match false </br>\n";
+					echo $text . "</br>\n";
+				}
+			}
+		} else {
+			$lengthCookie = 1;
+			for($i=0;$i<=$lengthCookie;$i++){
+				$phantomJS->renderText($urlCheck . '?lengthCookie='.$i);
+				$text = file_get_contents($this->getFilePhantomJSName());
+				if(preg_match($regexCookieLine, $text, $match)){
+					echo " " . $i . " => '" . $match['symbol'] . "',";
+				} else {
+					echo "preg_match false </br>\n";
+					echo $text . "</br>\n";
+				}
+			}
+		}
+		echo ")";
+		//file_put_contents($this->getFilePhantomJSName(),'');
 	}
 } 
