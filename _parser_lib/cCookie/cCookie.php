@@ -94,7 +94,7 @@ class cCookie {
 		return ((int)date('O')/100 * 3600);
 	}
 
-	private static $_regExCookieDelimiterPhantomJS = '(?:(?:\\\\n)?((\\\\0|\\\\{2}|\\\\x\w[^t]|\\\\x\w|\w|\\\_|\\\\\w|\W|\\\\\W)){4})';
+	private static $_regExCookieDelimiterPhantomJS = '(?:(?:\\\\n)?((\\\\0|\\\\{2}|\\\\x[0-9a-f]{2}|\\\\x[0-9a-f]|\\\\_|\\\\\w|\w|\W|\\\\\W)){4})';
 	private static $_phantomCookieCountSymbols = array(0 => '\0',  1 => '\x1', 2 => '\x2', 3 => '\x3', 4 => '\x4', 5 => '\x5', 6 => '\x6', 7 => '\a', 8 => '\b', 9 => '\t', 10 => '\n', 11 => '\v', 12 => '\f', 13 => '\r', 14 => '\xe', 15 => '\xf', 16 => '\x10', 17 => '\x11', 18 => '\x12', 19 => '\x13', 20 => '\x14', 21 => '\x15', 22 => '\x16', 23 => '\x17', 24 => '\x18', 25 => '\x19', 26 => '\x1a', 27 => '\x1b', 28 => '\x1c', 29 => '\x1d', 30 => '\x1e', 31 => '\x1f', 32 => ' ', 33 => '!', 34 => '\"', 35 => '#', 36 => '$', 37 => '%', 38 => '&', 39 => '\'', 40 => '(', 41 => ')', 42 => '*', 43 => '+', 44 => ',', 45 => '-', 46 => '.', 47 => '/', 48 => '\x30', 49 => '\x31', 50 => '\x32',);
 
 	/**
@@ -449,14 +449,12 @@ cookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0
 		$phantomJS->setCookieFile($cookieName);
 		$this->setName($cookieName);
 		$regEx = self::$_regExCookieDelimiterPhantomJS;
-		$regexCookieCountSymbol = '(?:(?:\\\\n)?(?<symbol>(\\\\{2}|\\\\x\w[^t]|\\\\x\w|\w|\\\_|\\\\\w|\W|\\\\\W)){4})';
-		$regexCookieLine = "%^cookies=\"?\@Variant\($regEx{2}QList\\<QNetworkCookie\\>{$regEx}{$regexCookieCountSymbol}(?<cookie_str>.*)\)\"?\s*$%ims";
+		$regexCookieCountSymbol = '(?:(?:\\\\n)?(?<symbol>(\\\\0|\\\\{2}|\\\\x[0-9a-f]{2}|\\\\x[0-9a-f]|\\\\_|\\\\\w|\w|\W|\\\\\W)){4})';
+		$regexCookieLine = "%^cookies=\"?\@Variant\($regEx{2}QList\\<QNetworkCookie\\>\\\\0{$regEx}{$regexCookieCountSymbol}(?<cookie_str>.*)\)\"?\s*$%ms";
 		$minSizeLenCookie = 64;
 		$startSizeStringCookie = 256;
 		$startNumber = $startSizeStringCookie - $minSizeLenCookie + 1;
 		$countRepeat = $countRepeat + $startNumber;
-		var_dump($regexCookieLine);
-		exit;
 		echo "array(";
 		for($i = $startNumber ; $i <= $countRepeat ; $i++){
 			$phantomJS->renderText($urlCheck . '?lengthCookie='.$i);
