@@ -344,7 +344,8 @@ class cPhantomJS {
 		$this->renderImage('http://ukr.net');
 		$this->renderText('http://github.com');*/
 		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
-		$this->_cookie->genPhantomJSCountCookieNumber();
+		$count = 255;
+		$this->_cookie->genPhantomJSCountCookieNumber('http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php', $count);//http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php
 		//var_dump($this->_cookie->fromFilePhantomJS());
 		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
 	}

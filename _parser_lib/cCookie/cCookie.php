@@ -94,8 +94,30 @@ class cCookie {
 		return ((int)date('O')/100 * 3600);
 	}
 
-	private static $_regExCookieDelimiterPhantomJS = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?((\\\\{2})|((\\\\x\w{2}){1,2})|(\w)|(\_)|(\\\\x\w)|(\\\\\w)|(\W)|(\\\\\W)){1})';
-	private static $_phantomCookieCountSymbol = array(0 => '\0',  1 => '\x1', 2 => '\x2', 3 => '\x3', 4 => '\x4', 5 => '\x5', 6 => '\x6', 7 => '\a', 8 => '\b', 9 => '\t', 10 => '\n', 11 => '\v', 12 => '\f', 13 => '\r', 14 => '\xe', 15 => '\xf', 16 => '\x10', 17 => '\x11', 18 => '\x12', 19 => '\x13', 20 => '\x14', 21 => '\x15', 22 => '\x16', 23 => '\x17', 24 => '\x18', 25 => '\x19', 26 => '\x1a', 27 => '\x1b', 28 => '\x1c', 29 => '\x1d', 30 => '\x1e', 31 => '\x1f', 32 => ' ', 33 => '!', 34 => '\"', 35 => '#', 36 => '$', 37 => '%', 38 => '&', 39 => '\'', 40 => '(', 41 => ')', 42 => '*', 43 => '+', 44 => ',', 45 => '-', 46 => '.', 47 => '/', 48 => '\x30', 49 => '\x31', 50 => '\x32',);
+	private static $_regExCookieDelimiterPhantomJS = '(?:(?:\\\\n)?((\\\\0|\\\\{2}|\\\\x\w[^t]|\\\\x\w|\w|\\\_|\\\\\w|\W|\\\\\W)){4})';
+	private static $_phantomCookieCountSymbols = array(0 => '\0',  1 => '\x1', 2 => '\x2', 3 => '\x3', 4 => '\x4', 5 => '\x5', 6 => '\x6', 7 => '\a', 8 => '\b', 9 => '\t', 10 => '\n', 11 => '\v', 12 => '\f', 13 => '\r', 14 => '\xe', 15 => '\xf', 16 => '\x10', 17 => '\x11', 18 => '\x12', 19 => '\x13', 20 => '\x14', 21 => '\x15', 22 => '\x16', 23 => '\x17', 24 => '\x18', 25 => '\x19', 26 => '\x1a', 27 => '\x1b', 28 => '\x1c', 29 => '\x1d', 30 => '\x1e', 31 => '\x1f', 32 => ' ', 33 => '!', 34 => '\"', 35 => '#', 36 => '$', 37 => '%', 38 => '&', 39 => '\'', 40 => '(', 41 => ')', 42 => '*', 43 => '+', 44 => ',', 45 => '-', 46 => '.', 47 => '/', 48 => '\x30', 49 => '\x31', 50 => '\x32',);
+
+	/**
+	 * @param array $phantomCookieCountSymbols
+	 */
+	public static function setPhantomCookieCountSymbols($phantomCookieCountSymbols) {
+		self::$_phantomCookieCountSymbols = $phantomCookieCountSymbols;
+	}
+
+	/**
+ * @return array
+ */
+	public static function getPhantomCookieCountSymbols() {
+		return self::$_phantomCookieCountSymbols;
+	}
+
+	/**
+	 * @param int|string $count
+	 * @return string
+	 */
+	public static function getPhantomCookieCountSymbol($count) {
+		return self::$_phantomCookieCountSymbols[$count];
+	}
 
 	/**
 	 * @param bool|string $name
@@ -416,43 +438,38 @@ cookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0
 
 	/**
 	 * Генерирует массив с ключами которым обозначает phantomJS количество cookie или длинну строки cookie
-	 * @param bool   $symbolCount Генерация количества cookies[true] или длинны сроки[false].
-	 * @param string $urlCheck    проверочный url для генерации
+	 * ДОЛГО ВЫПОЛНЯЕТСЯ ЕСЛИ МНОГО ИТЕРАЦИЙ
+	 * @param string $urlCheck проверочный url для генерации
+	 * @param int    $countRepeat
 	 */
-	public function genPhantomJSCountCookieNumber($symbolCount = true, $urlCheck = 'http://test1.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php'){
-
+	public function genPhantomJSCountCookieNumber($urlCheck = 'http://t.ru/cPhantomJS/generateSymbolCookieNumber.php', $countRepeat = 255){
+		set_time_limit(0);
 		$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
 		$cookieName = 'zzz_generatorCountCookieNumber';
 		$phantomJS->setCookieFile($cookieName);
 		$this->setName($cookieName);
 		$regEx = self::$_regExCookieDelimiterPhantomJS;
-		$regexCookieCountSymbol = '(?:(?:\\\\n)?\\\\0\\\\0\\\\0(?:\\\\0)?(?<symbol>(\\\\{2})|((\\\\x\w{2}){1,2})|(\w)|(\_)|(\\\\x\w)|(\\\\\w)|(\W)|(\\\\\W)){1})';
-		$regexCookieLine = "%^cookies=\"?\@Variant\($regEx{2}QList\\<QNetworkCookie\\>{$regEx}{$regexCookieCountSymbol}{$regEx}(?<cookie_str>.*)\)\"?\s*$%ims";
+		$regexCookieCountSymbol = '(?:(?:\\\\n)?(?<symbol>(\\\\{2}|\\\\x\w[^t]|\\\\x\w|\w|\\\_|\\\\\w|\W|\\\\\W)){4})';
+		$regexCookieLine = "%^cookies=\"?\@Variant\($regEx{2}QList\\<QNetworkCookie\\>{$regEx}{$regexCookieCountSymbol}(?<cookie_str>.*)\)\"?\s*$%ims";
+		$minSizeLenCookie = 64;
+		$startSizeStringCookie = 256;
+		$startNumber = $startSizeStringCookie - $minSizeLenCookie + 1;
+		$countRepeat = $countRepeat + $startNumber;
+		var_dump($regexCookieLine);
+		exit;
 		echo "array(";
-		if($symbolCount){
-			$countCookie = 50;
-			for($i=0;$i<=$countCookie;$i++){
-				$phantomJS->renderText($urlCheck . '?countCookie='.$i);
-				$text = file_get_contents($this->getFilePhantomJSName());
-				if(preg_match($regexCookieLine, $text, $match)){
-					echo " " . $i . " => '" . $match['symbol'] . "',";
-				} else {
-					echo "preg_match false </br>\n";
-					echo $text . "</br>\n";
-				}
+		for($i = $startNumber ; $i <= $countRepeat ; $i++){
+			$phantomJS->renderText($urlCheck . '?lengthCookie='.$i);
+			$text = file_get_contents($this->getFilePhantomJSName());
+			preg_match($regexCookieLine, $text, $match);
+			var_dump($match['cookie_str']);
+			if(preg_match('%' . $regexCookieCountSymbol . '%ims', $match['cookie_str'], $match)){
+				echo " " . ($i - $startNumber) . " => '" . $match['symbol'] . "',\n";
+			} else {
+				echo "preg_match false </br>\n";
+				echo $text . "</br>\n";
 			}
-		} else {
-			$lengthCookie = 1;
-			for($i=0;$i<=$lengthCookie;$i++){
-				$phantomJS->renderText($urlCheck . '?lengthCookie='.$i);
-				$text = file_get_contents($this->getFilePhantomJSName());
-				if(preg_match($regexCookieLine, $text, $match)){
-					echo " " . $i . " => '" . $match['symbol'] . "',";
-				} else {
-					echo "preg_match false </br>\n";
-					echo $text . "</br>\n";
-				}
-			}
+			//file_put_contents($this->getFilePhantomJSName(),'');
 		}
 		echo ")";
 		//file_put_contents($this->getFilePhantomJSName(),'');
