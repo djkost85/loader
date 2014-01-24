@@ -265,21 +265,6 @@ class cPhantomJS {
 		return $this->exec();
 	}
 
-	public function getCookie(){
-		$this->setScriptName('getCookie');
-		return $this->exec();
-	}
-
-	/**
-	 * @param string $cookies
-	 * @return string
-	 */
-	public function addCookie($cookies){
-		$this->setArguments(array($cookies, $this->getDirForScript()));
-		$this->setScriptName('addCookie');
-		return $this->exec(false);
-	}
-
 	/**
 	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845
 	 * @return string
@@ -287,13 +272,12 @@ class cPhantomJS {
 	private function exec(){
 		$output = array();
 		$return_val = null;
-		//echo $this->createCommand();
 		exec($this->createCommand(), $output, $return_val);
 		return $output ? implode("\n", $output) : $return_val;
 	}
 
 	private function createCommand(){
-		return $this->createPhantomExePath() . ' ' . $this->createOptions() . ' ' . $this->createScriptName() . ' ' . $this->createArguments();
+		return $this->getPhantomExePath() . ' ' . $this->createOptions() . ' ' . $this->createScriptName() . ' ' . $this->createArguments();
 	}
 
 	private function createOptions(){
@@ -320,25 +304,4 @@ class cPhantomJS {
 		return "'" . $this->getDirForScript() . DIRECTORY_SEPARATOR . $this->getScriptName() . '.js' . "'";
 	}
 
-	private function createPhantomExePath(){
-		return $this->getPhantomExePath();
-	}
-
-	public function test(){
-		//header ("Content-type: image/png"); //image/png
-		$this->setCookieFile('testCookies');
-		//var_dump($this->getCookie());
-		/*$this->renderImage('http://sinoptik.ua');
-		$this->renderImage('http://vk.com');
-		$this->renderImage('http://ya.ru');
-		$this->renderImage('http://google.com');
-		$this->renderImage('http://market.yandex.ru');
-		$this->renderImage('http://ukr.net');
-		$this->renderText('http://github.com');*/
-		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
-		//echo $this->renderText('http://test1.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php');
-		$this->_cookie->genPhantomJSCountCookieNumber('http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php');//http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php
-		//var_dump($this->_cookie->fromFilePhantomJS());
-		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
-	}
 } 
