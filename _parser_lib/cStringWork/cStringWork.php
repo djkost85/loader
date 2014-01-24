@@ -18,22 +18,6 @@ class cStringWork
 	 */
 	private $_cryptTagArray;
 
-	private static $_encodingDetection = array('UTF-8', 'windows-1251' , 'koi8-r', 'iso8859-5');
-
-	/**
-	 * @param array $encodingDetection
-	 */
-	public static function setEncodingDetection($encodingDetection) {
-		self::$_encodingDetection = $encodingDetection;
-	}
-
-	/**
-	 * @return array
-	 */
-	public static function getEncodingDetection() {
-		return self::$_encodingDetection;
-	}
-
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
 	 * @param string $text      разбиваемый текст
@@ -227,7 +211,7 @@ class cStringWork
 		$specters = array();
 		foreach ($encodingDetection as $encoding) {
 			$weights[$encoding] = 0;
-			$specters[$encoding] = require dirname(__FILE__) . '/specters/' . $encoding . '.php';
+			$specters[$encoding] = require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'specters' . DIRECTORY_SEPARATOR . $encoding . '.php';
 		}
 		foreach (str_split($text, 2) as $key) {
 			foreach ($encodingDetection as $encoding) {
@@ -245,42 +229,13 @@ class cStringWork
 		return key($weights);
 	}
 
-	public function transcriptRusToEng($text){
-		$abc = array(
-			'А' => 'A',
-			'Б' => 'B',
-			'В' => 'V',
-			'Г' => 'G',
-			'Д' => 'D',
-			'Е' => 'E',
-			'Ё' => 'Yo',
-			'Ж' => 'Zh',
-			'З' => 'Z',
-			'И' => 'I',
-			'Й' => 'Y',
-			'К' => 'K',
-			'Л' => 'L',
-			'М' => 'M',
-			'Н' => 'N',
-			'О' => 'O',
-			'П' => 'P',
-			'Р' => 'R',
-			'С' => 'S',
-			'Т' => 'T',
-			'У' => 'U',
-			'Ф' => 'F',
-			'Х' => 'H',
-			'Ц' => 'C',
-			'Ч' => 'Ch',
-			'Ш' => 'Sh',
-			'Щ' => 'Sch',
-			'Ъ' => '\'',
-			'Ы' => 'Y',
-			'Ь' => '\'',
-			'Э' => 'E',
-			'Ю' => 'Yu',
-			'Я' => 'Ya',
-		);
+	/**
+	 * ISO 9:1995
+	 * @param $text
+	 * @return mixed
+	 */
+	public function transliterationCyrillicToLatin($text){
+		$abc = array( 'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'Yo', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I', 'Й' => 'J', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N', 'О' => 'O','П' => 'P',  'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch', 'Ш' => 'Sh', 'Щ' => 'Shh', 'Ъ' => '"', 'Ы' => 'Y', 'Ь' => '\'', 'Э' => 'E\'', 'Ю' => 'Yu', 'Я' => 'Ya',);
 		foreach($abc as $rus => $eng){
 			$text = preg_replace('%'.preg_quote('%',$rus).'%smu',$eng,$text);
 			$text = preg_replace('%'.preg_quote('%',$rus).'%ismu',strtolower($eng),$text);

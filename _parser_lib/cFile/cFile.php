@@ -19,10 +19,18 @@ namespace GetContent;
  */
 class cFile {
 
-	/**
-	 * @var string $_currentPath Текущая папка
-	 */
 	private $_currentPath;
+	/**
+	 * @var resource
+	 */
+	private $_head;
+	private $_name;
+	private $_own;
+	/**
+	 * Ожидать пока освободиться файл или нет
+	 * @var bool
+	 */
+	private $_waitFree = false;
 
 	/**
 	 * @param string $currentPath
@@ -39,11 +47,6 @@ class cFile {
 	}
 
 	/**
-	 * @var resource $_fileHead Заголовок указываеющий на файл
-	 */
-	private $_head;
-
-	/**
 	 * @param string $val
 	 */
 	public function setHead($val) {
@@ -56,11 +59,6 @@ class cFile {
 	public function &getHead() {
 		return $this->_head;
 	}
-
-	/**
-	 * @var string $_fileName имя текущего файла
-	 */
-	private $_name;
 
 	/**
 	 * @param string $name
@@ -76,8 +74,6 @@ class cFile {
 	public function getName() {
 		return $this->_name;
 	}
-
-	private $_own;
 
 	/**
 	 * @param mixed $own
@@ -104,12 +100,6 @@ class cFile {
 		}
 		return $res;
 	}
-
-	/**
-	 * Ожидать пока освободиться файл или нет
-	 * @var bool
-	 */
-	private $_waitFree = false;
 
 	/**
 	 * @param boolean $waitFree

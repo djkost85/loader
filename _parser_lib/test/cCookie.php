@@ -14,17 +14,17 @@ echo "cCookie<br/>\n";
 define('FILE_NAME','testCookies');
 
 $functions = array(
-	//'open',
-	//'create',
-	//'fromCurl',
-	//'toCurl',
-	//'toFileCurl',
-	//'fromFileCurl',
-	//'toPhantomJS',
+	'open',
+	'create',
+	'fromCurl',
+	'toCurl',
+	'toFileCurl',
+	'fromFileCurl',
+	'toPhantomJS',
 	'toFilePhantomJS',
-	//'fromPhantomJS',
-	//'fromFilePhantomJS',
-	//'delete',
+	'fromPhantomJS',
+	'fromFilePhantomJS',
+	'delete',
 );
 
 runTest($functions, 'cCookie_');
@@ -83,27 +83,12 @@ function cCookie_fromFileCurl(){
 	return ($testCookie['testName']['value'] == 'testValue' && $testCookie['PHPSESSID']['value'] == '123456' && $testCookie['PHPSESSID']['httponly']);
 }
 
-function cCookie_fromPhantomJS(){
-	$phantomJsCookie = '';
-	$cookies = cCookie::fromPhantomJS($phantomJsCookie);
-	return $cookies['test0']['value'] == 'valueTest0' && $cookies['test3']['expires'] == 'Mon, 20-Jan-2014 11:23:48 GMT' && $cookies['test2']['httponly'] && $cookies['test2']['secure'];
-}
-
-function cCookie_fromFilePhantomJS(){
-	$cookie = new cCookie();
-	$cookie->open(FILE_NAME);
-	$cookie->delete('.test1.ru');
-	$cookie->creates($cookie->fromFilePhantomJS());
-	$testCookie = $cookie->getCookies('test1.ru');
-	return ($testCookie['testName']['value'] == 'testValue' && $testCookie['PHPSESSID']['value'] == 'asdf123465');
-}
-
 function cCookie_toPhantomJS(){
 	$cookie = new cCookie();
 	$cookie->open(FILE_NAME);
 	$testCookie = $cookie->getCookies('test1.ru');
-	$testPhantomCookie = $cookie->toPhantomJS($testCookie);
-	return in_array(array('name' => '2testName', 'value' => '2testValue', 'domain' => '.test1.ru', 'path' => '/', 'expires' => 'Thu, 01-Jan-70 18:33:20 GMT', 'httponly' => true, 'secure' => true ), $testPhantomCookie);
+	$testPhantomCookie = $cookie->toPhantomJS($testCookie['2testName']);
+	return '2testName=2testValue; expires=Thu, 01-Jan-70 18:33:20 GMT; secure; HttpOnly; domain=.test1.ru; path=/' == $testPhantomCookie;
 }
 
 function cCookie_toFilePhantomJS(){
@@ -113,8 +98,25 @@ function cCookie_toFilePhantomJS(){
 	$cookie->create('PHPSESSID', 'asdf123465', '.test1.ru', '/', date('D, d-M-y H:i:s', time()+100000) . ' GMT', false, false, true);
 	$cookie->create('testName', 'testValue', '.test1.ru', '/', date('D, d-M-y H:i:s', time()+100000) . ' GMT', false, false, true);
 	$cookie->toFilePhantomJS($cookie->getCookies('test1.ru'));
+	$testCookie = $cookie->fromFilePhantomJS();
+	return $testCookie['PHPSESSID']['value'] == 'asdf123465' && $testCookie['testName']['value'] == 'testValue';
+}
+
+function cCookie_fromPhantomJS(){
+	$phantomJsCookie = '[General]
+cookies="@Variant(\0\0\0\x7f\0\0\0\x16QList<QNetworkCookie>\0\0\0\0\x1\0\0\0\x2\0\0\0SPHPSESSID=asdf123465; expires=Sat, 25-Jan-14 16:57:33 GMT; domain=.test1.ru; path=/\0\0\0QtestName=testValue; expires=Sat, 25-Jan-14 16:57:33 GMT; domain=.test1.ru; path=/)"
+';
+	$cookies = cCookie::fromPhantomJS($phantomJsCookie);
+	return ($cookies['testName']['value'] == 'testValue' && $cookies['PHPSESSID']['value'] == 'asdf123465');
+}
+
+function cCookie_fromFilePhantomJS(){
+	$cookie = new cCookie();
+	$cookie->open(FILE_NAME);
+	$cookie->delete('.test1.ru');
+	$cookie->creates($cookie->fromFilePhantomJS());
 	$testCookie = $cookie->getCookies('test1.ru');
-	return $testCookie['PHPSESSID']['value'] == 'asdf123465';
+	return ($testCookie['testName']['value'] == 'testValue' && $testCookie['PHPSESSID']['value'] == 'asdf123465');
 }
 
 function cCookie_delete(){

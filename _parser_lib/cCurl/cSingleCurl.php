@@ -14,7 +14,8 @@ namespace GetContent;
 
 class cSingleCurl extends cCurl{
 
-	private $_redirectCount = 10;
+	private $_redirectCount;
+	private $_maxRedirectCount = 10;
 
 	/**
 	 * @param mixed $redirectCount
@@ -29,8 +30,6 @@ class cSingleCurl extends cCurl{
 	public function getRedirectCount() {
 		return $this->_redirectCount;
 	}
-
-	private $_maxRedirectCount;
 
 	/**
 	 * @param mixed $maxRedirectCount

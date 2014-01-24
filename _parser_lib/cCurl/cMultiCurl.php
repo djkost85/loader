@@ -15,11 +15,13 @@ class cMultiCurl extends cCurl{
 
 	public $descriptorArray;
 
+	private $_countDescriptor;
+	private $_countStream = 1;
+	private $_countCurl = 1;
+
 	public function &getDescriptorArray() {
 		return $this->descriptorArray;
 	}
-
-	private $_countCurl = 1;
 
 	public function setCountCurl($value = 1) {
 		if ($this->getCountCurl() != $value) {
@@ -34,8 +36,6 @@ class cMultiCurl extends cCurl{
 		return $this->_countCurl;
 	}
 
-	private $_countStream = 1;
-
 	public function setCountStream($value = 1) {
 		if ($this->getCountStream() != $value) {
 			$this->close();
@@ -48,8 +48,6 @@ class cMultiCurl extends cCurl{
 	public function getCountStream() {
 		return $this->_countStream;
 	}
-
-	private $_countDescriptor;
 
 	private function setCountDescriptor() {
 		$this->_countDescriptor = $this->getCountCurl() * $this->getCountStream();

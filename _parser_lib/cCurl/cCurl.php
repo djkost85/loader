@@ -15,14 +15,54 @@ abstract class cCurl{
 
 	protected $_url;
 	protected $_answer;
+	protected $_referer = 'http://google.com/';
+	protected $_userAgentList = array();
+	protected $_maxRepeat = 10;
+	protected $_numRepeat = 0;
+	protected $_minSizeAnswer = 1000;
+	protected $_encodingAnswer = true;
+	protected $_encodingName = 'utf-8';
+	protected $_encodingAnswerName;
+	protected $_saveOption = false;
+	/**
+	 * Тип получаемых данных
+	 * @var mixed
+	 * [file] Файл
+	 * [img] Изображение
+	 * [text] Текст
+	 * [html] html страницы
+	 */
+	protected $_typeContent = 'text';
+	protected $_useProxy;
+	/**
+	 * @var cCookie
+	 */
+	protected $_cookie;
+	protected $_useStaticCookie = false;
+	protected $_staticCookieFileName;
+
+	/**
+	 * @var cProxy
+	 */
+	public $proxy;
+	public $descriptor;
+	public $defaultOptions = array(
+		CURLOPT_HEADER => true,
+		CURLOPT_TIMEOUT => 10,
+		CURLOPT_RETURNTRANSFER => true,
+		CURLOPT_FOLLOWLOCATION => false,
+		CURLOPT_REFERER => 'http://google.com/',
+		CURLOPT_POSTFIELDS => '',
+		CURLOPT_POST => false,
+		CURLOPT_FRESH_CONNECT => true,
+		CURLOPT_FORBID_REUSE => true,
+	);
 
 	protected function setAnswer($newAnswer){
 		$this->_answer = $newAnswer;
 	}
 
 	public abstract function getAnswer();
-
-	public $descriptor;
 
 	public function &getDescriptor() {
 		return $this->descriptor;
@@ -37,8 +77,6 @@ abstract class cCurl{
 	public function getCheckAnswer() {
 		return $this->_checkAnswer;
 	}
-
-	protected $_referer = 'http://google.com/';
 
 	/**
 	 * @param bool|resource $descriptor
@@ -55,18 +93,6 @@ abstract class cCurl{
 	public function getReferer() {
 		return $this->_referer;
 	}
-
-	public $defaultOptions = array(
-		CURLOPT_HEADER => true,
-		CURLOPT_TIMEOUT => 10,
-		CURLOPT_RETURNTRANSFER => true,
-		CURLOPT_FOLLOWLOCATION => false,
-		CURLOPT_REFERER => 'http://google.com/',
-		CURLOPT_POSTFIELDS => '',
-		CURLOPT_POST => false,
-		CURLOPT_FRESH_CONNECT => true,
-		CURLOPT_FORBID_REUSE => true,
-	);
 
 	/**
 	 * @param array $defaultOption
@@ -90,9 +116,6 @@ abstract class cCurl{
 		return $this->defaultOptions[$option];
 	}
 
-
-	protected $_userAgentList = array();
-
 	/**
 	 * @param string $type
 	 */
@@ -111,8 +134,6 @@ abstract class cCurl{
 		return $this->_userAgentList[array_rand($this->_userAgentList,1)];
 	}
 
-	protected $_maxRepeat = 10;
-
 	/**
 	 * @param int $maxRepeat
 	 */
@@ -126,8 +147,6 @@ abstract class cCurl{
 	public function getMaxRepeat() {
 		return $this->_maxRepeat;
 	}
-
-	protected $_numRepeat = 0;
 
 	protected function nextRepeat(){
 		$this->setNumRepeat($this->getNumRepeat() + 1);
@@ -160,8 +179,6 @@ abstract class cCurl{
 		return $this->_numRepeat;
 	}
 
-	protected $_minSizeAnswer = 1000;
-
 	/**
 	 * @param int $minSizeAnswer
 	 */
@@ -175,16 +192,6 @@ abstract class cCurl{
 	public function getMinSizeAnswer() {
 		return $this->_minSizeAnswer;
 	}
-
-	/**
-	 * Тип получаемых данных
-	 * @var mixed
-	 * [file] Файл
-	 * [img] Изображение
-	 * [text] Текст
-	 * [html] html страницы
-	 */
-	protected $_typeContent = 'text';
 
 	public function setTypeContent($typeContent = "text") {
 		switch ($typeContent) {
@@ -218,8 +225,6 @@ abstract class cCurl{
 		return $this->_typeContent;
 	}
 
-	protected $_encodingAnswer = true;
-
 	/**
 	 * @param boolean $encodingAnswer
 	 */
@@ -233,7 +238,6 @@ abstract class cCurl{
 	public function getEncodingAnswer() {
 		return $this->_encodingAnswer;
 	}
-	protected $_encodingName = 'utf-8';
 
 	/**
 	 * @param string $encodingName
@@ -249,8 +253,6 @@ abstract class cCurl{
 		return $this->_encodingName;
 	}
 
-	protected $_encodingAnswerName;
-
 	/**
 	 * @param mixed $encodingAnswerName
 	 */
@@ -264,8 +266,6 @@ abstract class cCurl{
 	public function getEncodingAnswerName() {
 		return $this->_encodingAnswerName;
 	}
-
-	protected $_saveOption = false;
 
 	/**
 	 * @param mixed $saveOption
@@ -286,8 +286,6 @@ abstract class cCurl{
 		$this->init();
 	}
 
-	protected $_useProxy;
-
 	/**
 	 * @param mixed $useProxy
 	 */
@@ -302,11 +300,6 @@ abstract class cCurl{
 	public function getUseProxy() {
 		return $this->_useProxy;
 	}
-
-	/**
-	 * @var cProxy
-	 */
-	public $proxy;
 
 	/**
 	 * @param bool|string $proxy
@@ -358,18 +351,11 @@ abstract class cCurl{
 		}
 	}
 
-	/**
-	 * @var cCookie
-	 */
-	protected $_cookie;
-
 	private function setOptionCookie(&$descriptor){
 		$this->_cookie->setName($this->getUseStaticCookie() ? $this->getStaticCookieFileName() : $descriptor['descriptor_key']);
 		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
 		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
 	}
-
-	protected $_useStaticCookie = false;
 
 	/**
 	 * @param boolean $useStaticCookie
@@ -384,8 +370,6 @@ abstract class cCurl{
 	public function getUseStaticCookie() {
 		return $this->_useStaticCookie;
 	}
-
-	protected $_staticCookieFileName;
 
 	/**
 	 * @param string $staticCookieFileName

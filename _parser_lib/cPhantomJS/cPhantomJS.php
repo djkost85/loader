@@ -14,6 +14,30 @@ namespace GetContent;
 class cPhantomJS {
 
 	private $_answer;
+	private $_phantomFilesPath;
+	private $_dirForFile = 'files';
+	private $_dirForScript = 'script';
+	private $_dirForStorage = 'storage';
+	private $_keyStream = 'phantomjs';
+	private $_options;
+	private $_defaultOptions = array(
+		'cookies-file' => null, // /path/to/cookies.txt
+		'ignore-ssl-errors' => 'true',
+		'load-images' => 'true',
+		'local-storage-path' => null, // /some/path
+		'output-encoding' => 'utf-8',
+		'proxy' => null, // 192.168.1.42:8080
+		'proxy-type' => null, // http|socks5|none
+		'proxy-auth' => null, // username:password
+		'local-to-remote-url-access' => 'true',
+	);
+	private $_scriptName;
+	private $_phantomExePath;
+	private $_arguments = array();
+	/**
+	 * @var cCookie
+	 */
+	private $_cookie;
 
 	/**
 	 * @param mixed $answer
@@ -33,8 +57,6 @@ class cPhantomJS {
 		return $this->getPhantomFilesPath() . DIRECTORY_SEPARATOR . $dirName;
 	}
 
-	private $_dirForFile = 'files';
-
 	/**
 	 * @param string $dirForFile
 	 */
@@ -48,7 +70,6 @@ class cPhantomJS {
 	public function getDirForFile() {
 		return $this->getFullPathInPhantomFiles($this->_dirForFile);
 	}
-	private $_dirForScript = 'script';
 
 	/**
 	 * @param string $dirForScript
@@ -63,7 +84,6 @@ class cPhantomJS {
 	public function getDirForScript() {
 		return $this->getFullPathInPhantomFiles($this->_dirForScript);
 	}
-	private $_dirForStorage = 'storage';
 
 	/**
 	 * @param string $dirForStorage
@@ -79,8 +99,6 @@ class cPhantomJS {
 		return $this->getFullPathInPhantomFiles($this->_dirForStorage);
 	}
 
-	private $_phantomFilesPath;
-
 	/**
 	 * @param mixed $phantomFilesPath
 	 */
@@ -95,22 +113,19 @@ class cPhantomJS {
 		return $this->_phantomFilesPath;
 	}
 
-	private $_key = 'phantomjs';
-
 	/**
-	 * @param mixed $key
+	 * @param mixed $keyStream
 	 */
-	public function setKey($key) {
-		$this->_key = $key;
+	public function setKeyStream($keyStream) {
+		$this->_keyStream = $keyStream;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	public function getKey() {
-		return $this->_key;
+	public function getKeyStream() {
+		return $this->_keyStream;
 	}
-	private $_options;
 
 	/**
 	 * @param mixed $options
@@ -142,18 +157,6 @@ class cPhantomJS {
 		return isset($this->_options[$option]) ? $this->_options[$option] : null;
 	}
 
-	private $_defaultOptions = array(
-		'cookies-file' => null, // /path/to/cookies.txt
-		'ignore-ssl-errors' => 'true',
-		'load-images' => 'true',
-		'local-storage-path' => null, // /some/path
-		'output-encoding' => 'utf-8',
-		'proxy' => null, // 192.168.1.42:8080
-		'proxy-type' => null, // http|socks5|none
-		'proxy-auth' => null, // username:password
-		'local-to-remote-url-access' => 'true',
-	);
-
 	/**
 	 * @param array $defaultOptions
 	 */
@@ -184,8 +187,6 @@ class cPhantomJS {
 		return $this->_defaultOptions[$option];
 	}
 
-	private $_scriptName;
-
 	/**
 	 * @param mixed $name
 	 */
@@ -199,8 +200,6 @@ class cPhantomJS {
 	public function getScriptName() {
 		return $this->_scriptName;
 	}
-
-	private $_phantomExePath;
 
 	/**
 	 * @param $phantomExePath
@@ -216,8 +215,6 @@ class cPhantomJS {
 		return $this->_phantomExePath;
 	}
 
-	private $_arguments = array();
-
 	/**
 	 * @param array $arguments
 	 */
@@ -232,11 +229,6 @@ class cPhantomJS {
 		return $this->_arguments;
 	}
 
-	/**
-	 * @var cCookie
-	 */
-	private $_cookie;
-
 	public function setCookieFile($name){
 		$this->_cookie = new cCookie($name);
 		$this->setDefaultOption('cookies-file', $this->_cookie->getFilePhantomJSName());
@@ -245,10 +237,10 @@ class cPhantomJS {
 
 	function __construct($phantomExePath){
 		$this->setPhantomExePath($phantomExePath);
-		$this->setKey(microtime(1) . mt_rand());
+		$this->setKeyStream(microtime(1) . mt_rand());
 		$this->setPhantomFilesPath(dirname(__FILE__));
 		$this->setDefaultOption('local-storage-path', $this->getDirForStorage());
-		$this->setCookieFile($this->getKey());
+		$this->setCookieFile($this->getKeyStream());
 	}
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
@@ -344,8 +336,8 @@ class cPhantomJS {
 		$this->renderImage('http://ukr.net');
 		$this->renderText('http://github.com');*/
 		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
-		$count = 255;
-		$this->_cookie->genPhantomJSCountCookieNumber('http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php', $count);//http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php
+		//echo $this->renderText('http://test1.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php');
+		$this->_cookie->genPhantomJSCountCookieNumber('http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php');//http://t.ru/get_content-php-curl-proxy/_parser_lib/cPhantomJS/generateSymbolCookieNumber.php
 		//var_dump($this->_cookie->fromFilePhantomJS());
 		//echo (file_get_contents($this->_cookie->getFilePhantomJSName()));
 	}

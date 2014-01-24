@@ -16,10 +16,14 @@ namespace GetContent;
  */
 class cList {
 
-	/**
-	 * @var string корневой уровень списка
-	 */
 	private $_mainLevelName = "/";
+	private $_maxLevel = 1000;
+	private $_list;
+	/**
+	 * @var cFile $_file
+	 * Класс для работы с файлами
+	 */
+	private $_file;
 
 	/**
 	 * @param string $mainLevelName
@@ -36,11 +40,6 @@ class cList {
 	}
 
 	/**
-	 * @var int максимальная глубина списка
-	 */
-	private $_maxLevel = 1000;
-
-	/**
 	 * @param int $maxLevel
 	 */
 	public function setMaxLevel($maxLevel) {
@@ -53,10 +52,6 @@ class cList {
 	public function getMaxLevel() {
 		return $this->_maxLevel;
 	}
-	/**
-	 * @var array
-	 */
-	private $_list;
 
 	/**
 	 * @param array $list
@@ -71,11 +66,6 @@ class cList {
 	public function &getList() {
 		return $this->_list;
 	}
-	/**
-	 * @var cFile $_file
-	 * Класс для работы с файлами
-	 */
-	private $_file;
 
 	/**
 	 * @param \GetContent\cFile $file
