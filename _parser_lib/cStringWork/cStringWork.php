@@ -21,24 +21,24 @@ class cStringWork
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
 	 * @param string $text      разбиваемый текст
-	 * @param int    $partSize размер части
-	 * @param int    $offset    максимальное количество частей 0=бесконечно
+	 * @param int    $partSize  Максимальное количество символов в одной части
+	 * @param int    $offset    максимальное количество частей 0 = бесконечно
 	 * @return array
 	 */
-	public static function dividedText($text = "", $partSize = 4900, $offset = 0) {
-		$dividedTextArray = array();
-		if (strlen($text) > $partSize) {
-			for ($i = 0; ($i < $offset || $offset == 0) && $text; $i++) {
-				$partText = substr($text, 0, $partSize);
-				preg_match('%^(.*\.)[^\.]*$%i', $partText, $match);
-				if (strlen($match[1]) == 0) break;
-				$dividedTextArray[] = $match[1];
-				$text = trim(str_replace($match[1], "", $text));
+	public static function divideText($text = "", $partSize = 100, $offset = 0) {
+		$parts = array();
+		if (mb_strlen($text,'utf-8') >= $partSize) {
+			for ($i = 0; ($i < $offset || $offset === 0) && $text; $i++) {
+				$partText = mb_substr($text, 0, $partSize, 'utf-8');
+				preg_match('%^(.+[\.\?\!]|$).*%imsuU', $partText, $match);
+				if (mb_strlen($match[1],'utf-8') == 0) break;
+				$parts[] = $match[1];
+				$text = trim(preg_replace('%' . preg_quote($match[1], '%') . '%ms', '', $text, 1));
 			}
 		} else {
-			$dividedTextArray[] = $text;
+			$parts[] = $text;
 		}
-		return $dividedTextArray;
+		return $parts;
 	}
 
 	/**
@@ -82,6 +82,9 @@ class cStringWork
 		return $text;
 	}
 
+	/**
+	 * @return array
+	 */
 	public function getCryptTagArray() {
 		return $this->_cryptTagArray;
 	}
@@ -94,31 +97,34 @@ class cStringWork
 	 * @return string
 	 */
 	public static function betweenTag($text, $startTag = '<div class="xxx">', $withoutTag = true) {
-		if (!preg_match('%<(?<tag>\w+)[^>]*>%im', $startTag, $tag)) return false;
-		if (preg_match('%<(?<tag>\w+)\s*[\w-]+=[\"\']+[^\'\"]+[\"\']+[^>]*>%im', $startTag)) {
+		if (!preg_match('%<(?<tag>\w+)[^>]*>%im', $startTag, $tag)){
+			return false;
+		}
+		if (preg_match('%<(?<tag>\w+)\s*[\w-]+=\s*[\"\']?[^\'\"]+[\"\']?[^>]*>%im', $startTag)) {
 			preg_match_all('%(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))%im', $startTag, $matches);
-			$reg = '%<' . preg_quote($tag["tag"]) . '\s*';
-			foreach ($matches['parametr'] as $value) $reg .= '[^>]*' . preg_quote($value) . '[^>]*';
+			$reg = '%<' . preg_quote($tag["tag"]);
+			foreach ($matches['parametr'] as $value) {
+				$reg .= '[^>]*' . preg_quote($value) . '[^>]*';
+			}
 			$reg .= '>%im';
-			if (!preg_match($reg, $text, $match)) return false;
+			if (!preg_match($reg, $text, $match)) {
+				return false;
+			}
 			$startTag = $match[0];
 		} else {
-			preg_match('%<(?<tag>[^\s]+)[^>]*>%i', $startTag, $tag);
-			preg_match('%<(?<tag>' . preg_quote($tag[1]) . ')[^>]*>%i', $text, $tag);
+			preg_match('%<(?<tag>\w+)[^>]*>%i', $startTag, $tag);
+			preg_match('%<(?<tag>' . preg_quote($tag['tag']) . ')[^>]*>%i', $text, $tag);
 		}
-		unset($match);
-		unset($matches);
-		$tagName = $tag["tag"];
-		unset($tag);
+		$tagName = $tag['tag'];
 		$openTag = "<" . $tagName;
 		$closeTag = "</" . $tagName;
-		$text = substr($text, strpos($text, $startTag));
+		$text = mb_substr($text, strpos($text, $startTag));
 		$countOpenTag = 0;
 		$posEnd = 0;
 		$countTag = 2 * preg_match_all('%' . preg_quote($openTag, '%') . '%ims', $text, $matches);
 		for ($i = 0; $i < $countTag; $i++) {
-			$posOpenTag = strpos($text, $openTag, $posEnd);
-			$posCloseTag = strpos($text, $closeTag, $posEnd);
+			$posOpenTag = mb_strpos($text, $openTag, $posEnd);
+			$posCloseTag = mb_strpos($text, $closeTag, $posEnd);
 			if ($posOpenTag === false) {
 				$posOpenTag = $posCloseTag + 1;
 			}
@@ -133,10 +139,7 @@ class cStringWork
 				break;
 			}
 		}
-		if ($withoutTag) $returnText = substr($text, strlen($startTag), $posEnd - strlen($startTag) - 1);
-		else $returnText = substr($text, 0, $posEnd + strlen($tagName) + 2);
-
-		return $returnText;
+		return $withoutTag ? mb_substr($text, mb_strlen($startTag), $posEnd - strlen($startTag) - 1) : mb_substr($text, 0, $posEnd + mb_strlen($tagName) + 2);
 	}
 
 	/**
@@ -175,7 +178,6 @@ class cStringWork
 	}
 
 	/**
-	 * Вытаскивает доменное имя из url
 	 * @param string $url исходный адрес
 	 * @return bool|string
 	 */
@@ -196,7 +198,7 @@ class cStringWork
 	}
 
 	/**
-	 * Функция для определения однобайтовой кодировки русского текста
+	 * support encoding UTF-8 windows-1251 koi8-r iso8859-5
 	 * @param string $text строка для определения кодировки
 	 * @return string имя кодировки
 	 * @author m00t
@@ -234,25 +236,29 @@ class cStringWork
 	 * @param $text
 	 * @return mixed
 	 */
-	public function transliterationCyrillicToLatin($text){
+	public static function translitCyrillicToLatin($text){
 		$abc = array( 'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'Yo', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I', 'Й' => 'J', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N', 'О' => 'O','П' => 'P',  'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch', 'Ш' => 'Sh', 'Щ' => 'Shh', 'Ъ' => '"', 'Ы' => 'Y', 'Ь' => '\'', 'Э' => 'E\'', 'Ю' => 'Yu', 'Я' => 'Ya',);
 		foreach($abc as $rus => $eng){
-			$text = preg_replace('%'.preg_quote('%',$rus).'%smu',$eng,$text);
-			$text = preg_replace('%'.preg_quote('%',$rus).'%ismu',strtolower($eng),$text);
+			$text = preg_replace('%'.preg_quote($rus, '%').'%smu', $eng, $text);
+			$text = preg_replace('%'.preg_quote($rus, '%').'%ismu', strtolower($eng), $text);
 		}
 		return $text;
 	}
 
-	public static function getBiggestString($a) {
+	/**
+	 * @param array $text
+	 * @return string
+	 */
+	public static function getBiggestString($text) {
 		$bigA = 0;
 		$bigKey = 0;
-		foreach ($a as $key => $value) {
-			$thisA = strlen($value);
+		foreach ($text as $key => $value) {
+			$thisA = mb_strlen($value, 'utf-8');
 			if ($thisA > $bigA) {
 				$bigA = $thisA;
 				$bigKey = $key;
 			}
 		}
-		return $a[$bigKey];
+		return $text[$bigKey];
 	}
 }
