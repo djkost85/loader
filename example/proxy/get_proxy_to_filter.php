@@ -7,11 +7,11 @@
  * Project: bezagenta.lg.ua
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-use GetContent\cProxy as cProxy;
+use GetContent\old_cProxy as cProxy;
 ini_set('display_errors',1);
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
-$proxy = new cProxy();
+$proxy = new old_cProxy();
 $name = 'all';
 $proxy->selectProxyList($name);
 $list = $proxy->getProxyList();

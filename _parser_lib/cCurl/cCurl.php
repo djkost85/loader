@@ -322,7 +322,7 @@ abstract class cCurl{
 	private function setOptionProxy(&$descriptor){
 		if ($this->getUseProxy()) {
 			if (is_object($this->proxy)) {
-				$proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], cStringWork::getDomainName($descriptor['option'][CURLOPT_URL]));
+				$proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], $descriptor['option'][CURLOPT_URL]);
 				if (is_string($proxyIp) && cStringWork::isIp($proxyIp)){
 					$this->setOption($descriptor, CURLOPT_PROXY, $proxyIp);
 				} else {

@@ -8,8 +8,8 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Удаление из списка всех аренд
  */
-use GetContent\cProxy as cProxy;
+use GetContent\old_cProxy as cProxy;
 require_once dirname(__FILE__)."/../../include.php";
-$c_proxy = new cProxy();
+$c_proxy = new old_cProxy();
 $c_proxy->selectProxyList('bpteam');
 $c_proxy->removeAllRent();

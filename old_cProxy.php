@@ -10,7 +10,7 @@ namespace GetContent;
  * @package GetContent
  * @version 2.0
  */
-class cProxy
+class old_cProxy
 {
 
 	/**
@@ -184,7 +184,7 @@ class cProxy
 
 	/**
 	 * Конструктор инициализируте переменные значениями по умолчанию
-	 * @return \GetContent\cProxy
+	 * @return \GetContent\old_cProxy
 	 */
 	function __construct() {
 		$this->_storageTime = 72000;

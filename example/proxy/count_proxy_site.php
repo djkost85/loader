@@ -8,10 +8,10 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
-use GetContent\cProxy as cProxy;
+use GetContent\old_cProxy as cProxy;
 require_once dirname(__FILE__)."/../../include.php";
 set_time_limit(3600);
-$proxy = new cProxy();
+$proxy = new old_cProxy();
 $name = isset($_GET['l']) ? $_GET['l'] : 'all';
 $proxy->selectProxyList($name);
 $list = $proxy->getProxyList();

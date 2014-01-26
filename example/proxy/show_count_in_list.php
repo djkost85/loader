@@ -7,9 +7,9 @@
  * Project: bezagenta.lg.ua
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-use GetContent\cProxy as cProxy;
+use GetContent\old_cProxy as cProxy;
 require_once dirname(__FILE__)."/../../include.php";
-$proxy = new cProxy();
+$proxy = new old_cProxy();
 foreach ($proxy->getAllNameProxyList() as $name) {
 	$proxy->selectProxyList($name);
 	$list = $proxy->getProxyList();

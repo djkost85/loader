@@ -8,11 +8,11 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  * Обновление всех списков прокси
  */
-use GetContent\cProxy as cProxy;
+use GetContent\old_cProxy as cProxy;
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
 require_once dirname(__FILE__)."/../../include.php";
-$proxy= new cProxy();
+$proxy= new old_cProxy();
 $proxy->updateAllProxyList(true);
 $end = time();
 $list = $proxy->selectProxyList($proxy->getDefaultListName());

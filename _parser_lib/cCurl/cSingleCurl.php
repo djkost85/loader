@@ -67,9 +67,6 @@ class cSingleCurl extends cCurl{
 	public function close(){
 		$descriptor =& $this->getDescriptor();
 		curl_close($descriptor['descriptor']);
-		if ($this->getUseProxy() && is_object($this->proxy)) {
-			$this->proxy->removeAllRentFromKey($descriptor['descriptor_key']);
-		}
 		unset($descriptor['descriptor']);
 		if (!$this->getSaveOption()) unset($descriptor['option']);
 	}
@@ -99,7 +96,7 @@ class cSingleCurl extends cCurl{
 			} else {
 				$answer = false;
 				if ($this->getUseProxy() && is_object($this->proxy)) {
-					$this->proxy->removeProxyInList($descriptor['option'][CURLOPT_PROXY]);
+					$this->proxy->deleteInList($descriptor['option'][CURLOPT_PROXY]);
 				}
 			}
 		} while ($this->repeat());

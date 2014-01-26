@@ -99,9 +99,6 @@ class cMultiCurl extends cCurl{
 				if (isset($descriptorArray[$key]['descriptor'])) {
 					@curl_multi_remove_handle($descriptor['descriptor'], $descriptorArray[$key]['descriptor']);
 					curl_close($descriptorArray[$key]['descriptor']);
-					if ($this->getUseProxy() && is_object($this->proxy)) {
-						$this->proxy->removeAllRentFromKey($descriptorArray[$key]['descriptor_key']);
-					}
 					unset($descriptorArray[$key]['descriptor']);
 					if (!$this->getSaveOption()) unset($descriptorArray[$key]['option']);
 				}
@@ -132,8 +129,8 @@ class cMultiCurl extends cCurl{
 					$j++;
 				}
 			}
-			foreach ($descriptorArray as $key => &$value){
-				$this->setOptions($descriptorArray[$key]);
+			foreach ($descriptorArray as &$value){
+				$this->setOptions($value);
 			}
 			$answer = $this->exec();
 			foreach ($answer as $key => &$value) {
@@ -148,7 +145,7 @@ class cMultiCurl extends cCurl{
 				} else{
 					$value = false;
 					if ($this->getUseProxy() && is_object($this->proxy)) {
-						$this->proxy->removeProxyInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
+						$this->proxy->deleteInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
 					}
 				}
 			}

@@ -23,7 +23,7 @@ class cFile {
 	/**
 	 * @var resource
 	 */
-	private $_head;
+	private $_head = null;
 	private $_name;
 	private $_own;
 	/**
@@ -126,6 +126,9 @@ class cFile {
 	}
 
 	public function open($name){
+		if($this->getHead()){
+			$this->close();
+		}
 		$this->setName($name);
 		$this->setHead(fopen($this->getName(),'a+'));
 		return $this->getHead();

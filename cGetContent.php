@@ -394,7 +394,7 @@ class cGetContent
 						$value = false;
 					}
 				} elseif(!is_object($this->proxy)) {
-					$this->proxy = new cProxy();
+					$this->proxy = new old_cProxy();
 				}
 				break;
 			case false:

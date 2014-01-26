@@ -238,7 +238,7 @@ class cList {
 				$level = array();
 			}
 		}
-		$this->update();
+		return $this->update();
 	}
 
 	public function &getValue($level, $key){

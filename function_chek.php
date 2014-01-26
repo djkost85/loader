@@ -8,13 +8,13 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 use GetContent\cGetContent as cGetContent;
-use GetContent\cProxy as cProxy;
+use GetContent\old_cProxy as cProxy;
 use GetContent\cStringWork as cStringWork;
 include_once dirname(__FILE__)."/include.php";
 
 $get_content = new cGetContent();
 $string_work = new cStringWork();
-$proxy = new cProxy();
+$proxy = new old_cProxy();
 $get_content->functionCheck();
 $string_work->functionCheck();
 $proxy->functionChek();
