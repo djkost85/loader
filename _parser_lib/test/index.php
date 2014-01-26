@@ -5,6 +5,7 @@
 <a href="cMultiCurl.php">cMultiCurl</a><br/>
 <a href="cPhantomJS.php">cPhantomJS</a><br/>
 <a href="cStringWork.php">cStringWork</a><br/>
+<a href="cProxy.php">cProxy</a><br/>
 
 <br/><br/><br/><br/><br/>
 

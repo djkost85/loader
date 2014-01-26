@@ -16,7 +16,6 @@ abstract class cCurl{
 	protected $_url;
 	protected $_answer;
 	protected $_referer = 'http://google.com/';
-	protected $_userAgentList = array();
 	protected $_maxRepeat = 10;
 	protected $_numRepeat = 0;
 	protected $_minSizeAnswer = 1000;
@@ -45,6 +44,10 @@ abstract class cCurl{
 	 * @var cProxy
 	 */
 	public $proxy;
+	/**
+	 * @var cUserAgent
+	 */
+	public $userAgent;
 	public $descriptor;
 	public $defaultOptions = array(
 		CURLOPT_HEADER => true,
@@ -114,24 +117,6 @@ abstract class cCurl{
 
 	public function getDefaultSetting($option) {
 		return $this->defaultOptions[$option];
-	}
-
-	/**
-	 * @param string $type
-	 */
-	public function setUserAgentList($type = 'desktop') {
-		$this->_userAgentList = require dirname(__FILE__) . DIRECTORY_SEPARATOR . "user_agent_$type.php";
-	}
-
-	/**
-	 * @return array|mixed
-	 */
-	public function getUserAgentList() {
-		return $this->_userAgentList;
-	}
-
-	public function getRandomUserAgent(){
-		return $this->_userAgentList[array_rand($this->_userAgentList,1)];
 	}
 
 	/**
@@ -387,8 +372,8 @@ abstract class cCurl{
 	}
 
 	function __construct(){
-		$this->setUserAgentList('desktop');
-		$this->setDefaultOption(CURLOPT_USERAGENT, $this->getRandomUserAgent());
+		$this->userAgent = new cUserAgent('desktop');
+		$this->setDefaultOption(CURLOPT_USERAGENT, $this->userAgent->getRandomUserAgent());
 		$this->_cookie = new cCookie();
 		$this->init();
 	}

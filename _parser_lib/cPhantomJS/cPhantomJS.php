@@ -39,6 +39,8 @@ class cPhantomJS {
 	 */
 	private $_cookie;
 
+	public $userAgent;
+
 	/**
 	 * @param mixed $answer
 	 */
@@ -219,7 +221,7 @@ class cPhantomJS {
 	 * @param array $arguments
 	 */
 	public function setArguments($arguments) {
-		$this->_arguments = $arguments;
+		$this->_arguments = array_merge(array($this->userAgent->getRandomUserAgent()), $arguments);
 	}
 
 	/**
@@ -241,6 +243,7 @@ class cPhantomJS {
 		$this->setPhantomFilesPath(dirname(__FILE__));
 		$this->setDefaultOption('local-storage-path', $this->getDirForStorage());
 		$this->setCookieFile($this->getKeyStream());
+		$this->userAgent = new cUserAgent('desktop');
 	}
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
