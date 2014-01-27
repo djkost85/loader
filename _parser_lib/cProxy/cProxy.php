@@ -63,7 +63,7 @@ class cProxy {
 	/**
 	 * @return string
 	 */
-	public function getDefaultNameList() {
+	public function getDefaultListName() {
 		return $this->_defaultNameList;
 	}
 
@@ -109,13 +109,16 @@ class cProxy {
 		return $this->_deleteProxy;
 	}
 
+	public function getList(){
+		return $this->_list->getLevel($this->_list->getMainLevelName());
+	}
 
 
 
 
 
 	function __construct(){
-		$this->setNameList($this->getDefaultNameList());
+		$this->setNameList($this->getDefaultListName());
 		$this->_list = new cList();
 		$this->setDirList(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'proxy_list');
 	}
@@ -125,7 +128,7 @@ class cProxy {
 			$this->setNameList($name);
 			$this->_list->open($this->getListFileName());
 		} else {
-
+			$this->createList($name);
 		}
 	}
 

@@ -1030,16 +1030,16 @@ class old_cProxy
 	/**
 	 * Возвращает адреса прокси поддерживающие выбранные функции
 	 * @param array $proxyList Список прокси
-	 * @param array $funArray  перечень необходимых функций anonym|referer|post|get|cookie
+	 * @param array $function  перечень необходимых функций anonym|referer|post|get|cookie
 	 * @return array|bool
 	 */
-	public function getProxyByFunction($proxyList, $funArray = array()) {
+	public function getProxyByFunction($proxyList, $function = array()) {
 		if (!is_array($proxyList)) return false;
 		$goodProxy = array();
 		foreach ($proxyList as $challenger) {
 			$approach = false;
-			if (count($funArray)) {
-				foreach ($funArray as $nameFunction => $valueFunction) {
+			if (count($function)) {
+				foreach ($function as $nameFunction => $valueFunction) {
 					if (in_array($nameFunction, $this->_proxyFunction) && $challenger[$nameFunction] >= $valueFunction) {
 						if ($nameFunction == 'country') {
 							if ($valueFunction === $challenger[$nameFunction]) {

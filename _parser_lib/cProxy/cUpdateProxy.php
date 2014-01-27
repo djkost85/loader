@@ -16,7 +16,7 @@ class cUpdateProxy extends cProxy {
 
 	private $_serverIp;
 	private $_checkFunctionUrl;
-	private $_dirSource = 'site_source';
+	private $_dirSource;
 	private $_archiveProxyFile = 'archive';
 	/**
 	 * @var cMultiCurl
@@ -37,13 +37,29 @@ class cUpdateProxy extends cProxy {
 		return $this->_checkFunctionUrl;
 	}
 
+	/**
+	 * @param string $dirSource
+	 */
+	public function setDirSource($dirSource) {
+		$this->_dirSource = $dirSource;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getDirSource() {
+		return $this->_dirSource;
+	}
 
 
-	function __construct(){
+
+	function __construct($checkUrl){
 		parent::__construct();
 		$this->_curl = new cMultiCurl();
 		$this->_curl->setTypeContent('text');
 		$this->_curl->setEncodingAnswer(false);
+		$this->setDirSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
+		$this->setCheckFunctionUrl($checkUrl);
 	}
 
 
@@ -86,55 +102,159 @@ class cUpdateProxy extends cProxy {
 	}
 
 	public function updateDefaultList() {
-		$this->selectList($this->getDefaultNameList());
+		$this->selectList($this->getDefaultListName());
 		$proxyList = $this->downloadProxy();
-		$archive = $this->getArchiveProxy();
-		$archiveProxyList = array();
-		$tmp['source_proxy'] = 'archive';
-		$tmp['type_proxy'] = 'http';
-		foreach ($archive as $proxy) {
-			$tmp['proxy'] = $proxy;
-			$archiveProxyList[] = $tmp;
-		}
-		$newProxy = array();
-		foreach ($proxyList['content'] as $proxy) {
-			$newProxy[] = $proxy['proxy'];
-		}
-		$this->saveInArchive($newProxy);
-
-		$oldProxy['content'] = array_merge($proxyList['content'], $archiveProxyList);
-		$oldProxy['content'] = $this->getUniqueProxyIp($oldProxy['content']);
-		$oldProxy['content'] = $this->checkProxyArray($oldProxy['content']);
-		$this->_proxyList = $oldProxy;
-		$this->saveProxyList($this->_proxyList);
-		return $this->_proxyList;
+		$proxyList['content'] = $this->checkProxyArray($proxyList['content']);
+		$this->_list->write('content', $proxyList['content']);
 	}
 
-	public function updateList($nameList, $force = false) {
+	public function updateList($nameList) {
 		if ($nameList == $this->getDefaultListName()) {
-			return $this->selectProxyList($this->getDefaultListName());
+			return null;
+		}
+		$this->selectList($this->getDefaultListName());
+		$allProxy = $this->getList();
+		$this->selectList($nameList);
+		$proxyList = $this->getList();
+		$proxyList['content'] = $this->getProxyByFunction($allProxy['content'], $proxyList['function']);
+		$proxyList['content'] = $this->checkProxyArrayToSite($proxyList['content'], $proxyList['url'], $proxyList['check_word']);
+		$this->_list->write('content', $proxyList['content']);
+		$this->_list->update();
+	}
+
+	public function downloadProxy() {
+		$proxy['content'] = array();
+		foreach (glob($this->getDirSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
+			$tmpProxy = require $fileModule;
+			if (is_array($tmpProxy) && count($tmpProxy)) {
+				$proxy['content'] = array_merge($proxy['content'], $tmpProxy['content']);
+			}
+		}
+		return $proxy;
+	}
+
+	public function getProxyByFunction($proxyList, $function = array()) {
+		if (!is_array($proxyList)){
+			return false;
+		}
+		$goodProxy = array();
+		foreach ($proxyList as $challenger) {
+			$approach = false;
+			if (count($function)) {
+				foreach ($function as $nameFunction => $valueFunction) {
+					if (in_array($nameFunction, $this->_proxyFunction) && $challenger[$nameFunction] >= $valueFunction) {
+						if ($nameFunction == 'country') {
+							if ($valueFunction === $challenger[$nameFunction]) {
+								$approach = true;
+							} else {
+								$approach = false;
+								break;
+							}
+						} else {
+							$approach = true;
+						}
+					} else {
+						$approach = false;
+						break;
+					}
+				}
+			} else {
+				$approach = true;
+			}
+			if ($approach) {
+				$goodProxy[] = $challenger;
+			}
+		}
+		if (count($goodProxy)) return $goodProxy;
+		return false;
+	}
+
+	private function checkProxyArray($arrayProxy) {
+		if (is_array($arrayProxy)) {
+			$goodProxy = array();
+			$url = $this->getCheckFunctionUrl() . '?ip=' . $this->getServerIp() . '&proxy=yandex';
+			$this->_curl->setUseProxy(true);
+			$this->_curl->setCountStream(1);
+			$this->_curl->setMinSizeAnswer(5);
+			$this->_curl->setMaxRepeat(0);
+			$this->_curl->setDefaultOption(CURLOPT_REFERER, "proxy-check.net");
+			$this->_curl->setDefaultOption(CURLOPT_POST, true);
+			$this->_curl->setDefaultOption(CURLOPT_POSTFIELDS, "proxy=yandex");
+			$this->_curl->setTypeContent('text');
+			$this->_curl->setCheckAnswer(false);
+			foreach (array_chunk($arrayProxy, 100) as $challenger) {
+				$this->_curl->setCountCurl(count($challenger));
+				$urlList = array();
+				$descriptorArray =& $this->_curl->getDescriptorArray();
+				foreach ($descriptorArray as $key => &$descriptor) {
+					$this->_curl->setOption($descriptor, CURLOPT_PROXY, $challenger[$key]['proxy']);
+					$urlList[] = $url;
+				}
+				foreach ($this->_curl->getContent($urlList) as $key => $answer) {
+					$infoProxy = $this->genProxyInfo($challenger[$key], $answer, $descriptorArray[$key]['info']);
+					if ($infoProxy) {
+						$goodProxy[] = $infoProxy;
+					}
+				}
+			}
+			if (count($goodProxy)) return $goodProxy;
+		}
+		return false;
+	}
+
+	private function checkProxyArrayToSite($arrayProxy, $url, $checkWord) {
+		if (!is_array($arrayProxy)) return false;
+		$goodProxy = array();
+		$this->_curl->setCountStream(1);
+		$this->_curl->setUseProxy(true);
+		$this->_curl->setTypeContent('text');
+		$this->_curl->setDefaultOption(CURLOPT_POST, false);
+		$this->_curl->setCheckAnswer(false);
+		foreach (array_chunk($arrayProxy, 100) as $challenger) {
+			$this->_curl->setCountCurl(count($challenger));
+			$descriptorArray =& $this->_curl->getDescriptorArray();
+			$urlList = array();
+			foreach ($descriptorArray as $key => &$descriptor) {
+				$this->_curl->setOption($descriptor, CURLOPT_PROXY, $challenger[$key]['proxy']);
+				$urlList[] = $url;
+			}
+			foreach ($this->_curl->getContent($urlList) as $key => $answer) {
+				$testCount = 0;
+				$countGood = 0;
+				foreach ($checkWord as $valueCheckWord) {
+					$testCount++;
+					if (preg_match($valueCheckWord, $answer)){
+						$countGood++;
+					}
+				}
+				if ($countGood == $testCount) {
+					$goodProxy[] = $challenger[$key];
+				}
+			}
+		}
+		return count($goodProxy) ? $goodProxy : false;
+	}
+
+	/**
+	 * Переделать или делать запрос на другой сервис
+	 * @return string
+	 */
+	public function getServerIp() {
+		if (isset($this->_serverIp)) return $this->_serverIp;
+		if (false && isset($_SERVER['SERVER_ADDR']) && cStringWork::isIp($_SERVER['SERVER_ADDR'])) {
+			$this->_serverIp = $_SERVER['SERVER_ADDR'];
 		} else {
-			$allProxy = $this->selectProxyList($this->getDefaultListName());
-			$this->selectProxyList($nameList);
+			$this->_curl->setUseProxy(false);
+			$this->_curl->setCountStream(1);
+			$this->_curl->setTypeContent('html');
+			$this->_curl->getContent("http://2ip.ru/");
+			$answer = $this->_curl->getAnswer();
+			$reg = "/<span>\s*Ваш\s*IP\s*адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
+			if (preg_match($reg, $answer[0], $match) && !isset($match['ip']) || !$match['ip'] || !cStringWork::isIp($match['ip'])){
+				exit('NO SERVER IP');
+			}
+			$this->_serverIp = $match['ip'];
 		}
-		$this->freeProxyList();
-		$endTermProxy = time() - $this->_storageTime;
-		if (
-			(
-				isset($this->_proxyList)
-				&& is_array($this->_proxyList)
-				&& isset($this->_proxyList['content'])
-				&& count($this->_proxyList['content'])
-				&& $this->_proxyList['time'] > $endTermProxy
-				&& !$force
-			)
-			|| (!isset($this->_proxyList['need_update']) || !$this->_proxyList['need_update'])
-		) {
-			return $this->_proxyList;
-		}
-		$this->_proxyList['content'] = $this->getProxyByFunction($allProxy['content'], $this->_proxyList['need_function']);
-		$this->_proxyList['content'] = $this->checkProxyArrayToSite($this->_proxyList['content'], $this->_proxyList['url'], $this->_proxyList['check_word']);
-		$this->saveProxyList($this->_proxyList);
-		return $this->_proxyList;
+		return $this->_serverIp;
 	}
 } 
