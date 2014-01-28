@@ -51,6 +51,13 @@ class cUpdateProxy extends cProxy {
 		return $this->_dirSource;
 	}
 
+	public function getAllSourceName(){
+		$name = array();
+		foreach (glob($this->getDirSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
+			$name[] = basename($fileModule, '.php');
+		}
+		return $name;
+	}
 
 
 	function __construct($checkUrl){
@@ -103,7 +110,7 @@ class cUpdateProxy extends cProxy {
 
 	public function updateDefaultList() {
 		$this->selectList($this->getDefaultListName());
-		$proxyList = $this->downloadProxy();
+		$proxyList = $this->downloadAllSource();
 		$proxyList['content'] = $this->checkProxyArray($proxyList['content']);
 		$this->_list->write('content', $proxyList['content']);
 	}
@@ -122,15 +129,22 @@ class cUpdateProxy extends cProxy {
 		$this->_list->update();
 	}
 
-	public function downloadProxy() {
+	public function downloadAllSource() {
 		$proxy['content'] = array();
 		foreach (glob($this->getDirSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
 			$tmpProxy = require $fileModule;
-			if (is_array($tmpProxy) && count($tmpProxy)) {
+			if (is_array($tmpProxy)) {
 				$proxy['content'] = array_merge($proxy['content'], $tmpProxy['content']);
 			}
 		}
 		return $proxy;
+	}
+
+	public function downloadSource($name){
+		if (preg_match('#' . preg_quote($moduleName, '#') . '#ims', $valueProxyList)) {
+			$tmp_proxy = require $valueProxyList;
+			return $tmp_proxy;
+		}
 	}
 
 	public function getProxyByFunction($proxyList, $function = array()) {
