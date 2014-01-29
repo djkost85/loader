@@ -13,3 +13,4 @@ require_once dirname(__FILE__) . '/cCurl.php';
 require_once dirname(__FILE__) . '/cPhantomJS.php';
 require_once dirname(__FILE__) . '/cStringWork.php';
 require_once dirname(__FILE__) . '/cProxy.php';
+require_once dirname(__FILE__) . '/cUpdateProxy.php';

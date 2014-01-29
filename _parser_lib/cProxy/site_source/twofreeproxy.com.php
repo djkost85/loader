@@ -63,11 +63,11 @@ if ($answerTwofreeproxy) {
 	$tmpProxyArray2 = explode('<br>', $tmpJsonProxy['proxy']);
 }
 $tmpProxyNew = array_merge($tmpProxyArray2, $tmpProxyArray);
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 foreach ($tmpProxyNew as $valuePoststar) {
 	$tmpArray['proxy'] = trim($valuePoststar);
-	$proxyTwofreeproxyProxy['content'][] = $tmpArray;
+	$proxyTwofreeproxyProxy['content'][$tmpArray['proxy']] = $tmpArray;
 }
 unset($curl);
 return is_array($proxyTwofreeproxyProxy) ? $proxyTwofreeproxyProxy : array();

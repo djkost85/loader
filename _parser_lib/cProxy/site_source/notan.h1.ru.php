@@ -12,8 +12,8 @@ use GetContent\cSingleCurl as cSingleCurl;
 
 $nameSource = "notan.h1.ru";
 $proxyNotanProxy = array();
-$tmpArray["source_proxy"]=$nameSource;
-$tmpArray["type_proxy"]='http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 for($i=1;$i<=10;$i++){
 	$urlSource="http://notan.h1.ru/hack/xwww/proxy".$i.".html";
 	$curl = new cSingleCurl();
@@ -23,7 +23,7 @@ for($i=1;$i<=10;$i++){
 	if(!preg_match_all('%<TD\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</TD>%ims',$answerNotan,$matchesNotan)) return $proxyNotanProxy;
 	foreach ($matchesNotan['ip'] as $valueNotan) {
 		$tmpArray['proxy'] = trim($valueNotan);
-		$proxyNotanProxy['content'][] = $tmpArray;
+		$proxyNotanProxy['content'][$tmpArray['proxy']] = $tmpArray;
 	}
 	sleep(rand(1,3));
 }

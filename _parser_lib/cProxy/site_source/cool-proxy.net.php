@@ -24,13 +24,13 @@ if (preg_match_all('#/proxies/http_proxy_list/sort:working_average/direction:asc
 $proxyCoolProxy = array();
 do {
 	if ($countProxy = preg_match_all('#<td\s*style=\"text.align.left.\s*font.weight.bold.\"><script type="text/javascript">document\.write\(Base64\.decode\("(?<ip_base64>.*)"\)\)</script></td>\s*<td>(?<port>\d+)</td>#iUms', $content, $matches)) {
-		$tmpArray["source_proxy"] = $nameSource;
-		$tmpArray["type_proxy"] = 'http';
+		$tmpArray["source"][$nameSource] = true;
+		$tmpArray["protocol"]['http'] = true;
 		for ($j = 0; $j < $countProxy; $j++) {
 			$is_ip = base64_decode($matches['ip_base64'][$j]) . ":" . $matches['port'][$j];
 			if (cStringWork::isIp($is_ip)) {
 				$tmpArray['proxy'] = trim($is_ip);
-				$proxyCoolProxy['content'][] = $tmpArray;
+				$proxyCoolProxy['content'][$tmpArray['proxy']] = $tmpArray;
 			}
 		}
 	}

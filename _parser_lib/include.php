@@ -18,5 +18,6 @@ require_once ROOT_DIR . "/cCurl/cCurl.php";
 require_once ROOT_DIR . "/cCurl/cSingleCurl.php";
 require_once ROOT_DIR . "/cCurl/cMultiCurl.php";
 require_once ROOT_DIR . "/cProxy/cProxy.php";
+require_once ROOT_DIR . "/cProxy/cUpdateProxy.php";
 require_once ROOT_DIR . "/cPhantomJS/cPhantomJS.php";
 require_once ROOT_DIR . "/cUserAgent/cUserAgent.php";

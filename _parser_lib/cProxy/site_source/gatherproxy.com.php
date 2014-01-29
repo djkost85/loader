@@ -24,11 +24,11 @@ if (!preg_match('%<a\s*href="(?<url>[^"]+)">Download\s*fully\s*\d+\s*proxies</a>
 $curl->setDefaultOption(CURLOPT_REFERER, 'http://gatherproxy.com/subscribe/infos');
 $answerGatherproxy = $curl->getContent('http://gatherproxy.com' . $match['url']);
 if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerGatherproxy, $matchesGatherproxy)) return array();
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 foreach ($matchesGatherproxy['ip'] as $valueGatherproxy) {
 	$tmpArray['proxy'] = trim($valueGatherproxy);
-	$proxyGatherproxyProxy['content'][] = $tmpArray;
+	$proxyGatherproxyProxy['content'][$tmpArray['proxy']] = $tmpArray;
 }
 unset($curl, $answerGatherproxy);
 return is_array($proxyGatherproxyProxy) ? $proxyGatherproxyProxy : array();

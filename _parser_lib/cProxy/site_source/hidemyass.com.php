@@ -14,8 +14,8 @@ use GetContent\cStringWork as cStringWork;
 //return array();
 $urlSource = "http://hidemyass.com/proxy-list/";
 $nameSource = "hidemyass.com";
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $proxyHidemyass = array();
@@ -33,7 +33,7 @@ do {
 			$proxyAddress = preg_replace('%\s+%ms', '', $proxyAddress);
 			if (cStringWork::isIp($proxyAddress)) {
 				$tmpArray['proxy'] = trim($proxyAddress);
-				$proxyHidemyass['content'][] = $tmpArray;
+				$proxyHidemyass['content'][$tmpArray['proxy']] = $tmpArray;
 			}
 		}
 	}

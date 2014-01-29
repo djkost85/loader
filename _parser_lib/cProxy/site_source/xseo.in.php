@@ -22,11 +22,11 @@ if(!$answerXseo) return array();
 if(!$answerXseo=cStringWork::betweenTag($answerXseo,'<table width="100%" BORDER=0 CELLPADDING=0 CELLSPACING=1>',false)) return array();
 if(!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims",$answerXseo,$matchesXseo)) return array();
 $proxyXseoProxy=array();
-$tmpArray["source_proxy"]=$nameSource;
-$tmpArray["type_proxy"]='http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 foreach ($matchesXseo['ip'] as $value_xseo){
-	$tmpArray['proxy']=trim($value_xseo);
-	$proxyXseoProxy['content'][]=$tmpArray;
+	$tmpArray['proxy'] = trim($value_xseo);
+	$proxyXseoProxy['content'][$tmpArray['proxy']] = $tmpArray;
 }
 unset($getXseoContent, $answerXseo);
 return is_array($proxyXseoProxy) ? $proxyXseoProxy : array();

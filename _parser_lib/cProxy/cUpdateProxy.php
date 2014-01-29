@@ -71,18 +71,18 @@ class cUpdateProxy extends cProxy {
 
 
 	/**
-	 * @param array|string $proxy
-	 * @param string       $answer
-	 * @param string       $source
-	 * @param array        $protocol
-	 * @param null|array   $curlInfo
+	 * @param string     $proxy
+	 * @param string     $answer
+	 * @param string     $source
+	 * @param string     $protocol
+	 * @param null|array $curlInfo
 	 * @return array|bool
 	 */
-	private function genProxyInfo($proxy, $answer, $source = '', $protocol = array(), $curlInfo = null) {
+	private function genInfo($proxy, $answer, $source = '', $protocol = 'http', $curlInfo = null) {
 		if (preg_match('#^[01]{5}#', $answer) && preg_match_all('#(?<fun_status>[01])#U', $answer, $matches)) {
 			$infoProxy['proxy'] = $proxy;
-			$infoProxy['source'][] = $source;
-			$infoProxy['protocol'] = $protocol;
+			$infoProxy['source'][$source] = true;
+			$infoProxy['protocol'][$protocol] = true;
 			$infoProxy['anonym'] = (bool)$matches['fun_status'][0];
 			$infoProxy['referer'] = (bool)$matches['fun_status'][1];
 			$infoProxy['post'] = (bool)$matches['fun_status'][2];
@@ -141,9 +141,11 @@ class cUpdateProxy extends cProxy {
 	}
 
 	public function downloadSource($name){
-		if (preg_match('#' . preg_quote($moduleName, '#') . '#ims', $valueProxyList)) {
-			$tmp_proxy = require $valueProxyList;
-			return $tmp_proxy;
+		if (in_array($name, $this->getAllSourceName())) {
+			$proxy = require $this->getDirSource() . DIRECTORY_SEPARATOR . $name . '.php';
+			return $proxy;
+		} else {
+			return array();
 		}
 	}
 
@@ -205,7 +207,7 @@ class cUpdateProxy extends cProxy {
 					$urlList[] = $url;
 				}
 				foreach ($this->_curl->getContent($urlList) as $key => $answer) {
-					$infoProxy = $this->genProxyInfo($challenger[$key], $answer, $descriptorArray[$key]['info']);
+					$infoProxy = $this->genInfo($challenger[$key], $answer, $descriptorArray[$key]['info']);
 					if ($infoProxy) {
 						$goodProxy[] = $infoProxy;
 					}
@@ -255,7 +257,7 @@ class cUpdateProxy extends cProxy {
 	 */
 	public function getServerIp() {
 		if (isset($this->_serverIp)) return $this->_serverIp;
-		if (false && isset($_SERVER['SERVER_ADDR']) && cStringWork::isIp($_SERVER['SERVER_ADDR'])) {
+		if (isset($_SERVER['SERVER_ADDR']) && cStringWork::isIp($_SERVER['SERVER_ADDR'])) {
 			$this->_serverIp = $_SERVER['SERVER_ADDR'];
 		} else {
 			$this->_curl->setUseProxy(false);
@@ -263,12 +265,20 @@ class cUpdateProxy extends cProxy {
 			$this->_curl->setTypeContent('html');
 			$this->_curl->getContent("http://2ip.ru/");
 			$answer = $this->_curl->getAnswer();
-			$reg = "/<span>\s*Ваш\s*IP\s*адрес:\s*<\/span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*<\/big>/iUm";
+			$reg = '%<span>\s*Ваш\s*IP\s*адрес:\s*</span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*</big>%iUm';
 			if (preg_match($reg, $answer[0], $match) && !isset($match['ip']) || !$match['ip'] || !cStringWork::isIp($match['ip'])){
 				exit('NO SERVER IP');
 			}
 			$this->_serverIp = $match['ip'];
 		}
 		return $this->_serverIp;
+	}
+
+	public function setUpdateList($value, $name = false){
+		if($name){
+			$this->selectList($name);
+		}
+		$this->_list->write($this->_list->getMainLevelName(), $value, 'need_update');
+		$this->_list->update();
 	}
 } 

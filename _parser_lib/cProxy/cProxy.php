@@ -162,14 +162,14 @@ class cProxy {
 		$fileList = glob($this->getDirList() . DIRECTORY_SEPARATOR . "*.proxy");
 		$proxyListArray = array();
 		foreach ($fileList as $value) {
-			if (preg_match("%/(?<name_list>[^/]+)\.proxy$%iUm", $value, $match)) {
+			if (preg_match("%(?<name_list>[^/\\\\]+)\.proxy$%iUm", $value, $match)) {
 				$proxyListArray[] = $match['name_list'];
 			}
 		}
 		return $proxyListArray;
 	}
 
-	protected function listExist($name){
+	public function listExist($name){
 		return in_array($name, $this->getAllNameList());
 	}
 
@@ -198,14 +198,6 @@ class cProxy {
 	public function getProxy($key = false, $url = false){
 		$proxy = $this->_list->getRandom('content');
 		return is_array($proxy)? $proxy['proxy'] : false;
-	}
-
-	public function setUpdateList($value, $name = false){
-		if($name){
-			$this->selectList($name);
-		}
-		$this->_list->write($this->_list->getMainLevelName(), $value, 'need_update');
-		$this->_list->update();
 	}
 
 	public function loadProxy($url){

@@ -14,8 +14,8 @@ use GetContent\cStringWork as cStringWork;
 return array();
 $urlSource = "http://spys.ru/aproxy/";
 $nameSource = "spys.ru";
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $curl->setDefaultOption(CURLOPT_POST, true);
@@ -26,7 +26,7 @@ if (!$answerSpys = cStringWork::betweenTag($answerSpys, '<table width="100%" BOR
 if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerSpys, $matchesSpys)) return array();
 foreach ($matchesSpys['ip'] as $valueSpys) {
 	$tmpArray['proxy'] = trim($valueSpys);
-	$proxySpysProxy['content'][] = $tmpArray;
+	$proxySpysProxy['content'][$tmpArray['proxy']] = $tmpArray;
 }
 unset($answerSpys, $curl);
 return is_array($proxySpysProxy) ? $proxySpysProxy : array();

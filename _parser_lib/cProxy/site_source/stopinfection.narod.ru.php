@@ -21,11 +21,11 @@ $answerStopinfection = $curl->getContent($urlSource);
 $proxyStopinfectionProxy = array();
 if (!$answerStopinfection) return array();
 if (!preg_match_all('#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu', $answerStopinfection, $matchesStopinfection)) return array();
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 foreach ($matchesStopinfection['ip'] as $valueStopinfection) {
 	$tmpArray['proxy'] = trim($valueStopinfection);
-	$proxyStopinfectionProxy['content'][] = $tmpArray;
+	$proxyStopinfectionProxy['content'][$tmpArray['proxy']] = $tmpArray;
 }
 unset($urlSource, $nameSource, $curl, $answerStopinfection, $matchesStopinfection, $valueStopinfection);
 return is_array($proxyStopinfectionProxy) ? $proxyStopinfectionProxy : array();

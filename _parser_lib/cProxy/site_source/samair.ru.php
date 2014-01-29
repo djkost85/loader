@@ -17,8 +17,8 @@ $nameSource = "samair.ru";
 $curl = new cSingleCurl();
 $curl->setTypeContent("text");
 $proxySamair = array();
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 do {
 	$answerSamair = $curl->getContent($urlSource);
 	if (!$answerSamair) return $proxySamair;
@@ -28,7 +28,7 @@ do {
 	foreach ($matchesHtml['proxyHtml'] as $proxyHtml) {
 		if (cStringWork::isIp($proxyAddress)) {
 			$tmpArray['proxy'] = trim($proxyAddress);
-			$proxySamair['content'][] = $tmpArray;
+			$proxySamair['content'][$tmpArray['proxy']] = $tmpArray;
 		}
 	}
 

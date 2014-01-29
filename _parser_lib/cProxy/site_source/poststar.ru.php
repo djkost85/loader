@@ -15,8 +15,8 @@ $urlSource = "http://www.poststar.ru/proxy.htm";
 $nameSource = "poststar.ru";
 $curl = new cSingleCurl();
 $curl->setTypeContent("html");
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 $answerPoststar = $curl->getContent($urlSource);
 if (!$answerPoststar) return array();
 if (!$answerPoststar = cStringWork::betweenTag($answerPoststar, '<table width="730" border="0" align="center">')) {
@@ -28,7 +28,7 @@ if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\
 $proxyPoststarProxy = array();
 foreach ($matchesPoststar['ip'] as $valuePoststar) {
 	$tmpArray['proxy'] = trim($valuePoststar);
-	$proxyPoststarProxy['content'][] = $tmpArray;
+	$proxyPoststarProxy['content'][$tmpArray['proxy']] = $tmpArray;
 }
 unset($curl, $answerPoststar);
 return is_array($proxyPoststarProxy) ? $proxyPoststarProxy : array();

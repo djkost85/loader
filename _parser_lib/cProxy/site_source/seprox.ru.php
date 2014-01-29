@@ -43,7 +43,7 @@ $javascriptEncode = array(
 	"+" => "***"
 );
 $proxySeprox = array();
-$tmpArray["source_proxy"] = $nameSource;
+$tmpArray["source"][$nameSource] = true;
 do {
 	$regEx = '#<tr\s*class="proxyStr">\s*<td>\s*<script\s*type="text/javascript">\s*(?<js>[^<]*)\s*</script>\s*</td>\s*<td>\s*(?<type_proxy>.*)\s*</td>#iUms';
 	if (!preg_match_all($regEx, $content, $matchesSecretCode)) break;
@@ -62,8 +62,8 @@ do {
 			if (preg_match('#' . $valueIp . '=\'(?<ip>[^\']*)\'#s', $strSecretCode, $matchIp)) $ip .= $matchIp['ip'];
 		if (cStringWork::isIp($ip)) {
 			$tmpArray['proxy'] = trim($ip);
-			$tmpArray["type_proxy"] = trim($matchesSecretCode['type_proxy'][$keySecretCode]);
-			$proxySeprox['content'][] = $tmpArray;
+			$tmpArray["protocol"][trim($matchesSecretCode['type_proxy'][$keySecretCode])] = true;
+			$proxySeprox['content'][$tmpArray['proxy']] = $tmpArray;
 		}
 	}
 	$pagenation++;

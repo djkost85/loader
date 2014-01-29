@@ -13,7 +13,6 @@ echo "cSingleCurl<br/>\n";
 
 $functions = array(
 	'init',
-	'getRandomUserAgent',
 	'setOption',
 	'setOptions',
 	'getContent',
@@ -29,11 +28,6 @@ function cSingleCurl_init(){
 	$gc = new cSingleCurl();
 	$descriptor =& $gc->getDescriptor();
 	return is_resource($descriptor['descriptor']);
-}
-
-function cSingleCurl_getRandomUserAgent(){
-	$gc = new cSingleCurl();
-	return in_array($gc->getRandomUserAgent(), $gc->getUserAgentList());
 }
 
 function cSingleCurl_setOption(){

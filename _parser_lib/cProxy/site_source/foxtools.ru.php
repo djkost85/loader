@@ -16,8 +16,8 @@ $nameSource = "foxtools.ru";
 $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $proxyFoxtools = array();
-$tmpArray["source_proxy"] = $nameSource;
-$tmpArray["type_proxy"] = 'http';
+$tmpArray["source"][$nameSource] = true;
+$tmpArray["protocol"]['http'] = true;
 for ($nom = 1; $nom < 50; $nom++) {
 	$urlPage = $urlSource . $nom;
 	$answerFoxtools = $curl->getContent($urlPage);
@@ -28,7 +28,7 @@ for ($nom = 1; $nom < 50; $nom++) {
 		$proxyAddress = $proxyIp . ':' . $matchesIp['port'][$key];
 		if (cStringWork::isIp($proxyAddress)) {
 			$tmpArray['proxy'] = trim($proxyAddress);
-			$proxyFoxtools['content'][] = $tmpArray;
+			$proxyFoxtools['content'][$tmpArray['proxy']] = $tmpArray;
 		}
 	}
 	sleep(rand(1, 3));
