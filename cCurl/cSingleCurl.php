@@ -45,6 +45,16 @@ class cSingleCurl extends cCurl{
 		return $this->_maxRedirectCount;
 	}
 
+	public function setKeyStream($key){
+		$descriptor =& $this->getDescriptor();
+		$descriptor['descriptor_key'] = $key;
+	}
+
+	public function getKeyStream(){
+		$descriptor =& $this->getDescriptor();
+		return $descriptor['descriptor_key'];
+	}
+
 	private function useRedirect(){
 		$this->setRedirectCount($this->getRedirectCount()+1);
 		return ($this->getRedirectCount()<=$this->getMaxRedirectCount());
