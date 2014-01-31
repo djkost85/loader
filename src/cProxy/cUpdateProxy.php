@@ -60,7 +60,7 @@ class cUpdateProxy extends cProxy {
 	}
 
 
-	function __construct($checkUrl){
+	function __construct($checkUrl = 'http://test1.ru/proxy_check.php'){
 		parent::__construct();
 		$this->_curl = new cMultiCurl();
 		$this->_curl->setTypeContent('text');
