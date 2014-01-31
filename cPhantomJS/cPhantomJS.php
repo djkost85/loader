@@ -120,6 +120,8 @@ class cPhantomJS {
 	 */
 	public function setKeyStream($keyStream) {
 		$this->_keyStream = $keyStream;
+		$this->_cookie = new cCookie($keyStream);
+		$this->setDefaultOption('cookies-file', $this->_cookie->getFilePhantomJSName());
 	}
 
 	/**
@@ -231,18 +233,12 @@ class cPhantomJS {
 		return $this->_arguments;
 	}
 
-	public function setCookieFile($name){
-		$this->_cookie = new cCookie($name);
-		$this->setDefaultOption('cookies-file', $this->_cookie->getFilePhantomJSName());
-	}
-
 
 	function __construct($phantomExePath){
 		$this->setPhantomExePath($phantomExePath);
-		$this->setKeyStream(microtime(1) . mt_rand());
 		$this->setPhantomFilesPath(dirname(__FILE__));
 		$this->setDefaultOption('local-storage-path', $this->getDirForStorage());
-		$this->setCookieFile($this->getKeyStream());
+		$this->setKeyStream(microtime(1) . mt_rand());
 		$this->userAgent = new cUserAgent('desktop');
 	}
 
@@ -268,14 +264,19 @@ class cPhantomJS {
 		return $this->exec();
 	}
 
+	private function exec(){
+		return $this->execCommand($this->createCommand());
+	}
+
 	/**
-	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845
+	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845 or send me e-mail <bpteam22@gmail.com>
+	 * @param $command
 	 * @return string
 	 */
-	private function exec(){
+	public function execCommand($command){
 		$output = array();
 		$return_val = null;
-		exec($this->createCommand(), $output, $return_val);
+		exec($command, $output, $return_val);
 		return $output ? implode("\n", $output) : $return_val;
 	}
 

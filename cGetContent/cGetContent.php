@@ -13,47 +13,75 @@ namespace GetContent;
 
 class cGetContent {
 
-
-	private $_curl;
-	private $_phantomjs;
+	public $curl;
+	public $phantomjs;
+	public $cookie;
 	private $_mode;
 	private $_key;
 
 	/**
-	 * @param mixed $mode
+	 * @param string $mode curl | phantom
+	 * @return bool
 	 */
 	public function setMode($mode) {
-		$this->_mode = $mode;
+		switch($mode){
+			case 'curl' :
+				$this->_mode = $mode;
+				$this->curlToPhantom();
+				break;
+			case 'phantom':
+				$this->_mode = $mode;
+				$this->phantomToCurl();
+				break;
+			default:
+				return false;
+		}
+		return true;
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function getMode() {
 		return $this->_mode;
 	}
 
 	/**
-	 * @param mixed $key
+	 * @param string $key
 	 */
 	public function setKey($key) {
 		$this->_key = $key;
-		$this->_curl->setKeyStream($this->getKey());
-		$this->_phantomjs->setKeyStream($this->getKey());
+		$this->curl->setKeyStream($this->getKey());
+		$this->phantomjs->setKeyStream($this->getKey());
+		$this->cookie->open($this->getKey());
 	}
 
 	/**
-	 * @return mixed
+	 * @return string
 	 */
 	public function getKey() {
 		return $this->_key;
 	}
 
 	function __construct(){
-		$this->_curl = new cSingleCurl();
-		$this->_phantomjs = new cPhantomJS(PHANTOMJS_EXE);
+		$this->curl = new cSingleCurl();
+		$this->phantomjs = new cPhantomJS(PHANTOMJS_EXE);
+		$this->cookie = new cCookie();
+		$this->phantomjs->setDefaultOption('load-images', 'false');
 		$this->genKey();
 		$this->setMode('curl');
+	}
+
+	public function getContent($url){
+		switch($this->getMode()){
+			case 'curl':
+				return $this->curl->getContent($url);
+				break;
+			case 'phantom':
+				return $this->phantomjs->renderText($url);
+				break;
+		}
+		return false;
 	}
 
 	public function genKey(){
@@ -61,6 +89,14 @@ class cGetContent {
 	}
 
 	private function curlToPhantom(){
+		$cookies = $this->cookie->fromFileCurl();
+		$this->cookie->creates($cookies);
+		$this->cookie->toFilePhantomJS($cookies);
+	}
 
+	private function phantomToCurl(){
+		$cookies = $this->cookie->fromFilePhantomJS();
+		$this->cookie->creates($cookies);
+		$this->cookie->toFileCurl($cookies);
 	}
 }
