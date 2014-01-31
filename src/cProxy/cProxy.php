@@ -109,7 +109,7 @@ class cProxy {
 		return $this->_deleteProxy;
 	}
 
-	public function getList(){
+	public function  getList(){
 		return $this->_list->getLevel($this->_list->getMainLevelName());
 	}
 

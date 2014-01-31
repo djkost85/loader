@@ -29,8 +29,9 @@ function cPhantomJS_renderImage(){
 	$source = 'http://ya.ru';
 	$width = 1280;
 	$height = 720;
+	$picFormat = 'PNG';
 	$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
-	$img = $phantomJS->renderImage($source, $width, $height, 'PNG');
+	$img = $phantomJS->renderImage($source, $width, $height, $picFormat);
 	$ih = imagecreatefromstring($img);
 	return imagesy($ih) == $height && imagesx($ih) == $width;
 }

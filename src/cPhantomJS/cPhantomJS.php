@@ -280,7 +280,7 @@ class cPhantomJS {
 		return $output ? implode("\n", $output) : $return_val;
 	}
 
-	private function createCommand(){
+	public function createCommand(){
 		return $this->getPhantomExePath() . ' ' . $this->createOptions() . ' ' . $this->createScriptName() . ' ' . $this->createArguments();
 	}
 
