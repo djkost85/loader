@@ -102,9 +102,9 @@ class cStringWork
 		}
 		if (preg_match('%<(?<tag>\w+)\s*[\w-]+=\s*[\"\']?[^\'\"]+[\"\']?[^>]*>%im', $startTag)) {
 			preg_match_all('%(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))%im', $startTag, $matches);
-			$reg = '%<' . preg_quote($tag["tag"]);
+			$reg = '%<' . preg_quote($tag["tag"], '%');
 			foreach ($matches['parametr'] as $value) {
-				$reg .= '[^>]*' . preg_quote($value) . '[^>]*';
+				$reg .= '[^>]*' . preg_quote($value, '%') . '[^>]*';
 			}
 			$reg .= '>%im';
 			if (!preg_match($reg, $text, $match)) {
@@ -113,7 +113,7 @@ class cStringWork
 			$startTag = $match[0];
 		} else {
 			preg_match('%<(?<tag>\w+)[^>]*>%i', $startTag, $tag);
-			preg_match('%<(?<tag>' . preg_quote($tag['tag']) . ')[^>]*>%i', $text, $tag);
+			preg_match('%<(?<tag>' . preg_quote($tag['tag'], '%') . ')[^>]*>%i', $text, $tag);
 		}
 		$tagName = $tag['tag'];
 		$openTag = "<" . $tagName;
