@@ -26,7 +26,7 @@ runTest($functions, $prefix);
 $updateProxy = new cUpdateProxy(CHECK_URL);
 $start = microtime(true);
 echo date("[H:i:s Y/m/d]", $start)."\n<br>\n";
-echo "<table border='1' cellpadding='2'>";
+echo "<table border='1'>";
 foreach($updateProxy->getAllSourceName() as $sourceName){
 	echo "<tr>";
 	echo "<td> $sourceName ";

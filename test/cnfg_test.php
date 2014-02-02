@@ -11,12 +11,12 @@ ini_set('display_errors',1);
 error_reporting(E_ALL);
 require_once dirname(__FILE__) . '/../include.php';
 
-echo "<a href=''>..</a>";
+echo "<a href='index.php'>..</a>";
 
 function runTest($functions, $prefix = ''){
 	$start = microtime(true);
 	echo date("[H:i:s Y/m/d]", $start)."\n<br>\n";
-	echo "<table border='1' cellpadding='2'>";
+	echo "<table border='1'>";
 	foreach($functions as $function){
 		echo "<tr>";
 		echo "<td> $function </td>";

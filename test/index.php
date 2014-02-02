@@ -7,5 +7,6 @@
 <a href="cStringWork.php">cStringWork</a><br/>
 <a href="cProxy.php">cProxy</a><br/>
 <a href="cUpdateProxy.php">cUpdateProxy</a><br/>
+<a href="cGetContent.php">cGetContent</a><br/>
 
 <br/><br/><br/><br/><br/>

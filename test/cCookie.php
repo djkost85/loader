@@ -88,7 +88,7 @@ function cCookie_toPhantomJS(){
 	$cookie->open(FILE_NAME);
 	$testCookie = $cookie->getCookies('test1.ru');
 	$testPhantomCookie = $cookie->toPhantomJS($testCookie['2testName']);
-	return '2testName=2testValue; expires=Thu, 01-Jan-70 18:33:20 GMT; secure; HttpOnly; domain=.test1.ru; path=/' == $testPhantomCookie;
+	return '2testName=2testValue; expires=Thu, 01-Jan-70 17:33:20 GMT; secure; HttpOnly; domain=.test1.ru; path=/' == $testPhantomCookie;
 }
 
 function cCookie_toFilePhantomJS(){

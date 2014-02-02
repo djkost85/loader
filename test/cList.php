@@ -23,7 +23,7 @@ $functions = array(
 	'push',
 	'getRandom',
 	'deleteLevel',
-	//'deleteList',
+	'deleteList',
 );
 
 runTest($functions, 'cList_');

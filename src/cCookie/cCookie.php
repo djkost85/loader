@@ -24,7 +24,7 @@ class cCookie {
 	 */
 	private $_list;
 	private $_name = 'cookies';
-	private static $_regExCookieDelimiterPhantomJS = '(?:(?:\\\\n)?((\\\\0|\\\\{2}|\\\\x[0-9a-f]{2}|\\\\x[0-9a-f]|\\\\_|\\\\\w|\w|\W|\\\\\W)))';
+	private static $_regExCookieDelimiterPhantomJS = '(?:(?:\\\\n)?((\\\\0|\\\\{2}|((\\\\x[0-9a-f]{2}){2}|\\\\x[0-9a-f]{2})|\\\\x[0-9a-f]|\\\\_|\\\\[abtnvfr]|[g-zG-Z]|\W|\\\\\W)))';
 	private static $_phantomCookieCountSymbols = array(
 	0   => '\0',   1   => '\x1',  2   => '\x2',  3   => '\x3',  4   => '\x4',  5   => '\x5',  6   => '\x6',  7   => '\a',   8   => '\b',   9   => '\t',
 	10  => '\n',   11  => '\v',   12  => '\f',   13  => '\r',   14  => '\xe',  15  => '\xf',  16  => '\x10', 17  => '\x11', 18  => '\x12', 19  => '\x13',
@@ -134,11 +134,11 @@ class cCookie {
 	 * @return string
 	 */
 	public static function getPhantomCookieCountSymbol($count) {
-		$symbol = '\\0\\0';
+		$symbol = '\\0\\0\\0';
 		if(($count/255)>1){
 			$symbol .= self::$_phantomCookieCountSymbols[(int)($count/255)] . self::$_phantomCookieCountSymbols[$count%255];
 		} else {
-			$symbol .= '\\0' . self::$_phantomCookieCountSymbols[$count];
+			$symbol .= self::$_phantomCookieCountSymbols[$count];
 		}
 		return $symbol;
 	}
@@ -290,11 +290,11 @@ class cCookie {
 		$lines = explode("\n", $text);
 		$regexCookieDelimiter = self::$_regExCookieDelimiterPhantomJS;
 		$regexCookieLine = "%^cookies=\"?\@Variant\(($regexCookieDelimiter{4}){2}QList\\<QNetworkCookie\\>\\\\0({$regexCookieDelimiter}{4}){2}(?<cookie_str>.*)\)\"?\s*$%ms";
-		if(!preg_match($regexCookieLine, $lines[1], $match)){
+		if(!isset($lines[1]) || !preg_match($regexCookieLine, $lines[1], $match)){
 			return array();
 		}
 		$cookieDelimiter = 'REPLACE_COOKIE_DELIMITER';
-		$regEx = "\\\\0\\\\0".$regexCookieDelimiter.$regexCookieDelimiter;
+		$regEx = "\\\\0\\\\0\\\\0".$regexCookieDelimiter;
 		$text = preg_replace("%$regEx%ms", $cookieDelimiter, $match['cookie_str']);
 		$cookiesLines = explode($cookieDelimiter, $text);
 		$cookies = array();
@@ -355,7 +355,7 @@ class cCookie {
 	public static function toCurl($cookie){
 		return ($cookie['httponly']?'#HttpOnly_':'') .
 		       $cookie['domain'] . "\t" .
-		       ($cookie['tailmatch'] ? 'TRUE' : 'FALSE') . "\t" .
+		       (@$cookie['tailmatch'] ? 'TRUE' : 'FALSE') . "\t" .
 		       $cookie['path'] . "\t" .
 		       ($cookie['secure'] ? 'TRUE' : 'FALSE') . "\t" .
 		       ($cookie['expires'] ? strtotime($cookie['expires']) : 1) . "\t" .
@@ -378,7 +378,7 @@ class cCookie {
 	 * @return string
 	 */
 	public function toPhantomJS($cookie){
-		return ($cookie['name'] . '=' . $cookie['value'] . ';' .
+		return trim($cookie['name'] . '=' . $cookie['value'] . ';' .
 		                ' expires=' . $cookie['expires'] . ';' .
 		                ($cookie['secure'] ?' secure;' : '') .
 		                ($cookie['httponly'] ?' HttpOnly;' : '') .
@@ -452,7 +452,7 @@ cookies=\"@Variant(\\0\\0\\0\\x7f\\0\\0\\0\\x16QList<QNetworkCookie>\\0\\0\\0\\0
 		set_time_limit(0);
 		$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
 		$cookieName = 'zzz_generatorCountCookieNumber';
-		$phantomJS->setCookieFile($cookieName);
+		$phantomJS->setKeyStream($cookieName);
 		$this->setName($cookieName);
 		$regEx = self::$_regExCookieDelimiterPhantomJS;
 		$regexCookieLine = "%^cookies=\"?\@Variant\(({$regEx}{4}){2}QList\\<QNetworkCookie\\>\\\\0({$regEx}{4}){2}(?<cookie_str>.*)\)\"?\s*$%ms";

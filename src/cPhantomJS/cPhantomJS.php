@@ -55,7 +55,7 @@ class cPhantomJS {
 		return $this->_answer;
 	}
 
-	private function getFullPathInPhantomFiles($dirName){
+	private function getPathToPhantomDir($dirName){
 		return $this->getPhantomFilesPath() . DIRECTORY_SEPARATOR . $dirName;
 	}
 
@@ -70,7 +70,7 @@ class cPhantomJS {
 	 * @return string
 	 */
 	public function getDirForFile() {
-		return $this->getFullPathInPhantomFiles($this->_dirForFile);
+		return $this->getPathToPhantomDir($this->_dirForFile);
 	}
 
 	/**
@@ -84,7 +84,7 @@ class cPhantomJS {
 	 * @return string
 	 */
 	public function getDirForScript() {
-		return $this->getFullPathInPhantomFiles($this->_dirForScript);
+		return $this->getPathToPhantomDir($this->_dirForScript);
 	}
 
 	/**
@@ -98,7 +98,7 @@ class cPhantomJS {
 	 * @return string
 	 */
 	public function getDirForStorage() {
-		return $this->getFullPathInPhantomFiles($this->_dirForStorage);
+		return $this->getPathToPhantomDir($this->_dirForStorage);
 	}
 
 	/**

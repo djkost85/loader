@@ -12,9 +12,17 @@ namespace GetContent;
 
 
 class cGetContent {
-
+	/**
+	 * @var cSingleCurl
+	 */
 	public $curl;
+	/**
+	 * @var cPhantomJS
+	 */
 	public $phantomjs;
+	/**
+	 * @var cCookie
+	 */
 	public $cookie;
 	private $_mode;
 	private $_key;
@@ -27,11 +35,11 @@ class cGetContent {
 		switch($mode){
 			case 'curl' :
 				$this->_mode = $mode;
-				$this->curlToPhantom();
+				$this->phantomToCurl();
 				break;
 			case 'phantom':
 				$this->_mode = $mode;
-				$this->phantomToCurl();
+				$this->curlToPhantom();
 				break;
 			default:
 				return false;
@@ -80,8 +88,9 @@ class cGetContent {
 			case 'phantom':
 				return $this->phantomjs->renderText($url);
 				break;
+			default:
+				return false;
 		}
-		return false;
 	}
 
 	public function genKey(){
