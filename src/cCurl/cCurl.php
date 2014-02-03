@@ -59,6 +59,9 @@ abstract class cCurl{
 		CURLOPT_POST => false,
 		CURLOPT_FRESH_CONNECT => true,
 		CURLOPT_FORBID_REUSE => true,
+		CURLOPT_AUTOREFERER => true,
+		CURLOPT_SSL_VERIFYHOST => false,
+		CURLOPT_SSL_VERIFYPEER => false,
 	);
 
 	protected function setAnswer($newAnswer){
@@ -446,7 +449,7 @@ abstract class cCurl{
 		if($answer){
 				while(preg_match("%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums",$answer,$data)){
 					$header[] = $data['head'];
-					$answer = trim(preg_replace('%'.preg_quote($data['head'],'%').'%ims', '', $answer));
+					$answer = ltrim(preg_replace('%'.preg_quote($data['head'],'%').'%ims', '', $answer));
 				}
 		}
 		return $header;
