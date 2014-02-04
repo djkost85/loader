@@ -11,7 +11,7 @@ require_once dirname(__FILE__) . '/cnfg_test.php';
 use GetContent\cFile as cFile;
 echo "cFile<br/>\n";
 
-define('FILE_NAME', dirname(__FILE__).'/tmp/testCFile.txt');
+define('FILE_NAME', dirname(__FILE__).'/support/testCFile.txt');
 
 $functions = array(
 	'testCreateFile',

@@ -15,6 +15,7 @@ $functions = array(
 	'renderText',
 	'renderImage',
 	'renderPDF',
+	'sendPost',
 );
 
 runTest($functions, 'cPhantomJS_');
@@ -39,10 +40,18 @@ function cPhantomJS_renderImage(){
 function cPhantomJS_renderPDF(){
 	$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
 	$source = 'http://ya.ru';
-	$fileName = 'testFile.pdf';
+	$fileName = $phantomJS->getDirForFile() . DIRECTORY_SEPARATOR . 'testFile.pdf';
 	$sizePaper = 'A4';
 	$orientation = 'portrait';
 	$marginCm = 1;
 	$phantomJS->renderPdf($source, $fileName, $sizePaper, $orientation, $marginCm);
-	return file_exists($phantomJS->getDirForFile() . DIRECTORY_SEPARATOR . $fileName);
+	return file_exists($fileName);
+}
+
+function cPhantomJS_sendPost(){
+	$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
+	$post = 'url=vk.com&test=test_post';
+	$source = 'http://test1.ru/loader/test/support/post_test.php';
+	$text = $phantomJS->sendPost($source,$post);
+	return preg_match('%test_post%ims', $text);
 }

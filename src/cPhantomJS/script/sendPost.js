@@ -3,13 +3,13 @@
  */
 var page = require('webpage').create();
 var url = require('system').args[2];
-var picFormat = require('system').args[5];
+var postData = require('system').args[3];
 page.viewportSize = {
-    width: require('system').args[3],
-    height: require('system').args[4]
+    width: require('system').args[4],
+    height: require('system').args[5]
 };
 page.settings.userAgent = require('system').args[1];
-page.open(url, function () {
-    console.log(page.renderBase64(picFormat));
+page.open( url, 'post', postData, function () {
+    console.log(page.content);
     phantom.exit();
 });

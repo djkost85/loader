@@ -223,7 +223,7 @@ class cPhantomJS {
 	 * @param array $arguments
 	 */
 	public function setArguments($arguments) {
-		$this->_arguments = array_merge(array($this->userAgent->getRandomUserAgent()), $arguments);
+		$this->_arguments = $arguments;
 	}
 
 	/**
@@ -243,24 +243,26 @@ class cPhantomJS {
 	}
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
-		$this->setArguments(array($path, $screenWidthPx, $screenHeightPx));
-		$this->setScriptName('renderText');
-		$data = $this->exec();
-		return $data;
+		return $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), $path, $screenWidthPx, $screenHeightPx));
+	}
+
+	public function sendPost($path, $postStr, $screenWidthPx = 1280, $screenHeightPx = 720){
+		return $this->customScript('sendPost', array($this->userAgent->getRandomUserAgent(), $path, $postStr, $screenWidthPx, $screenHeightPx));
 	}
 
 	public function renderImage($path, $screenWidthPx = 1280, $screenHeightPx = 720, $formatImg = 'PNG'){
-		$this->setArguments(array($path, $screenWidthPx, $screenHeightPx, $formatImg));
-		$this->setScriptName('renderImage');
-		$data = $this->exec();
+		$data = $this->customScript('renderImage', array($this->userAgent->getRandomUserAgent(), $path, $screenWidthPx, $screenHeightPx, $formatImg));
 		$pic = base64_decode($data);
 		return $pic;
 	}
 
 	public function renderPdf($path, $fileName = 'MyPdf.pdf', $format = 'A4', $orientation = 'portrait', $marginCm = 1){
-		$fileName = $this->getDirForFile() . DIRECTORY_SEPARATOR . $fileName;
-		$this->setArguments(array($path, $fileName, $format, $orientation, $marginCm . 'cm'));
-		$this->setScriptName('renderPdf');
+		return $this->customScript('renderPdf',array($this->userAgent->getRandomUserAgent(), $path, $fileName, $format, $orientation, $marginCm . 'cm'));
+	}
+
+	public function customScript($scriptName, $arguments = array()){
+		$this->setArguments($arguments);
+		$this->setScriptName($scriptName);
 		return $this->exec();
 	}
 
@@ -269,7 +271,7 @@ class cPhantomJS {
 	}
 
 	/**
-	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845 or send me e-mail <bpteam22@gmail.com>
+	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845 or send me e-mail to <bpteam22@gmail.com>
 	 * @param $command
 	 * @return string
 	 */
@@ -290,7 +292,7 @@ class cPhantomJS {
 			$option = $this->getOption($name) ? $this->getOption($name) : $defaultOption;
 			$this->setOption($name, $option);
 			if($option){
-				$options[] = '--' . $name . '=' .$option;
+				$options[] = '--' . $name . '=' . $option;
 			}
 		}
 		return implode(' ', $options);
