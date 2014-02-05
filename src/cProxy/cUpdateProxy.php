@@ -90,7 +90,7 @@ class cUpdateProxy extends cProxy {
 			$infoProxy['cookie'] = (bool)$matches['fun_status'][4];
 			$infoProxy['last_check'] = time();
 			preg_match('%(?<ip>\d+\.\d+\.\d+\.\d+)\:\d+%ims', $infoProxy['proxy'], $match);
-			$countryName = isset($match['ip']) ? @geoip_country_name_by_name($match['ip']) : false;
+			$countryName = isset($match['ip']) && function_exists('geoip_country_name_by_name') ? @geoip_country_name_by_name($match['ip']) : false;
 			$infoProxy['country'] = $countryName ? $countryName : 'no country';
 			$infoProxy['starttransfer'] = isset($curlInfo['starttransfer_time']) ? $curlInfo['starttransfer_time'] : false;
 			$infoProxy['upload_speed'] = isset($curlInfo['speed_upload']) ? $curlInfo['speed_upload'] : false;
