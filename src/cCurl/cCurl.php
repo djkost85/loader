@@ -181,6 +181,10 @@ abstract class cCurl{
 		return $this->_minSizeAnswer;
 	}
 
+	/**
+	 * @param string $typeContent text | img | html | file
+	 * @return bool
+	 */
 	public function setTypeContent($typeContent = "text") {
 		switch ($typeContent) {
 			case 'file':
