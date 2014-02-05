@@ -41,7 +41,7 @@ abstract class cCurl{
 	protected $_staticCookieFileName;
 
 	/**
-	 * @var cProxy
+	 * @var string|cProxy
 	 */
 	public $proxy;
 	/**
@@ -325,9 +325,9 @@ abstract class cCurl{
 	private function setOptionProxy(&$descriptor){
 		if ($this->getUseProxy()) {
 			if (is_object($this->proxy)) {
-				$proxyIp = $this->proxy->getProxy($descriptor['descriptor_key'], $descriptor['option'][CURLOPT_URL]);
-				if (is_string($proxyIp) && cStringWork::isIp($proxyIp)){
-					$this->setOption($descriptor, CURLOPT_PROXY, $proxyIp);
+				$proxy = $this->proxy->getProxy($descriptor['descriptor_key'], $descriptor['option'][CURLOPT_URL]);
+				if (is_string($proxy['proxy']) && cStringWork::isIp($proxy['proxy'])){
+					$this->setOption($descriptor, CURLOPT_PROXY, $proxy['proxy']);
 				} else {
 					$descriptor['option'][CURLOPT_URL] = false;
 				}

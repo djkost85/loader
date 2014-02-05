@@ -52,7 +52,7 @@ function cProxy_addProxySelectListGetProxy(){
 	$proxy->selectList($listName);
 	$proxy->addProxy($proxyIp, $properties);
 	$getProxy = $proxy->getProxy();
-	return $getProxy == $proxyIp;
+	return $getProxy['proxy'] == $proxyIp;
 }
 
 function cProxy_loadProxy(){

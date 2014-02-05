@@ -34,12 +34,37 @@ class cPhantomJS {
 	private $_scriptName;
 	private $_phantomExePath;
 	private $_arguments = array();
+	private $_url = 'http://ya.ru';
 	/**
 	 * @var cCookie
 	 */
 	private $_cookie;
-
+	/**
+	 * @var cUserAgent
+	 */
 	public $userAgent;
+	/**
+	 * @var bool
+	 */
+	private $_useProxy;
+	/**
+	 * @var string|cProxy
+	 */
+	public $proxy;
+
+	/**
+	 * @param string $url
+	 */
+	public function setUrl($url) {
+		$this->_url = $url;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getUrl() {
+		return $this->_url;
+	}
 
 	/**
 	 * @param mixed $answer
@@ -233,6 +258,51 @@ class cPhantomJS {
 		return $this->_arguments;
 	}
 
+	/**
+	 * @param string|bool|int $useProxy 1/0 true/false '123.123.123.123:8080'
+	 */
+	public function setUseProxy($useProxy) {
+		$this->_useProxy = $this->setProxy($useProxy);
+
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getUseProxy() {
+		return $this->_useProxy;
+	}
+
+	/**
+	 * @param bool|int|string $proxy true/false 1/0 '123.123.123.123:8080'
+	 * @param null|string     $type http|socks5
+	 * @param null|string     $user
+	 * @param null|string     $password
+	 * @return bool
+	 */
+	protected function setProxy($proxy, $type = null, $user = null, $password = null) {
+		switch ((bool)$proxy) {
+			case true:
+				if (is_string($proxy)){
+					if(cStringWork::isIp($proxy)){
+						$this->proxy['proxy'] = $proxy;
+						$this->proxy['type'] = $type;
+						$this->proxy['auth'] = $user === null || $password === null ? null : $user.':'.$password;
+					} else {
+						$proxy = false;
+					}
+				} elseif(!is_object($this->proxy)) {
+					$this->proxy = new cProxy();
+				}
+				break;
+			case false:
+				$proxy = false;
+				break;
+			default:
+				return false;
+		}
+		return (bool)$proxy;
+	}
 
 	function __construct($phantomExePath){
 		$this->setPhantomExePath($phantomExePath);
@@ -243,24 +313,27 @@ class cPhantomJS {
 	}
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
-		return $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), $path, $screenWidthPx, $screenHeightPx));
+		$this->setUrl($path);
+		return $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), 'path' => $path, $screenWidthPx, $screenHeightPx));
 	}
 
 	public function sendPost($path, $postStr, $screenWidthPx = 1280, $screenHeightPx = 720){
-		return $this->customScript('sendPost', array($this->userAgent->getRandomUserAgent(), $path, $postStr, $screenWidthPx, $screenHeightPx));
+		$this->setUrl($path);
+		return $this->customScript('sendPost', array($this->userAgent->getRandomUserAgent(), 'path' => $path, $postStr, $screenWidthPx, $screenHeightPx));
 	}
 
 	public function renderImage($path, $screenWidthPx = 1280, $screenHeightPx = 720, $formatImg = 'PNG'){
-		$data = $this->customScript('renderImage', array($this->userAgent->getRandomUserAgent(), $path, $screenWidthPx, $screenHeightPx, $formatImg));
+		$data = $this->customScript('renderImage', array($this->userAgent->getRandomUserAgent(), 'path' => $path, $screenWidthPx, $screenHeightPx, $formatImg));
 		$pic = base64_decode($data);
 		return $pic;
 	}
 
 	public function renderPdf($path, $fileName = 'MyPdf.pdf', $format = 'A4', $orientation = 'portrait', $marginCm = 1){
-		return $this->customScript('renderPdf',array($this->userAgent->getRandomUserAgent(), $path, $fileName, $format, $orientation, $marginCm . 'cm'));
+		return $this->customScript('renderPdf',array($this->userAgent->getRandomUserAgent(), 'path' => $path, $fileName, $format, $orientation, $marginCm . 'cm'));
 	}
 
 	public function customScript($scriptName, $arguments = array()){
+		$this->setUrl($arguments['path']);
 		$this->setArguments($arguments);
 		$this->setScriptName($scriptName);
 		return $this->exec();
@@ -288,6 +361,7 @@ class cPhantomJS {
 
 	private function createOptions(){
 		$options = array();
+		$this->setOptionProxy();
 		foreach($this->getDefaultOptions() as $name => $defaultOption){
 			$option = $this->getOption($name) ? $this->getOption($name) : $defaultOption;
 			$this->setOption($name, $option);
@@ -296,6 +370,26 @@ class cPhantomJS {
 			}
 		}
 		return implode(' ', $options);
+	}
+
+	private function setOptionProxy(){
+		if ($this->getUseProxy()) {
+			if (is_object($this->proxy)) {
+				$proxy = $this->proxy->getProxy($this->getKeyStream(), $this->getUrl());
+				if (is_string($proxy['proxy']) && cStringWork::isIp($proxy['proxy'])){
+					$this->setOption('proxy', $proxy['proxy']);
+					$this->setOption('proxy-type', $proxy['protocol']);
+				}
+			} elseif (is_string($this->proxy['proxy'])){
+				$this->setOption('proxy', $this->proxy['proxy']);
+				$this->setOption('proxy-type', $this->proxy['type']);
+				$this->setOption('proxy-auth', $this->proxy['auth']);
+			}
+		} elseif($this->getOption('proxy') !== null) {
+			$this->setOption('proxy', null);
+			$this->setOption('proxy-type', null);
+			$this->setOption('proxy-auth', null);
+		}
 	}
 
 	private function createArguments(){

@@ -113,10 +113,6 @@ class cProxy {
 		return $this->_list->getLevel($this->_list->getMainLevelName());
 	}
 
-
-
-
-
 	function __construct(){
 		$this->setNameList($this->getDefaultListName());
 		$this->_list = new cList();
@@ -197,7 +193,7 @@ class cProxy {
 
 	public function getProxy($key = false, $url = false){
 		$proxy = $this->_list->getRandom('content');
-		return is_array($proxy)? $proxy['proxy'] : false;
+		return is_array($proxy) ? $proxy : false;
 	}
 
 	public function loadProxy($url){

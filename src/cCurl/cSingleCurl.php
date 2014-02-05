@@ -88,11 +88,11 @@ class cSingleCurl extends cCurl{
 			$this->setOption($descriptor, CURLOPT_URL, $url);
 			$this->setOptions($descriptor);
 			$answer = $this->exec();
-			$this->setReferer($descriptor, $url);
 			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
 			$descriptor['info']['header'] = $this->getHeader($answer);
 			if($this->isRedirect()){
 				if($this->useRedirect()){
+					$this->setReferer($descriptor, $url);
 					$answer = $this->getContent($descriptor['info']['redirect_url']);
 				} else {
 					break;
@@ -110,6 +110,7 @@ class cSingleCurl extends cCurl{
 				}
 			}
 		} while ($this->repeat());
+		$this->setReferer($descriptor, $url);
 		$this->setAnswer($this->prepareContent($answer));
 		$this->reinit();
 		return $this->getAnswer();
