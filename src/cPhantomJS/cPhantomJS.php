@@ -35,6 +35,7 @@ class cPhantomJS {
 	private $_phantomExePath;
 	private $_arguments = array();
 	private $_url = 'http://ya.ru';
+	private $_referer = 'http://google.com/';
 	/**
 	 * @var cCookie
 	 */
@@ -304,6 +305,22 @@ class cPhantomJS {
 		return (bool)$proxy;
 	}
 
+	/**
+	 * @param string $referer
+	 */
+	public function setReferer($referer) {
+		$this->_referer = $referer;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getReferer() {
+		return $this->_referer;
+	}
+
+
+
 	function __construct($phantomExePath){
 		$this->setPhantomExePath($phantomExePath);
 		$this->setPhantomFilesPath(dirname(__FILE__));
@@ -314,22 +331,22 @@ class cPhantomJS {
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
 		$this->setUrl($path);
-		return $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), 'path' => $path, $screenWidthPx, $screenHeightPx));
+		return $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $screenWidthPx, $screenHeightPx));
 	}
 
 	public function sendPost($path, $postStr, $screenWidthPx = 1280, $screenHeightPx = 720){
 		$this->setUrl($path);
-		return $this->customScript('sendPost', array($this->userAgent->getRandomUserAgent(), 'path' => $path, $postStr, $screenWidthPx, $screenHeightPx));
+		return $this->customScript('sendPost', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $postStr, $screenWidthPx, $screenHeightPx));
 	}
 
 	public function renderImage($path, $screenWidthPx = 1280, $screenHeightPx = 720, $formatImg = 'PNG'){
-		$data = $this->customScript('renderImage', array($this->userAgent->getRandomUserAgent(), 'path' => $path, $screenWidthPx, $screenHeightPx, $formatImg));
+		$data = $this->customScript('renderImage', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $screenWidthPx, $screenHeightPx, $formatImg));
 		$pic = base64_decode($data);
 		return $pic;
 	}
 
 	public function renderPdf($path, $fileName = 'MyPdf.pdf', $format = 'A4', $orientation = 'portrait', $marginCm = 1){
-		return $this->customScript('renderPdf',array($this->userAgent->getRandomUserAgent(), 'path' => $path, $fileName, $format, $orientation, $marginCm . 'cm'));
+		return $this->customScript('renderPdf',array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $fileName, $format, $orientation, $marginCm . 'cm'));
 	}
 
 	public function customScript($scriptName, $arguments = array()){

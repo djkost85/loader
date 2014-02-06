@@ -16,6 +16,7 @@ $functions = array(
 	'renderImage',
 	'renderPDF',
 	'sendPost',
+	'setReferer',
 );
 
 runTest($functions, 'cPhantomJS_');
@@ -54,4 +55,13 @@ function cPhantomJS_sendPost(){
 	$source = 'http://test1.ru/loader/test/support/post_test.php';
 	$text = $phantomJS->sendPost($source,$post);
 	return preg_match('%test_post%ims', $text);
+}
+
+function cPhantomJS_setReferer(){
+	$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
+	$source = 'http://test1.ru/loader/test/support/referer.php';
+	$referer = 'http://iamreferer.net';
+	$phantomJS->setReferer($referer);
+	$text = $phantomJS->renderText($source);
+	return preg_match('%iamreferer%ims', $text);
 }

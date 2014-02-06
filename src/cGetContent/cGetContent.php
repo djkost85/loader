@@ -26,6 +26,7 @@ class cGetContent {
 	public $cookie;
 	private $_mode;
 	private $_key;
+	private $_referer = 'http://google.com';
 
 	/**
 	 * @param string $mode curl | phantom
@@ -71,6 +72,24 @@ class cGetContent {
 		return $this->_key;
 	}
 
+	/**
+	 * @param string $referer
+	 */
+	public function setReferer($referer) {
+		$this->_referer = $referer;
+		$this->curl->setReferer($this->curl->getDescriptor(), $this->_referer);
+		$this->phantomjs->setReferer($this->_referer);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getReferer() {
+		return $this->_referer;
+	}
+
+
+
 	function __construct(){
 		$this->curl = new cSingleCurl();
 		$this->phantomjs = new cPhantomJS(PHANTOMJS_EXE);
@@ -83,14 +102,16 @@ class cGetContent {
 	public function getContent($url){
 		switch($this->getMode()){
 			case 'curl':
-				return $this->curl->getContent($url);
+				$answer = $this->curl->getContent($url);
 				break;
 			case 'phantom':
-				return $this->phantomjs->renderText($url);
+				$answer = $this->phantomjs->renderText($url);
 				break;
 			default:
 				return false;
 		}
+		$this->setReferer($url);
+		return $answer;
 	}
 
 	public function genKey(){

@@ -15,6 +15,7 @@ $functions = array(
 	'init',
 	'setOption',
 	'setOptions',
+	'setReferer',
 	'getContent',
 	'getHeader',
 	'mimeType',
@@ -101,4 +102,15 @@ function cSingleCurl_prepareContent(){
 	$gc->getContent($url);
 	$encoding2 = \GetContent\cStringWork::getEncodingName($gc->getAnswer());
 	return $encoding1 == $withoutEncoding && $needEncoding == $encoding2;
+}
+
+function cSingleCurl_setReferer(){
+	$url = 'http://test1.ru/loader/test/support/referer.php';
+	$referer = 'http://iamreferer.net';
+	$gc = new cSingleCurl();
+	$descriptor=& $gc->getDescriptor();
+	$gc->setReferer($descriptor, $referer);
+	$gc->getContent($url);
+	$text = $gc->getAnswer();
+	return preg_match('%iamreferer%ims', $text);
 }
