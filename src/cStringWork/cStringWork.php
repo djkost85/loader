@@ -101,7 +101,7 @@ class cStringWork
 			return false;
 		}
 		if (preg_match('%<(?<tag>\w+)\s*[\w-]+=\s*[\"\']?[^\'\"]+[\"\']?[^>]*>%im', $startTag)) {
-			preg_match_all('%(?<parametr>[\w-]+=([\"\']?[^\'\"\s]+[\"\']?|[\"\'][^\'\"]+[\"\']))%im', $startTag, $matches);
+			preg_match_all('%(?<parametr>[\w-]+=([\"\'][^\'\"]*[\"\']|[\"\']?[^\'\"]*[\"\']?))%im', $startTag, $matches);
 			$reg = '%<' . preg_quote($tag["tag"], '%');
 			foreach ($matches['parametr'] as $value) {
 				$reg .= '[^>]*' . preg_quote($value, '%') . '[^>]*';
