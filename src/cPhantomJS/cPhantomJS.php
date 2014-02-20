@@ -414,7 +414,7 @@ class cPhantomJS {
 	}
 
 	private function prepareArgument($argument){
-		return "'" . escapeshellcmd($argument) . "'";
+		return escapeshellarg($argument);
 	}
 
 	private function createScriptName(){
