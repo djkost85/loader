@@ -653,7 +653,7 @@ abstract class cCurl{
 			$this->setEncodingAnswerName(cStringWork::getEncodingName($text));
 			$from = $this->getEncodingAnswerName();
 			if ($from != $to){
-				$text = iconv($from, $to, $text);
+				$text = mb_convert_encoding( $text, $to, $from);
 			}
 		}
 		return $text;
