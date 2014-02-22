@@ -17,6 +17,7 @@ class cStringWork
 	 * @var array
 	 */
 	private $_cryptTagArray;
+	private static $_ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:{1}(?<port>\d{1,10})?)';
 
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
@@ -193,8 +194,14 @@ class cStringWork
 	 * @return bool
 	 */
 	public static function isIp($str) {
-		if (preg_match('%^\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(:{1}\d{1,10})?)\s*$%i', $str)) return true;
-		else return false;
+		return (bool)preg_match('%^' .self::$_ipRegEx. '$%i', $str);
+	}
+
+	public static function getIp($str){
+		if(preg_match_all('%' . self::$_ipRegEx . '%ms', $str, $matches)){
+			return $matches['address'];
+		}
+		return array();
 	}
 
 	/**

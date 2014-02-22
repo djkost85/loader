@@ -133,7 +133,7 @@ class cUpdateProxy extends cProxy {
 		$proxy['content'] = array();
 		foreach (glob($this->getDirSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
 			$tmpProxy = require $fileModule;
-			if (is_array($tmpProxy)) {
+			if (isset($tmpProxy['content'])) {
 				$proxy['content'] = array_merge($proxy['content'], $tmpProxy['content']);
 			}
 		}
@@ -262,14 +262,14 @@ class cUpdateProxy extends cProxy {
 		} else {
 			$this->_curl->setUseProxy(false);
 			$this->_curl->setCountStream(1);
-			$this->_curl->setTypeContent('html');
-			$this->_curl->getContent("http://2ip.ru/");
+			$this->_curl->setTypeContent('text');
+			$this->_curl->getContent("http://bpteam.net/server_ip.php");
 			$answer = $this->_curl->getAnswer();
-			$reg = '%<span>\s*Ваш\s*IP\s*адрес:\s*</span>\s*<big[^>]*>\s*(?<ip>[^<]*)\s*</big>%iUm';
-			if (preg_match($reg, $answer[0], $match) && !isset($match['ip']) || !$match['ip'] || !cStringWork::isIp($match['ip'])){
+			$ip = cStringWork::getIp($answer[0]);
+			if (!$ip){
 				exit('NO SERVER IP');
 			}
-			$this->_serverIp = $match['ip'];
+			$this->_serverIp = $ip;
 		}
 		return $this->_serverIp;
 	}

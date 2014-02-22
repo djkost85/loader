@@ -1,25 +1,26 @@
 <?php
 require_once dirname(__FILE__) . "/../include.php";
+ini_set('default_charset', 'utf-8');
 
 if(isset($_POST['proxy'])){
 	$proxy = new GetContent\cProxy();
 	$proxy->deleteList($_POST['list']);
 	$proxy->createList($_POST['list']);
-	foreach(explode("\n", $_POST['proxy']) as $proxyAddress){
+	foreach(\GetContent\cStringWork::getIp($_POST['proxy']) as $proxyAddress){
 		$proxy->addProxy($proxyAddress);
 	}
-
+	?><p>Список обновлен</p><?
 }
 
 ?>
-<h1>Обновить список прокси</h1>
+<h3>Обновить список прокси</h3>
 <form method="post">
-	<label>
-		<input type="text" name="list" value="auto.ru">
-	</label>
+	<p><label>
+		Имя списка: <input type="text" name="list" value="auto.ru">
+	</label></p>
 	<label>
 		Прокси:
-		<textarea cols="40" rows="5" name="proxy"></textarea>
+		<p><textarea cols="40" rows="5" name="proxy"></textarea></p>
 	</label><br>Новый прокси с новой строки<br>
 <input type="submit" value="Gen">
 </form>

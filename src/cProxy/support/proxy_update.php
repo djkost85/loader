@@ -7,7 +7,7 @@
  * Email: bpteam22@gmail.com
  */
 
-require_once dirname(__FILE__) . "/../include.php";
+require_once dirname(__FILE__)."/../../../include.php";
 
 use GetContent\cUpdateProxy as cUpdateProxy;
 
