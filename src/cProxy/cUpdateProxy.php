@@ -112,7 +112,7 @@ class cUpdateProxy extends cProxy {
 		$this->selectList($this->getDefaultListName());
 		$proxyList = $this->downloadAllSource();
 		$proxyList['content'] = $this->checkProxyArray($proxyList['content']);
-		$this->_list->write('content', $proxyList['content']);
+		$this->_list->write('/', $proxyList['content'], 'content');
 	}
 
 	public function updateList($nameList) {
@@ -189,7 +189,6 @@ class cUpdateProxy extends cProxy {
 		if (is_array($arrayProxy)) {
 			$goodProxy = array();
 			$url = $this->getCheckFunctionUrl() . '?ip=' . $this->getServerIp() . '&proxy=yandex';
-			$this->_curl->setUseProxy(true);
 			$this->_curl->setCountStream(1);
 			$this->_curl->setMinSizeAnswer(5);
 			$this->_curl->setMaxRepeat(0);

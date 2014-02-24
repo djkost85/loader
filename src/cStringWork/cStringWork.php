@@ -17,7 +17,7 @@ class cStringWork
 	 * @var array
 	 */
 	private $_cryptTagArray;
-	private static $_ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:{1}(?<port>\d{1,10})?)';
+	private static $_ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(?<port>\d{1,10})?)';
 
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
