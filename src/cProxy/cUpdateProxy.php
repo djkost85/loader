@@ -71,18 +71,18 @@ class cUpdateProxy extends cProxy {
 
 
 	/**
-	 * @param string     $proxy
-	 * @param string     $answer
-	 * @param string     $source
-	 * @param string     $protocol
-	 * @param null|array $curlInfo
+	 * @param string       $proxy
+	 * @param string       $answer
+	 * @param array        $source
+	 * @param array        $protocol
+	 * @param null|array   $curlInfo
 	 * @return array|bool
 	 */
-	private function genInfo($proxy, $answer, $source = '', $protocol = 'http', $curlInfo = null) {
+	private function genInfo($proxy, $answer, $source = array(), $protocol = array('http'=> true), $curlInfo = null) {
 		if (preg_match('#^[01]{5}#', $answer) && preg_match_all('#(?<fun_status>[01])#U', $answer, $matches)) {
 			$infoProxy['proxy'] = $proxy;
-			$infoProxy['source'][$source] = true;
-			$infoProxy['protocol'][$protocol] = true;
+			$infoProxy['source'] = $source;
+			$infoProxy['protocol'] = $protocol;
 			$infoProxy['anonym'] = (bool)$matches['fun_status'][0];
 			$infoProxy['referer'] = (bool)$matches['fun_status'][1];
 			$infoProxy['post'] = (bool)$matches['fun_status'][2];
@@ -111,6 +111,7 @@ class cUpdateProxy extends cProxy {
 	public function updateDefaultList() {
 		$this->selectList($this->getDefaultListName());
 		$proxyList = $this->downloadAllSource();
+		//$proxyList['content'] = array('182.253.49.125' => array('proxy' => '182.253.49.125:8080'));
 		$proxyList['content'] = $this->checkProxyArray($proxyList['content']);
 		$this->_list->write('/', $proxyList['content'], 'content');
 	}
@@ -206,13 +207,15 @@ class cUpdateProxy extends cProxy {
 					$urlList[] = $url;
 				}
 				foreach ($this->_curl->getContent($urlList) as $key => $answer) {
-					$infoProxy = $this->genInfo($challenger[$key], $answer, $descriptorArray[$key]['info']);
+					$infoProxy = $this->genInfo($challenger[$key]['proxy'], $answer, $challenger[$key]['source'], $challenger[$key]['protocol'], $descriptorArray[$key]['info']);
 					if ($infoProxy) {
 						$goodProxy[] = $infoProxy;
 					}
 				}
 			}
-			if (count($goodProxy)) return $goodProxy;
+			if (count($goodProxy)) {
+				return $goodProxy;
+			}
 		}
 		return false;
 	}
@@ -221,7 +224,6 @@ class cUpdateProxy extends cProxy {
 		if (!is_array($arrayProxy)) return false;
 		$goodProxy = array();
 		$this->_curl->setCountStream(1);
-		$this->_curl->setUseProxy(true);
 		$this->_curl->setTypeContent('text');
 		$this->_curl->setDefaultOption(CURLOPT_POST, false);
 		$this->_curl->setCheckAnswer(false);
@@ -265,10 +267,10 @@ class cUpdateProxy extends cProxy {
 			$this->_curl->getContent("http://bpteam.net/server_ip.php");
 			$answer = $this->_curl->getAnswer();
 			$ip = cStringWork::getIp($answer[0]);
-			if (!$ip){
+			if (!$ip[0]){
 				exit('NO SERVER IP');
 			}
-			$this->_serverIp = $ip;
+			$this->_serverIp = $ip[0];
 		}
 		return $this->_serverIp;
 	}
