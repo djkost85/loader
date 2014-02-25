@@ -19,7 +19,7 @@ $nameSource = "seprox.ru";
 $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $pagenation = 0;
-$content = $curl->getContent($urlSource . $pagenation . ".html");
+$content = $curl->load($urlSource . $pagenation . ".html");
 if (!$content) return array();
 if (preg_match("/<div\s*class=\"countResult\">\s*Всего\s*найдено.\s*(\d+)\s*<\/div>/iUs", $content, $match)) $countPage = ceil($match[1] / 15);
 else return false;
@@ -68,6 +68,6 @@ do {
 	}
 	$pagenation++;
 	sleep(rand(1, 3));
-	if (!$content = $curl->getContent($urlSource . $pagenation . ".html")) continue;
+	if (!$content = $curl->load($urlSource . $pagenation . ".html")) continue;
 } while ($pagenation < $countPage);
 return is_array($proxySeprox) ? $proxySeprox : array();

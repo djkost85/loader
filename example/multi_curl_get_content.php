@@ -13,5 +13,5 @@ use GetContent\cMultiCurl as cMultiCurl;
 
 
 $curl = new cMultiCurl();
-$curl->getContent(array('http://ya.ru', 'http://google.com'));
+$curl->load(array('http://ya.ru', 'http://google.com'));
 var_dump($curl->getAnswer()); // array('page of ya.ru', 'page of google.com')

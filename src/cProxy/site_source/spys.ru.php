@@ -20,7 +20,7 @@ $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $curl->setDefaultOption(CURLOPT_POST, true);
 $curl->setDefaultOption(CURLOPT_POSTFIELDS, 'sto=%CF%EE%EA%E0%E7%E0%F2%FC+200');
-$answerSpys = $curl->getContent($urlSource);
+$answerSpys = $curl->load($urlSource);
 if (!$answerSpys) return array();
 if (!$answerSpys = cStringWork::betweenTag($answerSpys, '<table width="100%" BORDER=0 CELLPADDING=1 CELLSPACING=1>')) return array();
 if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerSpys, $matchesSpys)) return array();

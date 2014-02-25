@@ -57,6 +57,7 @@ abstract class cCurl{
 		CURLOPT_REFERER => 'http://google.com/',
 		CURLOPT_POSTFIELDS => '',
 		CURLOPT_POST => false,
+		CURLOPT_PROXY => false,
 		CURLOPT_FRESH_CONNECT => true,
 		CURLOPT_FORBID_REUSE => true,
 		CURLOPT_AUTOREFERER => true,
@@ -140,11 +141,11 @@ abstract class cCurl{
 		$this->setNumRepeat($this->getNumRepeat() + 1);
 	}
 
-	protected function endRepeat() {
+	public function endRepeat() {
 		$this->setNumRepeat(0);
 	}
 
-	protected function repeat() {
+	public function repeat() {
 		if ($this->getNumRepeat() < $this->getMaxRepeat()) {
 			$this->nextRepeat();
 			return true;
@@ -389,7 +390,7 @@ abstract class cCurl{
 		$this->_cookie->deleteOldCookieFile(86400);
 	}
 
-	public abstract function getContent($url = '', $checkRegEx = '##');
+	public abstract function load($url = '', $checkRegEx = '##');
 
 	protected abstract function init();
 
@@ -398,13 +399,15 @@ abstract class cCurl{
 	protected abstract function close();
 
 	public function setOption(&$descriptor, $option, $value = null){
+		if(!$this->configOption($descriptor, $option, $descriptor['option'][$option])){
+			return false;
+		}
 		if ($value === null){
 			$descriptor['option'][$option] = $this->getDefaultSetting($option);
 		}
 		else{
 			$descriptor['option'][$option] = $value;
 		}
-		$this->configOption($descriptor, $option, $descriptor['option'][$option]);
 	}
 
 	public function setOptions(&$descriptor, $options = array()){
@@ -446,6 +449,7 @@ abstract class cCurl{
 			default:
 				break;
 		}
+		return in_array($option, array_keys($this->getDefaultOptions()));
 	}
 
 	protected function getHeader(&$answer){
@@ -499,7 +503,7 @@ abstract class cCurl{
 	 * @internal в запросах и дополнительо будет приниматься решения больше на посылать заросы на текуший URL
 	 * @internal Пример: Если вернуло ошибку 500, то не повторять запрос
 	 */
-	protected function checkHttpCode($httpCode) {
+	public function checkHttpCode($httpCode) {
 		switch ((int)$httpCode) {
 			case 100:
 				return false;
@@ -647,7 +651,7 @@ abstract class cCurl{
 		return $answer;
 	}
 
-	protected function encodingAnswerText($text) {
+	public function encodingAnswerText($text) {
 		if ($this->getEncodingAnswer()) {
 			$to = $this->getEncodingName();
 			$this->setEncodingAnswerName(cStringWork::getEncodingName($text));

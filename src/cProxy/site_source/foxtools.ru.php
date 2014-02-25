@@ -20,7 +20,7 @@ $tmpArray["source"][$nameSource] = true;
 $tmpArray["protocol"]['http'] = true;
 for ($nom = 1; $nom < 50; $nom++) {
 	$urlPage = $urlSource . $nom;
-	$answerFoxtools = $curl->getContent($urlPage);
+	$answerFoxtools = $curl->load($urlPage);
 	if (!$answerFoxtools) return $proxyFoxtools;
 	$answerFoxtools = cStringWork::betweenTag($answerFoxtools, '<table style="width:100%" id="theProxyList">');
 	if (!preg_match_all('%<td\s*style="[^"]*">(?<ip>\d+.\d+.\d+.\d+)</td>\s*<td\s*style="[^"]*">(?<port>\d+)</td>%imsu', $answerFoxtools, $matchesIp)) break;

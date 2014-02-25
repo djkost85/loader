@@ -206,7 +206,7 @@ class cUpdateProxy extends cProxy {
 					$this->_curl->setOption($descriptor, CURLOPT_PROXY, $challenger[$key]['proxy']);
 					$urlList[] = $url;
 				}
-				foreach ($this->_curl->getContent($urlList) as $key => $answer) {
+				foreach ($this->_curl->load($urlList) as $key => $answer) {
 					$infoProxy = $this->genInfo($challenger[$key]['proxy'], $answer, $challenger[$key]['source'], $challenger[$key]['protocol'], $descriptorArray[$key]['info']);
 					if ($infoProxy) {
 						$goodProxy[] = $infoProxy;
@@ -235,7 +235,7 @@ class cUpdateProxy extends cProxy {
 				$this->_curl->setOption($descriptor, CURLOPT_PROXY, $challenger[$key]['proxy']);
 				$urlList[] = $url;
 			}
-			foreach ($this->_curl->getContent($urlList) as $key => $answer) {
+			foreach ($this->_curl->load($urlList) as $key => $answer) {
 				$testCount = 0;
 				$countGood = 0;
 				foreach ($checkWord as $valueCheckWord) {
@@ -257,22 +257,19 @@ class cUpdateProxy extends cProxy {
 	 * @return string
 	 */
 	public function getServerIp() {
-		if (isset($this->_serverIp)) return $this->_serverIp;
-		if (isset($_SERVER['SERVER_ADDR']) && cStringWork::isIp($_SERVER['SERVER_ADDR'])) {
-			$this->_serverIp = $_SERVER['SERVER_ADDR'];
-		} else {
-			$this->_curl->setUseProxy(false);
-			$this->_curl->setCountStream(1);
-			$this->_curl->setTypeContent('text');
-			$this->_curl->getContent("http://bpteam.net/server_ip.php");
-			$answer = $this->_curl->getAnswer();
-			$ip = cStringWork::getIp($answer[0]);
-			if (!$ip[0]){
-				exit('NO SERVER IP');
-			}
-			$this->_serverIp = $ip[0];
+		if (isset($this->_serverIp)) {
+			return $this->_serverIp;
 		}
-		return $this->_serverIp;
+		$this->_curl->setUseProxy(false);
+		$this->_curl->setCountStream(1);
+		$this->_curl->setTypeContent('text');
+		$this->_curl->load("http://bpteam.net/server_ip.php");
+		$answer = $this->_curl->getAnswer();
+		$ip = cStringWork::getIp($answer[0]);
+		if (!$ip[0]){
+			exit('NO SERVER IP');
+		}
+		return $this->_serverIp = $ip[0];
 	}
 
 	public function setUpdateList($value, $name = false){

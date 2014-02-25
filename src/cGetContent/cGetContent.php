@@ -99,13 +99,31 @@ class cGetContent {
 		$this->setMode('curl');
 	}
 
-	public function getContent($url){
+	public function __coll($name, $arguments){
+		if(method_exists($this->phantomjs, $name)){
+			call_user_func_array(array($this->phantomjs, $name), $arguments);
+		}
+		if(method_exists($this->curl, $name)) {
+			call_user_func_array(array($this->curl, $name), $arguments);
+		}
+	}
+
+	public function getContent($url, $checkRegEx='%%'){
 		switch($this->getMode()){
 			case 'curl':
-				$answer = $this->curl->getContent($url);
+				$answer = $this->curl->load($url, $checkRegEx);
 				break;
 			case 'phantom':
-				$answer = $this->phantomjs->renderText($url);
+				do{
+					$answer = $this->phantomjs->renderText($url);
+					if($this->checkAnswerValid($answer) && preg_match($checkRegEx, $answer)){
+						$answer = $this->encodingAnswerText($answer);
+						$this->endRepeat();
+						break;
+					} else {
+						$answer = false;
+					}
+				}while($this->repeat());
 				break;
 			default:
 				return false;
@@ -128,5 +146,9 @@ class cGetContent {
 		$cookies = $this->cookie->fromFilePhantomJS();
 		$this->cookie->creates($cookies);
 		$this->cookie->toFileCurl($cookies);
+	}
+
+	private function checkAnswerValid($answer){
+		return (strlen($answer) <= $this->curl->getMinSizeAnswer());
 	}
 }

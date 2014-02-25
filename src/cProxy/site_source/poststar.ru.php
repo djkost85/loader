@@ -17,7 +17,7 @@ $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $tmpArray["source"][$nameSource] = true;
 $tmpArray["protocol"]['http'] = true;
-$answerPoststar = $curl->getContent($urlSource);
+$answerPoststar = $curl->load($urlSource);
 if (!$answerPoststar) return array();
 if (!$answerPoststar = cStringWork::betweenTag($answerPoststar, '<table width="730" border="0" align="center">')) {
 	return array();

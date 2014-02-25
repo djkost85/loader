@@ -18,7 +18,7 @@ for($i=1;$i<=10;$i++){
 	$urlSource="http://notan.h1.ru/hack/xwww/proxy".$i.".html";
 	$curl = new cSingleCurl();
 	$curl->setTypeContent("html");
-	$answerNotan = $curl->getContent($urlSource);
+	$answerNotan = $curl->load($urlSource);
 	if(!$answerNotan) return $proxyNotanProxy;
 	if(!preg_match_all('%<TD\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</TD>%ims',$answerNotan,$matchesNotan)) return $proxyNotanProxy;
 	foreach ($matchesNotan['ip'] as $valueNotan) {

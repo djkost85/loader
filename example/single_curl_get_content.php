@@ -12,5 +12,5 @@ use GetContent\cSingleCurl as cSingleCurl;
 
 
 $curl = new cSingleCurl();
-$curl->getContent('http://ya.ru');
+$curl->load('http://ya.ru');
 $answer = $curl->getAnswer(); // page of ya.ru

@@ -17,7 +17,7 @@ $curl = new cSingleCurl();
 $curl->setEncodingAnswer(true);
 $curl->setEncodingName('UTF-8');
 $curl->setTypeContent("html");
-$answerStopinfection = $curl->getContent($urlSource);
+$answerStopinfection = $curl->load($urlSource);
 $proxyStopinfectionProxy = array();
 if (!$answerStopinfection) return array();
 if (!preg_match_all('#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu', $answerStopinfection, $matchesStopinfection)) return array();

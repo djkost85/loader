@@ -20,7 +20,7 @@ $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $proxyHidemyass = array();
 do {
-	$answerHidemyass = $curl->getContent($urlSource);
+	$answerHidemyass = $curl->load($urlSource);
 	if (!$answerHidemyass) return $proxyHidemyass;
 	if (preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxyHtml>.*)</tr>%imsu', $answerHidemyass, $matchesHtml)) {
 		foreach ($matchesHtml['proxyHtml'] as $proxyHtml) {

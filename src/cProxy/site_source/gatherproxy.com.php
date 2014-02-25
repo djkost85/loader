@@ -17,12 +17,12 @@ $curl = new cSingleCurl();
 $curl->setDefaultOption(CURLOPT_REFERER, 'http://gatherproxy.com/subscribe/login');
 $curl->setTypeContent("html");
 $curl->setDefaultOption(CURLOPT_POSTFIELDS, 'Username=zking.nothingz@gmail.com&Password=)VQd$x;7');
-$answerGatherproxy = $curl->getContent($urlSource);
+$answerGatherproxy = $curl->load($urlSource);
 if (!preg_match('%<a\s*href="(?<url>[^"]+)">Download\s*fully\s*\d+\s*proxies</a>%ims', $answerGatherproxy, $match)) {
 	return $proxyGatherproxyProxy;
 }
 $curl->setDefaultOption(CURLOPT_REFERER, 'http://gatherproxy.com/subscribe/infos');
-$answerGatherproxy = $curl->getContent('http://gatherproxy.com' . $match['url']);
+$answerGatherproxy = $curl->load('http://gatherproxy.com' . $match['url']);
 if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerGatherproxy, $matchesGatherproxy)) return array();
 $tmpArray["source"][$nameSource] = true;
 $tmpArray["protocol"]['http'] = true;

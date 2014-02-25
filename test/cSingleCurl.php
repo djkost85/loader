@@ -56,14 +56,14 @@ function cSingleCurl_setOptions(){
 
 function cSingleCurl_getContent(){
 	$gc = new cSingleCurl();
-	$gc->getContent('ya.ru', '%yandex%ims');
+	$gc->load('ya.ru', '%yandex%ims');
 	$answer = $gc->getAnswer();
 	return preg_match('%yandex%ims', $answer);
 }
 
 function cSingleCurl_getHeader(){
 	$gc = new cSingleCurl();
-	$gc->getContent('ya.ru', '%yandex%ims');
+	$gc->load('ya.ru', '%yandex%ims');
 	$descriptor = $gc->getDescriptor();
 	return $descriptor['info']['header'];
 }
@@ -81,10 +81,10 @@ function cSingleCurl_checkAnswerValid() {
 	$gc = new cSingleCurl();
 	$gc->setCheckAnswer(true);
 	$gc->setMinSizeAnswer(1000);
-	$gc->getContent($url);
+	$gc->load($url);
 	$answerTrue = $gc->getAnswer();
 	$gc->setMinSizeAnswer(strlen($answerTrue) + 100000);
-	$gc->getContent($url);
+	$gc->load($url);
 	$answerFalse = $gc->getAnswer();
 	return $answerTrue && !(bool)$answerFalse;
 }
@@ -95,11 +95,11 @@ function cSingleCurl_prepareContent(){
 	$needEncoding = 'UTF-8';
 	$gc = new cSingleCurl();
 	$gc->setEncodingAnswer(false);
-	$gc->getContent($url);
+	$gc->load($url);
 	$encoding1 = \GetContent\cStringWork::getEncodingName($gc->getAnswer());
 	$gc->setEncodingAnswer(true);
 	$gc->setEncodingName($needEncoding);
-	$gc->getContent($url);
+	$gc->load($url);
 	$encoding2 = \GetContent\cStringWork::getEncodingName($gc->getAnswer());
 	return $encoding1 == $withoutEncoding && $needEncoding == $encoding2;
 }
@@ -110,7 +110,7 @@ function cSingleCurl_setReferer(){
 	$gc = new cSingleCurl();
 	$descriptor=& $gc->getDescriptor();
 	$gc->setReferer($descriptor, $referer);
-	$gc->getContent($url);
+	$gc->load($url);
 	$text = $gc->getAnswer();
 	return preg_match('%iamreferer%ims', $text);
 }

@@ -81,7 +81,7 @@ class cSingleCurl extends cCurl{
 		if (!$this->getSaveOption()) unset($descriptor['option']);
 	}
 
-	public function getContent($url = '', $checkRegEx = '%%'){
+	public function load($url = '', $checkRegEx = '%%'){
 		$descriptor =& $this->getDescriptor();
 		do {
 			if ($this->getNumRepeat() > 0) $this->reinit();
@@ -93,7 +93,7 @@ class cSingleCurl extends cCurl{
 			if($this->isRedirect()){
 				if($this->useRedirect()){
 					$this->setReferer($descriptor, $url);
-					$answer = $this->getContent($descriptor['info']['redirect_url']);
+					$answer = $this->load($descriptor['info']['redirect_url']);
 				} else {
 					break;
 				}

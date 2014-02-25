@@ -33,7 +33,7 @@ $curl->setDefaultOption(CURLOPT_REFERER, 'http://2freeproxy.com/anonymous-proxy.
 $curl->setDefaultOption(CURLOPT_USERAGENT, 'Mozilla/5.0 (Windows NT 6.1; rv:21.0) Gecko/20100101 Firefox/21.0');
 $curl->setDefaultOption(CURLOPT_POST, true);
 $curl->setDefaultOption(CURLOPT_POSTFIELDS, 'type=anonymous');
-$answerTwofreeproxy = $curl->getContent($urlSource);
+$answerTwofreeproxy = $curl->load($urlSource);
 $tmpProxyArray = array();
 if ($answerTwofreeproxy) {
 	$tmpJsonProxy = json_decode($answerTwofreeproxy, true);
@@ -56,7 +56,7 @@ $curl->setDefaultOption(CURLOPT_HTTPHEADER, $httpHead);
 $curl->setDefaultOption(CURLOPT_REFERER, 'http://2freeproxy.com/elite-proxy.html');
 $curl->setDefaultOption(CURLOPT_POST, true);
 $curl->setDefaultOption(CURLOPT_POSTFIELDS, 'type=elite');
-$answerTwofreeproxy = $curl->getContent($urlSource);
+$answerTwofreeproxy = $curl->load($urlSource);
 $tmpProxyArray2 = array();
 if ($answerTwofreeproxy) {
 	$tmpJsonProxy = json_decode($answerTwofreeproxy, true);

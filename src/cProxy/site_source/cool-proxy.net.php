@@ -17,7 +17,7 @@ $nameSource = "cool-proxy.net";
 $curl = new cSingleCurl();
 $curl->setTypeContent("html");
 $i = 1;
-if (!$content = $curl->getContent($urlSource . $i . "/sort:working_average/direction:asc")) return array();
+if (!$content = $curl->load($urlSource . $i . "/sort:working_average/direction:asc")) return array();
 if (preg_match_all('#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<pagenation>\d*)"#iUm', $content, $matches)) {
 	$countPage = max($matches['pagenation']);
 } else return array();
@@ -36,7 +36,7 @@ do {
 	}
 	$i++;
 	sleep(rand(1, 3));
-	$content = $curl->getContent($urlSource . $i . "/sort:working_average/direction:asc");
+	$content = $curl->load($urlSource . $i . "/sort:working_average/direction:asc");
 } while ($i <= $countPage);
 unset($urlSource, $nameSource, $curl, $content, $countProxy);
 return is_array($proxyCoolProxy) ? $proxyCoolProxy : array();

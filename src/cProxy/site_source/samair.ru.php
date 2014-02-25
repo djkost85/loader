@@ -20,10 +20,10 @@ $proxySamair = array();
 $tmpArray["source"][$nameSource] = true;
 $tmpArray["protocol"]['http'] = true;
 do {
-	$answerSamair = $curl->getContent($urlSource);
+	$answerSamair = $curl->load($urlSource);
 	if (!$answerSamair) return $proxySamair;
 	if (!preg_match('%<script\s*src="(?<jsFile>/js/\d+.js)"\s*type="text/javascript"></script>%imsu', $answerSamair, $jsFile)) break;
-	$answerJs = $curl->getContent('http://www.samair.ru' . $jsFile);
+	$answerJs = $curl->load('http://www.samair.ru' . $jsFile);
 	if (!preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxyHtml>.*)</tr>%imsu', $answerSamair, $matchesHtml)) break;
 	foreach ($matchesHtml['proxyHtml'] as $proxyHtml) {
 		if (cStringWork::isIp($proxyAddress)) {
