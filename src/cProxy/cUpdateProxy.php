@@ -79,7 +79,7 @@ class cUpdateProxy extends cProxy {
 	 * @return array|bool
 	 */
 	private function genInfo($proxy, $answer, $source = array(), $protocol = array('http'=> true), $curlInfo = null) {
-		if (preg_match('#^[01]{5}#', $answer) && preg_match_all('#(?<fun_status>[01])#U', $answer, $matches)) {
+		if (preg_match('#^[01]{5}#', $answer) && preg_match_all('#^(?<fun_status>[01]){5}#U', $answer, $matches)) {
 			$infoProxy['proxy'] = $proxy;
 			$infoProxy['source'] = $source;
 			$infoProxy['protocol'] = $protocol;
@@ -111,9 +111,9 @@ class cUpdateProxy extends cProxy {
 	public function updateDefaultList() {
 		$this->selectList($this->getDefaultListName());
 		$proxyList = $this->downloadAllSource();
-		//$proxyList['content'] = array('182.253.49.125' => array('proxy' => '182.253.49.125:8080'));
 		$proxyList['content'] = $this->checkProxyArray($proxyList['content']);
 		$this->_list->write('/', $proxyList['content'], 'content');
+		$this->_list->update();
 	}
 
 	public function updateList($nameList) {
@@ -198,7 +198,7 @@ class cUpdateProxy extends cProxy {
 			$this->_curl->setDefaultOption(CURLOPT_POSTFIELDS, "proxy=yandex");
 			$this->_curl->setTypeContent('text');
 			$this->_curl->setCheckAnswer(false);
-			foreach (array_chunk($arrayProxy, 100) as $challenger) {
+			foreach (array_chunk($arrayProxy, 300) as $challenger) {
 				$this->_curl->setCountCurl(count($challenger));
 				$urlList = array();
 				$descriptorArray =& $this->_curl->getDescriptorArray();

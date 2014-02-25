@@ -21,6 +21,6 @@ if(isset($_POST['proxy'])){
 	<label>
 		Прокси:
 		<p><textarea cols="40" rows="5" name="proxy"></textarea></p>
-	</label><br>Новый прокси с новой строки<br>
+	</label><br>
 <input type="submit" value="Gen">
 </form>
