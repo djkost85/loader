@@ -50,6 +50,7 @@ abstract class cCurl{
 	public $userAgent;
 	public $descriptor;
 	public $defaultOptions = array(
+		CURLOPT_URL => '',
 		CURLOPT_HEADER => true,
 		CURLOPT_TIMEOUT => 10,
 		CURLOPT_RETURNTRANSFER => true,
@@ -399,7 +400,7 @@ abstract class cCurl{
 	protected abstract function close();
 
 	public function setOption(&$descriptor, $option, $value = null){
-		if(!$this->configOption($descriptor, $option, $descriptor['option'][$option])){
+		if(!in_array($option, array_keys($this->getDefaultOptions()))){
 			return false;
 		}
 		if ($value === null){
@@ -408,6 +409,7 @@ abstract class cCurl{
 		else{
 			$descriptor['option'][$option] = $value;
 		}
+		$this->configOption($descriptor, $option, $descriptor['option'][$option]);
 	}
 
 	public function setOptions(&$descriptor, $options = array()){
@@ -449,7 +451,6 @@ abstract class cCurl{
 			default:
 				break;
 		}
-		return in_array($option, array_keys($this->getDefaultOptions()));
 	}
 
 	protected function getHeader(&$answer){

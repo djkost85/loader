@@ -71,10 +71,10 @@ class cMultiCurl extends cCurl{
 		if (is_array($descriptorArray) && count($descriptorArray) > $this->getCountDescriptor()) {
 			$descriptorArray = array_slice($descriptorArray, 0, $this->getCountDescriptor());
 		}
-		for ($i = 0; $i < $this->getCountDescriptor(); $i++) {
-			if (!isset($descriptorArray[$i]['descriptor_key'])) $descriptorArray[$i]['descriptor_key'] = microtime(1) . mt_rand();
-			$descriptorArray[$i]['descriptor'] = curl_init();
-			curl_multi_add_handle($descriptor['descriptor'], $descriptorArray[$i]['descriptor']);
+		foreach ($descriptorArray as &$subDescriptor) {
+			if (!isset($subDescriptor['descriptor_key'])) $subDescriptor['descriptor_key'] = microtime(1) . mt_rand();
+			$subDescriptor['descriptor'] = curl_init();
+			curl_multi_add_handle($descriptor['descriptor'], $subDescriptor['descriptor']);
 		}
 	}
 
@@ -105,6 +105,13 @@ class cMultiCurl extends cCurl{
 				}
 			}
 			curl_multi_close($descriptor['descriptor']);
+		}
+	}
+
+	public function genNewKeyStream(){
+		$descriptorArray =& $this->getDescriptorArray();
+		foreach ($descriptorArray as &$subDescriptor) {
+			$subDescriptor['descriptor_key'] = microtime(1) . mt_rand();
 		}
 	}
 

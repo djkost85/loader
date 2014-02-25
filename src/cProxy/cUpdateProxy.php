@@ -79,7 +79,7 @@ class cUpdateProxy extends cProxy {
 	 * @return array|bool
 	 */
 	private function genInfo($proxy, $answer, $source = array(), $protocol = array('http'=> true), $curlInfo = null) {
-		if (preg_match('#^[01]{5}#', $answer) && preg_match_all('#^(?<fun_status>[01]){5}#U', $answer, $matches)) {
+		if (preg_match('%^[01]{5}%', $answer) && preg_match_all('%(?<fun_status>[01]){5}%U', $answer, $matches)) {
 			$infoProxy['proxy'] = $proxy;
 			$infoProxy['source'] = $source;
 			$infoProxy['protocol'] = $protocol;
@@ -198,7 +198,7 @@ class cUpdateProxy extends cProxy {
 			$this->_curl->setDefaultOption(CURLOPT_POSTFIELDS, "proxy=yandex");
 			$this->_curl->setTypeContent('text');
 			$this->_curl->setCheckAnswer(false);
-			foreach (array_chunk($arrayProxy, 300) as $challenger) {
+			foreach (array_chunk($arrayProxy, 150) as $challenger) {
 				$this->_curl->setCountCurl(count($challenger));
 				$urlList = array();
 				$descriptorArray =& $this->_curl->getDescriptorArray();
@@ -212,6 +212,7 @@ class cUpdateProxy extends cProxy {
 						$goodProxy[] = $infoProxy;
 					}
 				}
+				$this->_curl->genNewKeyStream();
 			}
 			if (count($goodProxy)) {
 				return $goodProxy;
