@@ -346,7 +346,7 @@ abstract class cCurl{
 	}
 
 	private function setOptionCookie(&$descriptor){
-		$this->_cookie->setName($descriptor['descriptor_key']);
+		$this->_cookie->open($descriptor['descriptor_key']);
 		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
 		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
 	}
