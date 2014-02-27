@@ -79,7 +79,7 @@ class cUpdateProxy extends cProxy {
 	 * @return array|bool
 	 */
 	private function genInfo($proxy, $answer, $source = array(), $protocol = array('http'=> true), $curlInfo = null) {
-		if (preg_match('%^[01]{5}%', $answer) && preg_match_all('%(?<fun_status>[01]){5}%U', $answer, $matches)) {
+		if (preg_match('%^[01]{5}%', $answer) && preg_match_all('%(?<fun_status>[01])%', $answer, $matches)) {
 			$infoProxy['proxy'] = $proxy;
 			$infoProxy['source'] = $source;
 			$infoProxy['protocol'] = $protocol;
@@ -192,6 +192,7 @@ class cUpdateProxy extends cProxy {
 			$url = $this->getCheckFunctionUrl() . '?ip=' . $this->getServerIp() . '&proxy=yandex';
 			$this->_curl->setCountStream(1);
 			$this->_curl->setMinSizeAnswer(5);
+			$this->_curl->setDefaultOption(CURLOPT_TIMEOUT, 30);
 			$this->_curl->setMaxRepeat(0);
 			$this->_curl->setDefaultOption(CURLOPT_REFERER, "proxy-check.net");
 			$this->_curl->setDefaultOption(CURLOPT_POST, true);

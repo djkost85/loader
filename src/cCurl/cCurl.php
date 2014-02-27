@@ -64,6 +64,8 @@ abstract class cCurl{
 		CURLOPT_AUTOREFERER => true,
 		CURLOPT_SSL_VERIFYHOST => false,
 		CURLOPT_SSL_VERIFYPEER => false,
+		CURLOPT_COOKIEJAR => false,
+		CURLOPT_COOKIEFILE => false,
 	);
 
 	protected function setAnswer($newAnswer){
@@ -657,7 +659,7 @@ abstract class cCurl{
 			$to = $this->getEncodingName();
 			$this->setEncodingAnswerName(cStringWork::getEncodingName($text));
 			$from = $this->getEncodingAnswerName();
-			if ($from != $to){
+			if (!preg_match('%'.preg_quote($from,'%').'%i',$to)){
 				$text = mb_convert_encoding( $text, $to, $from);
 			}
 		}

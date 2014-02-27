@@ -99,12 +99,12 @@ class cGetContent {
 		$this->setMode('curl');
 	}
 
-	public function __coll($name, $arguments){
+	public function __call($name, $arguments){
 		if(method_exists($this->phantomjs, $name)){
-			call_user_func_array(array($this->phantomjs, $name), $arguments);
+			return call_user_func_array(array($this->phantomjs, $name), $arguments);
 		}
 		if(method_exists($this->curl, $name)) {
-			call_user_func_array(array($this->curl, $name), $arguments);
+			return call_user_func_array(array($this->curl, $name), $arguments);
 		}
 	}
 
@@ -149,6 +149,6 @@ class cGetContent {
 	}
 
 	private function checkAnswerValid($answer){
-		return (strlen($answer) <= $this->curl->getMinSizeAnswer());
+		return (strlen($answer) >= $this->curl->getMinSizeAnswer());
 	}
 }

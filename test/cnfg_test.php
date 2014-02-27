@@ -26,7 +26,7 @@ function runTest($functions, $prefix = ''){
 			echo "<td> success </td>";
 		} else {
 			echo "<td> <b> ERROR </b> </td>";
-			break;
+			//break;
 		}
 		$funTime = microtime(true) - $funStart;
 		echo " <td> $funTime </td>";
