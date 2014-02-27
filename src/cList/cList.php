@@ -206,6 +206,11 @@ class cList {
 		}
 	}
 
+	public function getNextRecord($levelName){
+		$level =& $this->getLevel($levelName);
+		return next($level);
+	}
+
 	public function push($levelName, $data){
 		$level =& $this->getLevel($levelName);
 		if(is_array($level)){

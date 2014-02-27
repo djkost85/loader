@@ -11,7 +11,7 @@ require_once dirname(__FILE__) . "/../../../include.php";
 use GetContent\cProxy AS cProxy;
 ?>
 <form method="post">
-	<input type="text" name="list_name" value="<?=isset($_POST['list_name'])?$_POST['list_name']:''?>"><br/>
+	<input type="text" name="list_name" value="<?=isset($_POST['list_name'])?$_POST['list_name']:''?>"> List name<br/>
 <?
 if(isset($_POST['list_name'])){
 	$proxy = new cProxy();

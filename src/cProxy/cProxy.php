@@ -215,7 +215,7 @@ class cProxy {
 	}
 
 	public function getProxy($key = false, $url = false){
-		$proxy = $this->_list->getRandom('content');
+		$proxy = $this->_list->getNextRecord('content');
 		return is_array($proxy) ? $proxy : false;
 	}
 

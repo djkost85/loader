@@ -228,6 +228,7 @@ class cUpdateProxy extends cProxy {
 		$this->_curl->setCountStream(1);
 		$this->_curl->setTypeContent('text');
 		$this->_curl->setDefaultOption(CURLOPT_POST, false);
+		$this->_curl->setDefaultOption(CURLOPT_TIMEOUT, 30);
 		$this->_curl->setCheckAnswer(false);
 		foreach (array_chunk($arrayProxy, 100) as $challenger) {
 			$this->_curl->setCountCurl(count($challenger));
