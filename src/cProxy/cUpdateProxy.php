@@ -132,12 +132,27 @@ class cUpdateProxy extends cProxy {
 
 	public function downloadAllSource() {
 		$proxy['content'] = array();
-		foreach (glob($this->getDirSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
-			$tmpProxy = require $fileModule;
-			if (isset($tmpProxy['content'])) {
-				$proxy['content'] = array_merge($proxy['content'], $tmpProxy['content']);
-			}
+		$tmpProxy = array();
+		/**
+		 * @var $threads \Thread[]
+		 */
+		$threads = array();
+		foreach ($this->getAllSourceName() as $key => $sourceName) {
+			$threads[$key] = new \Thread(array($this, 'downloadSource'));
+			$tmpProxy[$key] = $threads[$key]->start($sourceName);
 		}
+		do{
+			$continue = false;
+			foreach($threads as &$thread){
+				if($thread->isAlive()){
+					$continue = true;
+				}
+			}
+		}while($continue);
+		foreach($tmpProxy as $proxyList){
+			$proxy['content'] = array_merge($proxy['content'], $proxyList['content']);
+		}
+
 		return $proxy;
 	}
 

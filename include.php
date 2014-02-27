@@ -8,6 +8,8 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 require_once dirname(__FILE__) . "/cnfg.php";
+require_once dirname(__FILE__) . "/vendor/include.php";
+
 require_once dirname(__FILE__) . "/src/cFile/cFile.php";
 require_once dirname(__FILE__) . "/src/cList/cList.php";
 require_once dirname(__FILE__) . "/src/cCookie/cCookie.php";
