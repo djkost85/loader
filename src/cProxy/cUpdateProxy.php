@@ -148,6 +148,7 @@ class cUpdateProxy extends cProxy {
 					$continue = true;
 				}
 			}
+			sleep(1);
 		}while($continue);
 		foreach($tmpProxy as $proxyList){
 			$proxy['content'] = array_merge($proxy['content'], $proxyList['content']);

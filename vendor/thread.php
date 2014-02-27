@@ -103,7 +103,8 @@ class Thread {
 	 * @return boolean
 	 */
 	public static function runnableOk( $_runnable ) {
-		return ( function_exists( $_runnable ) && is_callable( $_runnable ) );
+		return true;
+		//return ( function_exists( $_runnable ) && is_callable( $_runnable ) );
 	}
 
 	/**
@@ -133,7 +134,7 @@ class Thread {
 	 * @return mixed
 	 */
 	public function start() {
-		$pid = @ pcntl_fork();
+		$pid =  pcntl_fork();
 		if( $pid == -1 ) {
 			throw new Exception( $this->getError( Thread::COULD_NOT_FORK ), Thread::COULD_NOT_FORK );
 		}
