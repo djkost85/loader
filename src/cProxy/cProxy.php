@@ -177,7 +177,7 @@ class cProxy {
 		$this->_list->update();
 	}
 
-	protected function getAllNameList() {
+	public function getAllNameList() {
 		$fileList = glob($this->getDirList() . DIRECTORY_SEPARATOR . "*.proxy");
 		$proxyListArray = array();
 		foreach ($fileList as $value) {

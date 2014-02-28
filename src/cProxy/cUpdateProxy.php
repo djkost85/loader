@@ -126,7 +126,7 @@ class cUpdateProxy extends cProxy {
 		$proxyList = $this->getList();
 		$proxyList['content'] = $this->getProxyByFunction($allProxy['content'], $proxyList['function']);
 		$proxyList['content'] = $this->checkProxyArrayToSite($proxyList['content'], $proxyList['url'], $proxyList['check_word']);
-		$this->_list->write('content', $proxyList['content']);
+		$this->_list->write('/', $proxyList['content'], 'content');
 		$this->_list->update();
 	}
 

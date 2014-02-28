@@ -16,9 +16,12 @@ echo date('[H:i:s Y/m/d]', $start);
 $proxy= new cUpdateProxy('http://free-lance.dyndns.info/proxy_check.php');
 $proxy->updateAllList(true);
 $end = time();
-$proxy->selectList($proxy->getDefaultListName());
-$list = $proxy->getList();
-$count = count($list['content']);
+$text = "\n";
+foreach($proxy->getAllNameList() as $nameList){
+	$proxy->selectList($nameList);
+	$list = $proxy->getList();
+	$text .= "$nameList " . count($list['content']) . "\n";
+}
 echo date('[H:i:s Y/m/d]', $end);
-echo $echo = $time = "~".round(($end-$start)/60)." m  count $count";
-mail("bpteam22@gmail.com", "ALERT update proxy $time", $echo);
+echo $echo = $time = round(($end-$start)/60)." m  $text";
+mail("zking.nothingz@gmail.com", "update proxy $time", $echo);
