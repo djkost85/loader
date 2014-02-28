@@ -197,7 +197,7 @@ class cList {
 		return array_key_exists($levelName, $level);
 	}
 
-	public function &getRandom($levelName){
+	public function &getRandomRecord($levelName){
 		$level =& $this->getLevel($levelName);
 		if(is_array($level)){
 			return $level[array_rand($level,1)];
@@ -208,7 +208,11 @@ class cList {
 
 	public function getNextRecord($levelName){
 		$level =& $this->getLevel($levelName);
-		return next($level);
+		$data = next($level);
+		if($data === false){
+			$data = reset($level);
+		}
+		return $data;
 	}
 
 	public function push($levelName, $data){

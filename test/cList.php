@@ -102,7 +102,7 @@ function cList_getRandom(){
 	$testData = array(array(1,2,3,4,5,6,7,8),'test');
 	$list = new cList();
 	$list->open(FILE_NAME);
-	return in_array($list->getRandom($levelName), $testData) !== false ? true : false;
+	return in_array($list->getRandomRecord($levelName), $testData) !== false ? true : false;
 
 }
 
