@@ -390,7 +390,7 @@ abstract class cCurl{
 	}
 
 	function __destruct(){
-		$this->_cookie->deleteOldCookieFile(86400);
+		$this->_cookie->deleteOldCookieFile(3600);
 	}
 
 	public abstract function load($url = '', $checkRegEx = '##');

@@ -1,4 +1,4 @@
-
+https://github.com/bpteam/loader-curl-phantomjs-proxy
 
 php >= 5.3
 
