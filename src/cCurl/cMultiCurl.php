@@ -149,9 +149,11 @@ class cMultiCurl extends cCurl{
 				else $regAnswer = false;
 				if ((!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
 					unset($url[$urlDescriptors[$key]]);
+					$descriptorArray[$key]['info']['good_answer'] = true;
 					$goodAnswer[$keyGoodAnswer] = $this->prepareContent($value);
 				} else{
 					$value = false;
+					$descriptorArray[$key]['info']['good_answer'] = false;
 					if ($this->getUseProxy() && is_object($this->proxy)) {
 						$this->proxy->deleteInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
 					}
