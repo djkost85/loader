@@ -448,7 +448,9 @@ abstract class cCurl{
 				if (!preg_match("%^(http|https)://%iUm", $descriptor['option'][$option])) $descriptor['option'][$option] = "http://" . $value;
 				break;
 			case CURLOPT_PROXY:
-				$this->_useProxy = true;
+				if(cStringWork::isIp($value)){
+					$this->_useProxy = true;
+				}
 				break;
 			default:
 				break;
