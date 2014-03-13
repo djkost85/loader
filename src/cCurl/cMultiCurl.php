@@ -130,9 +130,9 @@ class cMultiCurl extends cCurl{
 			$urlDescriptors = array();
 			foreach ($url as $keyUrl => $valueUrl) {
 				for ($i = 0; $i < $countMultiStream; $i++) {
-					$urlDescriptors[$j] = $keyUrl;
-					if (isset($descriptorArray[$j]['descriptor'])) {
-						$this->setOption($descriptorArray[$j], CURLOPT_URL, $valueUrl);
+					$urlDescriptors[$keyUrl][] = $j;
+					if (isset($descriptorArray[$keyUrl]['descriptor'])) {
+						$this->setOption($descriptorArray[$keyUrl], CURLOPT_URL, $valueUrl);
 					}
 					$j++;
 				}
@@ -149,6 +149,7 @@ class cMultiCurl extends cCurl{
 				else $regAnswer = false;
 				if ((!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
 					unset($url[$urlDescriptors[$key]]);
+					$this->clearUselessUrl($url, $key);
 					$descriptorArray[$key]['info']['good_answer'] = true;
 					$goodAnswer[$keyGoodAnswer] = $this->prepareContent($value);
 				} else{
@@ -165,16 +166,18 @@ class cMultiCurl extends cCurl{
 			}
 		} while ($this->repeat());
 		$completeAnswer = array();
-		$j = 0;
 		foreach ($copyUrl as $keyUrl => $valueUrl) {
 			for ($i = 0; $i < $countMultiStream; $i++) {
-				if (isset($goodAnswer[$j])) $completeAnswer[$keyUrl][$i] = $goodAnswer[$j];
-				$j++;
+				if (isset($goodAnswer[$keyUrl])) $completeAnswer[$keyUrl][$i] = $goodAnswer[$keyUrl];
 			}
 		}
 		$this->setAnswer($completeAnswer);
 		$this->reinit();
 		return $this->getAnswer();
+	}
+
+	private function clearUselessUrl($url,$key){
+
 	}
 
 	public function getAnswer($getAllAnswer = false){
