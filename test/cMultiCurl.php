@@ -36,6 +36,8 @@ function cMultiCurl_getContent(){
 		'ya.ru'
 	);
 	$gc = new cMultiCurl();
+	$gc->setCountStream(5);
+	$gc->setMaxRepeat(5);
 	$gc->load($url);
 	$answer = $gc->getAnswer();
 	return preg_match('%vk\.me%ims', $answer[0]) && preg_match('%yandex%ims', $answer[1]);

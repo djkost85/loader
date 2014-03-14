@@ -119,20 +119,20 @@ class cMultiCurl extends cCurl{
 		if(is_string($url)){
 			$url = array($url);
 		}
-		$copyUrl = $url;
+		$this->_url = array_values($url);
 		$goodAnswer = array();
+		$countMultiStream = $this->getCountStream();
 		do {
 			if ($this->getNumRepeat() > 0) $this->reinit();
-			$this->setCountCurl(count($url));
+			$this->setCountCurl(count($this->_url));
 			$descriptorArray =& $this->getDescriptorArray();
-			$countMultiStream = $this->getCountStream();
 			$j = 0;
-			$urlDescriptors = array();
-			foreach ($url as $keyUrl => $valueUrl) {
+			$urlDescriptorsLink = array();
+			foreach ($this->_url as $keyUrl => $valueUrl) {
 				for ($i = 0; $i < $countMultiStream; $i++) {
-					$urlDescriptors[$keyUrl][] = $j;
-					if (isset($descriptorArray[$keyUrl]['descriptor'])) {
-						$this->setOption($descriptorArray[$keyUrl], CURLOPT_URL, $valueUrl);
+					$urlDescriptorsLink[$keyUrl][] = $j;
+					if (isset($descriptorArray[$j]['descriptor'])) {
+						$this->setOption($descriptorArray[$j], CURLOPT_URL, $valueUrl);
 					}
 					$j++;
 				}
@@ -144,40 +144,38 @@ class cMultiCurl extends cCurl{
 			foreach ($answer as $key => &$value) {
 				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
 				$descriptorArray[$key]['info']['header'] = $this->getHeader($value);
-				$keyGoodAnswer = ($urlDescriptors[$key] * $countMultiStream) + $key % $countMultiStream;
 				if ($checkRegEx && preg_match($checkRegEx, $value)) $regAnswer = true;
 				else $regAnswer = false;
 				if ((!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
-					unset($url[$urlDescriptors[$key]]);
-					$this->clearUselessUrl($url, $key);
+					$linkKey = $this->getLinkKey($urlDescriptorsLink, $key);
+					unset($this->_url[$linkKey]);
 					$descriptorArray[$key]['info']['good_answer'] = true;
-					$goodAnswer[$keyGoodAnswer] = $this->prepareContent($value);
+					$goodAnswer[$linkKey][] = $this->prepareContent($value);
 				} else{
-					$value = false;
 					$descriptorArray[$key]['info']['good_answer'] = false;
 					if ($this->getUseProxy() && is_object($this->proxy)) {
 						$this->proxy->deleteInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
 					}
 				}
 			}
-			if (!$url) {
+			if (!$this->_url) {
 				$this->endRepeat();
 				break;
 			}
 		} while ($this->repeat());
-		$completeAnswer = array();
-		foreach ($copyUrl as $keyUrl => $valueUrl) {
-			for ($i = 0; $i < $countMultiStream; $i++) {
-				if (isset($goodAnswer[$keyUrl])) $completeAnswer[$keyUrl][$i] = $goodAnswer[$keyUrl];
-			}
-		}
-		$this->setAnswer($completeAnswer);
+		$this->_url = $url;
+		$this->setAnswer($goodAnswer);
 		$this->reinit();
 		return $this->getAnswer();
 	}
 
-	private function clearUselessUrl($url,$key){
-
+	private function getLinkKey($links, $key){
+		foreach($links as $linkKey => $linkValue){
+			if(in_array($key,$linkValue)){
+				return $linkKey;
+			}
+		}
+		return false;
 	}
 
 	public function getAnswer($getAllAnswer = false){

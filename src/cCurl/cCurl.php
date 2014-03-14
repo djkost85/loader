@@ -401,7 +401,7 @@ abstract class cCurl{
 
 	protected abstract function close();
 
-	public function setOption(&$descriptor, $option, $value = null){
+	public final function setOption(&$descriptor, $option, $value = null){
 		if(!in_array($option, array_keys($this->getDefaultOptions()))){
 			return false;
 		}
@@ -414,7 +414,7 @@ abstract class cCurl{
 		$this->configOption($descriptor, $option, $descriptor['option'][$option]);
 	}
 
-	public function setOptions(&$descriptor, $options = array()){
+	public final function setOptions(&$descriptor, $options = array()){
 		foreach ($this->defaultOptions as $keySetting => $value) {
 			if (isset($options[$keySetting])){
 				$this->setOption($descriptor, $keySetting, $options[$keySetting]);
