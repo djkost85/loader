@@ -97,7 +97,7 @@ class cStringWork
 	 * @param bool   $withoutTag возвращать с тегом или без
 	 * @return string
 	 */
-	public static function betweenTag($text, $startTag = '<div class="xxx">', $withoutTag = true) {
+	public static function betweenTag($text, $startTag = '<div class="xxx">', $withoutTag = true, $encoding="UTF-8") {
 		if (!preg_match('%<(?<tag>\w+)[^>]*>%im', $startTag, $tag)){
 			return false;
 		}
@@ -119,13 +119,14 @@ class cStringWork
 		$tagName = $tag['tag'];
 		$openTag = "<" . $tagName;
 		$closeTag = "</" . $tagName;
-		$text = mb_substr($text, strpos($text, $startTag));
+		$startPos = mb_strpos($text, $startTag, 0,$encoding);
+		$text = mb_substr($text, $startPos, -1,$encoding);
 		$countOpenTag = 0;
 		$posEnd = 0;
 		$countTag = 2 * preg_match_all('%' . preg_quote($openTag, '%') . '%ims', $text, $matches);
 		for ($i = 0; $i < $countTag; $i++) {
-			$posOpenTag = mb_strpos($text, $openTag, $posEnd);
-			$posCloseTag = mb_strpos($text, $closeTag, $posEnd);
+			$posOpenTag = mb_strpos($text, $openTag, $posEnd,$encoding);
+			$posCloseTag = mb_strpos($text, $closeTag, $posEnd,$encoding);
 			if ($posOpenTag === false) {
 				$posOpenTag = $posCloseTag + 1;
 			}
@@ -140,7 +141,7 @@ class cStringWork
 				break;
 			}
 		}
-		return $withoutTag ? mb_substr($text, mb_strlen($startTag), $posEnd - strlen($startTag) - 1) : mb_substr($text, 0, $posEnd + mb_strlen($tagName) + 2);
+		return $withoutTag ? mb_substr($text, mb_strlen($startTag,$encoding), $posEnd - mb_strlen($startTag,$encoding) - 1) : mb_substr($text, 0, $posEnd + mb_strlen($tagName,$encoding) + 2,$encoding);
 	}
 
 	/**
