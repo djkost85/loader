@@ -23,6 +23,7 @@ abstract class cCurl{
 	protected $_encodingName = 'utf-8';
 	protected $_encodingAnswerName;
 	protected $_saveOption = false;
+	protected $_sleepTime = 0;
 	/**
 	 * Тип получаемых данных
 	 * @var mixed
@@ -67,6 +68,21 @@ abstract class cCurl{
 		CURLOPT_COOKIEJAR => false,
 		CURLOPT_COOKIEFILE => false,
 	);
+
+	/**
+	 * @param int $sleepTime
+	 */
+	public function setSleepTime($sleepTime) {
+		$this->_sleepTime = $sleepTime;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getSleepTime() {
+		return $this->_sleepTime;
+	}
+
 
 	protected function setAnswer($newAnswer){
 		$this->_answer = $newAnswer;
@@ -400,6 +416,12 @@ abstract class cCurl{
 	protected abstract function exec();
 
 	protected abstract function close();
+
+	protected final function sleep(){
+		if($this->getSleepTime()){
+			usleep($this->getSleepTime());
+		}
+	}
 
 	public final function setOption(&$descriptor, $option, $value = null){
 		if(!in_array($option, array_keys($this->getDefaultOptions()))){

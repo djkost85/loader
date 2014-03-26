@@ -84,6 +84,7 @@ class cSingleCurl extends cCurl{
 	public function load($url = '', $checkRegEx = '%%'){
 		$descriptor =& $this->getDescriptor();
 		do {
+			$this->sleep();
 			if ($this->getNumRepeat() > 0) $this->reinit();
 			$this->setOption($descriptor, CURLOPT_URL, $url);
 			$this->setOptions($descriptor);

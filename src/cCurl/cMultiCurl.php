@@ -123,6 +123,7 @@ class cMultiCurl extends cCurl{
 		$goodAnswer = array();
 		$countMultiStream = $this->getCountStream();
 		do {
+			$this->sleep();
 			if ($this->getNumRepeat() > 0) $this->reinit();
 			$this->setCountCurl(count($this->_url));
 			$descriptorArray =& $this->getDescriptorArray();
