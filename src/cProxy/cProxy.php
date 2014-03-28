@@ -158,7 +158,6 @@ class cProxy {
 		$this->setListOption('country', $country);
 		$this->setListOption('need_update', $needUpdate);
 		$this->_list->write($this->_list->getMainLevelName(), array(), 'content');
-		$this->_list->update();
 	}
 
 	public function deleteList($name = false){
