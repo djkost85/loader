@@ -67,6 +67,7 @@ abstract class cCurl{
 		CURLOPT_SSL_VERIFYPEER => false,
 		CURLOPT_COOKIEJAR => false,
 		CURLOPT_COOKIEFILE => false,
+		CURLOPT_HTTPHEADER => '',
 	);
 
 	/**

@@ -92,9 +92,10 @@ class cStringWork
 
 	/**
 	 * Парсит html страницу и вытаскивает содержимое тега
-	 * @param string $text        текст в котором ищет
+	 * @param string $text       текст в котором ищет
 	 * @param string $startTag   открывающий тег
 	 * @param bool   $withoutTag возвращать с тегом или без
+	 * @param string $encoding
 	 * @return string
 	 */
 	public static function betweenTag($text, $startTag = '<div class="xxx">', $withoutTag = true, $encoding="UTF-8") {
