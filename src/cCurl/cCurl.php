@@ -71,10 +71,10 @@ abstract class cCurl{
 	);
 
 	/**
-	 * @param int $sleepTime
+	 * @param int $millisecond 0.001 of second
 	 */
-	public function setSleepTime($sleepTime) {
-		$this->_sleepTime = $sleepTime;
+	public function setSleepTime($millisecond) {
+		$this->_sleepTime = $millisecond;
 	}
 
 	/**
