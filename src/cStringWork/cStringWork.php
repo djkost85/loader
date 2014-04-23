@@ -45,7 +45,7 @@ class cStringWork
 	/**
 	 * Стирание спец. символов, двойных и более пробелов, табуляций и переводов строки
 	 * @param string $text
-	 * @param array  $repTextArray массив регулярных выражений для выполнения
+	 * @param array  $repTextArray массив регулярных выражений для замены на пробел
 	 * @return string
 	 */
 	public static function clearNote($text = "", $repTextArray = array('%\s+%')) {
