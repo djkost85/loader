@@ -97,7 +97,7 @@ class cUpdateProxy extends cProxy {
 			$infoProxy['download_speed'] = isset($curlInfo['speed_download']) ? $curlInfo['speed_download'] : false;
 			return $infoProxy;
 		} else {
-			return false;
+			return array();
 		}
 	}
 
@@ -219,11 +219,11 @@ class cUpdateProxy extends cProxy {
 				return $goodProxy;
 			}
 		}
-		return false;
+		return array();
 	}
 
 	private function checkProxyArrayToSite($arrayProxy, $url, $checkWord) {
-		if (!is_array($arrayProxy)) return false;
+		if (!is_array($arrayProxy)) return array();
 		$goodProxy = array();
 		$this->_curl->setCountStream(1);
 		$this->_curl->setTypeContent('text');
@@ -252,7 +252,7 @@ class cUpdateProxy extends cProxy {
 				}
 			}
 		}
-		return count($goodProxy) ? $goodProxy : false;
+		return count($goodProxy) ? $goodProxy : array();
 	}
 
 	/**
