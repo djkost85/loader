@@ -26,7 +26,9 @@ if(isset($_POST['list_name'])){
 				$functions[] = $function;
 			}
 		}
-		$proxy->setListOption('country', explode("\n",$_POST['country']));
+		if($_POST['country']){
+			$proxy->setListOption('country', explode("\n",$_POST['country']));
+		}
 		$proxy->setListOption('function', $functions);
 		$proxy->setListOption('need_update', isset($_POST['need_update']));
 	}
