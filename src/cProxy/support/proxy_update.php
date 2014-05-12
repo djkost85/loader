@@ -13,7 +13,7 @@ use GetContent\cUpdateProxy as cUpdateProxy;
 
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
-$proxy= new cUpdateProxy('http://free-lance.dyndns.info/proxy_check.php');
+$proxy= new cUpdateProxy('http://66.225.221.237/proxy_check.php');
 $proxy->updateAllList(true);
 $end = time();
 $text = "\n";
