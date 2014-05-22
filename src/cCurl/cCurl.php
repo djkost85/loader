@@ -68,6 +68,7 @@ abstract class cCurl{
 		CURLOPT_COOKIEJAR => false,
 		CURLOPT_COOKIEFILE => false,
 		CURLOPT_HTTPHEADER => array(),
+		CURLOPT_PORT => 80,
 	);
 
 	/**

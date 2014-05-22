@@ -114,3 +114,11 @@ function cSingleCurl_setReferer(){
 	$text = $gc->getAnswer();
 	return preg_match('%iamreferer%ims', $text);
 }
+
+function cSingleCurl_usePort(){
+	$gc = new cSingleCurl();
+	$gc->setDefaultOption(CURLOPT_PORT, 112);
+	$gc->load('hamstersgangsters.com', '%380632359213%ims');
+	$answer = $gc->getAnswer();
+	return preg_match('%380632359213%ims', $answer);
+}
