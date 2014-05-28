@@ -60,11 +60,12 @@ class cUpdateProxy extends cProxy {
 	}
 
 
-	function __construct($checkUrl = 'http://test1.ru/proxy_check.php'){
+	function __construct($checkUrl = 'http://test1.ru/proxy_check.php', $port = 80){
 		parent::__construct();
 		$this->_curl = new cMultiCurl();
 		$this->_curl->setTypeContent('text');
 		$this->_curl->setEncodingAnswer(false);
+		$this->_curl->setDefaultOption(CURLOPT_PORT, $port);
 		$this->setDirSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
 		$this->setCheckFunctionUrl($checkUrl);
 	}
