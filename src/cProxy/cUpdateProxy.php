@@ -17,6 +17,7 @@ class cUpdateProxy extends cProxy {
 	private $_serverIp;
 	private $_checkFunctionUrl;
 	private $_dirSource;
+	private $_urlCheckServerIp;
 	private $_archiveProxyFile = 'archive';
 	/**
 	 * @var cMultiCurl
@@ -59,15 +60,31 @@ class cUpdateProxy extends cProxy {
 		return $name;
 	}
 
+	/**
+	 * @param string $urlCheckServerIp
+	 */
+	public function setUrlCheckServerIp($urlCheckServerIp) {
+		$this->_urlCheckServerIp = $urlCheckServerIp;
+	}
 
-	function __construct($checkUrl = 'http://test1.ru/proxy_check.php', $port = 80){
+	/**
+	 * @return string
+	 */
+	public function getUrlCheckServerIp() {
+		return $this->_urlCheckServerIp;
+	}
+
+
+	function __construct($checkUrl = 'http://test1.ru/proxy_check.php', $port = 80, $serverIp = '', $urlCheckServerIp = 'http://bpteam.net/server_ip.php'){
 		parent::__construct();
 		$this->_curl = new cMultiCurl();
+		$this->setUrlCheckServerIp($urlCheckServerIp);
 		$this->_curl->setTypeContent('text');
 		$this->_curl->setEncodingAnswer(false);
 		$this->_curl->setDefaultOption(CURLOPT_PORT, $port);
 		$this->setDirSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
 		$this->setCheckFunctionUrl($checkUrl);
+		$this->setServerIp($serverIp);
 	}
 
 
@@ -257,23 +274,26 @@ class cUpdateProxy extends cProxy {
 	}
 
 	/**
-	 * Переделать или делать запрос на другой сервис
 	 * @return string
 	 */
 	public function getServerIp() {
-		if (isset($this->_serverIp)) {
-			return $this->_serverIp;
+		return $this->_serverIp;
+	}
+
+	/**
+	 * Переделать или делать запрос на другой сервис
+	 * @param $ip
+	 * @return void
+	 */
+	public function setServerIp($ip) {
+		if (!$ip) {
+			$answer = file_get_contents($this->getUrlCheckServerIp());
+			$ip = cStringWork::getIp($answer);
+			if (!$ip[0]) exit('NO SERVER IP');
+			$this->setServerIp($ip[0]);
+		} else {
+			$this->_serverIp = $ip;
 		}
-		$this->_curl->setUseProxy(false);
-		$this->_curl->setCountStream(1);
-		$this->_curl->setTypeContent('text');
-		$this->_curl->load("http://bpteam.net/server_ip.php");
-		$answer = $this->_curl->getAnswer();
-		$ip = cStringWork::getIp($answer[0]);
-		if (!$ip[0]){
-			exit('NO SERVER IP');
-		}
-		return $this->_serverIp = $ip[0];
 	}
 
 	public function setUpdateList($value, $name = false){
