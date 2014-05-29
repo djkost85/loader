@@ -182,12 +182,15 @@ class cStringWork
 
 	/**
 	 * @param string $url исходный адрес
+	 * @param int    $level
 	 * @return bool|string
 	 */
-	public static function getDomainName($url) {
-		$partUrl = cStringWork::parseUrl($url);
-		preg_match('#(?<domain>[^\.]+.\w+)($|/)#ims', isset($partUrl['host']) ? $partUrl['host'] : $url, $match);
-		return $match['domain'];
+	public static function getDomainName($url, $level = 2) {
+		$partUrl = self::parseUrl($url);
+		$levelRegEx = array();
+		for($i = 0; $i < $level; $i++) $levelRegEx[] = '[^\.]+';
+		$fullDomain = isset($partUrl['host']) ? $partUrl['host'] : $partUrl['path'];
+		return preg_match('%(?<domain>' . implode('\.', $levelRegEx) . ')($|/|\s)%ims', $fullDomain, $match) ? $match['domain'] : false;
 	}
 
 	/**
