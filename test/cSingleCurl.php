@@ -38,7 +38,7 @@ function cSingleCurl_setOption(){
 	$gc->setOption($descriptor, CURLOPT_TIMEOUT, 5);
 	$check1 = $descriptor['option'][CURLOPT_TIMEOUT] == 5;
 	$gc->setOption($descriptor, CURLOPT_TIMEOUT);
-	$check2 = $descriptor['option'][CURLOPT_TIMEOUT] == $gc->getDefaultSetting(CURLOPT_TIMEOUT);
+	$check2 = $descriptor['option'][CURLOPT_TIMEOUT] == $gc->getDefaultOption(CURLOPT_TIMEOUT);
 	return $check1 && $check2;
 }
 

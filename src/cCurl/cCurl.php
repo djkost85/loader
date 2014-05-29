@@ -140,7 +140,7 @@ abstract class cCurl{
 		return $this->defaultOptions;
 	}
 
-	public function getDefaultSetting($option) {
+	public function getDefaultOption($option) {
 		return $this->defaultOptions[$option];
 	}
 
@@ -430,7 +430,7 @@ abstract class cCurl{
 			return false;
 		}
 		if ($value === null){
-			$descriptor['option'][$option] = $this->getDefaultSetting($option);
+			$descriptor['option'][$option] = $this->getDefaultOption($option);
 		}
 		else{
 			$descriptor['option'][$option] = $value;
