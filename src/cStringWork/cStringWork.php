@@ -142,7 +142,14 @@ class cStringWork
 				break;
 			}
 		}
-		return $withoutTag ? mb_substr($text, mb_strlen($startTag,$encoding), $posEnd - mb_strlen($startTag,$encoding) - 1) : mb_substr($text, 0, $posEnd + mb_strlen($tagName,$encoding) + 2,$encoding);
+		if($withoutTag){
+		$start = mb_strlen($startTag,$encoding);
+		$length = $posEnd - mb_strlen($startTag,$encoding) - 1;
+		} else {
+			$start = 0;
+			$length = $posEnd + mb_strlen($tagName,$encoding) + 2;
+		}
+		return mb_substr($text, $start, $length, $encoding);
 	}
 
 	/**

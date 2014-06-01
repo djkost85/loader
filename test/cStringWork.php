@@ -37,9 +37,13 @@ function cStringWork_encryptDecryptTag(){
 }
 
 function cStringWork_betweenTag(){
-	$text = '<p>test</p><div>I am test <div class="test">Hi<div> you are cool</div></div>:)</div>';
+	$text = '<p>test</p><div>I am test <div class="test">Hi<div> you are cool
+	Проверка UTF8</div></div>:)</div>';
 	$inTag = cStringWork::betweenTag($text, '<div class="test">');
-	return $inTag == 'Hi<div> you are cool</div>';
+	$whithTag = cStringWork::betweenTag($text, '<div class="test">', false);
+	return $inTag == 'Hi<div> you are cool
+	Проверка UTF8</div>' && $whithTag == '<div class="test">Hi<div> you are cool
+	Проверка UTF8</div></div>';
 }
 
 function cStringWork_translitCyrillicToLatin(){
