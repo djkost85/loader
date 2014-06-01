@@ -57,8 +57,8 @@ abstract class cCurl{
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => false,
 		CURLOPT_REFERER => 'http://google.com/',
-		CURLOPT_POSTFIELDS => '',
 		CURLOPT_POST => false,
+		CURLOPT_POSTFIELDS => '',
 		CURLOPT_PROXY => false,
 		CURLOPT_FRESH_CONNECT => true,
 		CURLOPT_FORBID_REUSE => true,
@@ -459,6 +459,7 @@ abstract class cCurl{
 		switch ($option) {
 			case CURLOPT_POST:
 				if ($value != NULL) $descriptor['option'][$option] = (bool)$value;
+				if(!$descriptor['option'][$option] && $descriptor['option'][CURLOPT_POSTFIELDS]) $this->setOption($descriptor, CURLOPT_POSTFIELDS, '');
 				break;
 			case CURLOPT_POSTFIELDS:
 				if (!$value) {
