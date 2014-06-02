@@ -153,7 +153,7 @@ class cStringWork
 	}
 
 	/**
-	 * Аналог встроеной функции parse_url но с дополнительным разбитием на масив параметры query и fragment
+	 * Аналог встроеной функции parse_url + pathinfo но с дополнительным разбитием на масив параметры query и fragment и path
 	 * @param $url
 	 * @return array
 	 * scheme Протокол
@@ -166,7 +166,7 @@ class cStringWork
 	 * query массив GET запроса [Имя переменной]=Значение
 	 * fragment массив ссылок на HTML якоря [Имя якоря]=Значение
 	 */
-	public static function parseUrl($url) {
+	public static function parsePath($url) {
 		$partUrl = parse_url($url);
 		if (isset($partUrl['query'])) {
 			$arrayQuery = explode("&", $partUrl['query']);
@@ -184,7 +184,18 @@ class cStringWork
 				$partUrl['fragment'][$partFragment[0]] = (isset($partFragment[1]) ? $partFragment[1] : '');
 			}
 		}
+		if(isset($partUrl['path'])){
+			$partPath = pathinfo($partUrl['path']);
+			$partUrl['dirname'] = $partPath['dirname'];
+			$partUrl['basename'] = $partPath['basename'];
+			$partUrl['extension'] = $partPath['extension'];
+			$partUrl['filename'] = isset($partPath['filename']) ? $partPath['filename'] : '';
+		}
 		return $partUrl;
+	}
+
+	public static function parseUrl($url){
+		return self::parsePath($url);
 	}
 
 	/**
@@ -193,7 +204,7 @@ class cStringWork
 	 * @return bool|string
 	 */
 	public static function getDomainName($url, $level = 2) {
-		$partUrl = self::parseUrl($url);
+		$partUrl = self::parsePath($url);
 		$levelRegEx = array();
 		for($i = 0; $i < $level; $i++) $levelRegEx[] = '[^\.]+';
 		$fullDomain = isset($partUrl['host']) ? $partUrl['host'] : $partUrl['path'];
