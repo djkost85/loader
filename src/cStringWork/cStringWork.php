@@ -192,9 +192,9 @@ class cStringWork
 		}
 		if(isset($partUrl['path'])){
 			$partPath = pathinfo($partUrl['path']);
-			$partUrl['dirname'] = $partPath['dirname'];
-			$partUrl['basename'] = $partPath['basename'];
-			$partUrl['extension'] = $partPath['extension'];
+			$partUrl['dirname'] = isset($partPath['dirname'])?$partPath['dirname']:'';
+			$partUrl['basename'] = isset($partPath['basename'])?$partPath['basename']:'';
+			$partUrl['extension'] = isset($partPath['extension'])?$partPath['extension']:'';
 			$partUrl['filename'] = isset($partPath['filename']) ? $partPath['filename'] : '';
 		}
 		return $partUrl;
