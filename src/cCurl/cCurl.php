@@ -458,8 +458,12 @@ abstract class cCurl{
 	protected function configOption(&$descriptor, $option, $value){
 		switch ($option) {
 			case CURLOPT_POST:
-				if ($value != NULL) $descriptor['option'][$option] = (bool)$value;
-				if(!$descriptor['option'][$option] && $descriptor['option'][CURLOPT_POSTFIELDS]) $this->setOption($descriptor, CURLOPT_POSTFIELDS, '');
+				if ($value != NULL) {
+					$descriptor['option'][$option] = (bool)$value;
+				}
+				if(!$descriptor['option'][$option] && isset($descriptor['option'][CURLOPT_POSTFIELDS])) {
+					unset($descriptor['option'][CURLOPT_POSTFIELDS]);
+				}
 				break;
 			case CURLOPT_POSTFIELDS:
 				if (!$value) {
