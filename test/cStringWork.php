@@ -18,6 +18,7 @@ $functions = array(
 	'encryptDecryptTag',
 	'betweenTag',
 	'translitCyrillicToLatin',
+	'clearNote',
 );
 
 runTest($functions, 'cStringWork_');
@@ -50,4 +51,11 @@ function cStringWork_translitCyrillicToLatin(){
 	$text = 'Генадий выпил водки и занялся йогой. Вот алкаш!';
 	$translitText = cStringWork::translitCyrillicToLatin($text);
 	return $translitText == 'Genadij vypil vodki i zanyalsya jogoj. Vot alkash!';
+}
+
+function cStringWork_clearNote(){
+	$text = '<h1>Hello Мир!!!     			 фывпфывап asdfsd agjas;dgl
+	Как<h1> tak!';
+	$trueText = ' Hello Мир!!! фывпфывап asdfsd agjas;dgl Как tak!';
+	return $trueText == cStringWork::clearNote( $text, array('%<[^>]+>%ims', '%\s+%',));
 }
