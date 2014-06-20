@@ -208,7 +208,7 @@ class cList {
 
 	public function getNextRecord($levelName){
 		$level =& $this->getLevel($levelName);
-		$data = next($level);
+		$data = $level?next($level):null;
 		if($data === false){
 			$data = reset($level);
 		}
