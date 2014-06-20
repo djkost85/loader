@@ -106,7 +106,7 @@ class cSingleCurl extends cCurl{
 				break;
 			} else {
 				$answer = false;
-				if ($this->getUseProxy() && is_object($this->proxy)) {
+				if ($this->getUseProxy() && is_object($this->proxy) && isset($descriptor['option'][CURLOPT_PROXY])) {
 					$this->proxy->deleteInList($descriptor['option'][CURLOPT_PROXY]);
 				}
 			}

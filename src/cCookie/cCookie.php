@@ -227,9 +227,11 @@ class cCookie {
 	public function deleteOldCookieFile($storageTime = 172800){
 		$fileList = glob($this->getDir() . "/*.cookie");
 		foreach ($fileList as $value) {
-			$fileInfo = stat($value);
-			if ($fileInfo['ctime'] < time() - $storageTime){
-				unlink($value);
+			if(file_exists($value)){
+				$fileInfo = stat($value);
+				if ($fileInfo['ctime'] < time() - $storageTime){
+					unlink($value);
+				}
 			}
 		}
 	}
