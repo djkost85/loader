@@ -10,7 +10,7 @@
 require_once dirname(__FILE__)."/../../../include.php";
 
 use GetContent\cUpdateProxy as cUpdateProxy;
-
+register_shutdown_function('sendMessage');
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
 $proxy= new cUpdateProxy('http://track.hamstersgangsters.com/proxy_check.php', 8888);
@@ -28,4 +28,7 @@ foreach($proxy->getAllNameList() as $nameList){
 echo date('[H:i:s Y/m/d]', $end);
 $time = round(($end-$start)/60);
 echo $echo = $time." m  $text";
-mail("zking.nothingz@gmail.com", "update proxy $time m $subject", $echo);
+function sendMessage(){
+	global $echo;
+	mail("zking.nothingz@gmail.com", "update proxy", $echo);
+}
