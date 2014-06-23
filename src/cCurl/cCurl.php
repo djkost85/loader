@@ -13,6 +13,8 @@ namespace GetContent;
 
 abstract class cCurl{
 
+	protected $_scheme = 'http';
+	protected $_schemeDefaultPort = array('http' => 80, 'https' => 443);
 	protected $_url;
 	protected $_answer;
 	protected $_referer = 'http://google.com/';
@@ -475,6 +477,10 @@ abstract class cCurl{
 				break;
 			case CURLOPT_URL:
 				if (!preg_match("%^(http|https)://%iUm", $descriptor['option'][$option])) $descriptor['option'][$option] = "http://" . $value;
+				$urlInfo = cStringWork::parseUrl($descriptor['option'][$option]);
+				if($urlInfo['scheme'] != $this->_scheme){
+					$this->setScheme($urlInfo['scheme']);
+				}
 				break;
 			case CURLOPT_PROXY:
 				if(cStringWork::isIp($value)){
@@ -667,6 +673,13 @@ abstract class cCurl{
 				false;
 		}
 		return false;
+	}
+
+	protected function setScheme($schemeName){
+		$this->_scheme = $schemeName;
+		if(isset($this->_schemeDefaultPort[$schemeName])){
+			$this->setDefaultOption(CURLOPT_PORT, $this->_schemeDefaultPort[$schemeName]);
+		}
 	}
 
 	protected function prepareContent($answer) {
