@@ -90,6 +90,7 @@ class cSingleCurl extends cCurl{
 			$this->setOptions($descriptor);
 			$answer = $this->exec();
 			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
+			$descriptor['info']['error'] = curl_error($descriptor['descriptor']);
 			$descriptor['info']['header'] = $this->getHeader($answer);
 			if($this->isRedirect()){
 				if($this->useRedirect()){

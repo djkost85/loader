@@ -144,6 +144,7 @@ class cMultiCurl extends cCurl{
 			$answer = $this->exec();
 			foreach ($answer as $key => &$value) {
 				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
+				$descriptorArray[$key]['info']['error'] = curl_error($descriptorArray[$key]['descriptor']);
 				$descriptorArray[$key]['info']['header'] = $this->getHeader($value);
 				if ($checkRegEx && preg_match($checkRegEx, $value)) $regAnswer = true;
 				else $regAnswer = false;
