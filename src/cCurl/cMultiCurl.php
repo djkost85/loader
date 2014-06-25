@@ -18,6 +18,7 @@ class cMultiCurl extends cCurl{
 	private $_countDescriptor;
 	private $_countStream = 1;
 	private $_countCurl = 1;
+	private $_waitExecMSec = 1000;
 
 	public function &getDescriptorArray() {
 		return $this->descriptorArray;
@@ -57,6 +58,22 @@ class cMultiCurl extends cCurl{
 		return $this->_countDescriptor;
 	}
 
+	/**
+	 * @param int $waitExecMSec
+	 */
+	public function setWaitExecMSec($waitExecMSec) {
+		$this->_waitExecMSec = $waitExecMSec;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getWaitExecMSec() {
+		return $this->_waitExecMSec;
+	}
+
+
+
 	function __construct(){
 		$this->defaultOptions[CURLOPT_FOLLOWLOCATION] = true;
 		$this->defaultOptions[CURLOPT_MAXREDIRS] = 10;
@@ -83,7 +100,7 @@ class cMultiCurl extends cCurl{
 		$descriptorArray =& $this->getDescriptorArray();
 		do {
 			curl_multi_exec($descriptor['descriptor'], $running);
-			usleep(10);
+			usleep($this->getWaitExecMSec());
 		} while ($running > 0);
 		$answer = array();
 		foreach ($descriptorArray as $key => $value){
