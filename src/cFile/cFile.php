@@ -33,6 +33,27 @@ class cFile {
 	private $_waitFree = false;
 
 	/**
+	 * @var bool Блокировать файл или нет
+	 */
+	private $_lockAccess = false;
+
+	/**
+	 * @param boolean $lockAccess
+	 */
+	public function setLockAccess($lockAccess) {
+		$this->_lockAccess = $lockAccess;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getLockAccess() {
+		return $this->_lockAccess;
+	}
+
+
+
+	/**
 	 * @param string $currentPath
 	 */
 	public function setCurrentPath($currentPath) {
@@ -90,7 +111,7 @@ class cFile {
 	}
 
 	private function access($function){
-		if($this->getOwn()){
+		if($this->getOwn() || !$this->getLockAccess()){
 			$res = $function(func_get_arg(1), func_get_arg(2));
 		} elseif($this->lock()){
 			$res = $function(func_get_arg(1), func_get_arg(2));
