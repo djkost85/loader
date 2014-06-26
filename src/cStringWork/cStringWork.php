@@ -179,7 +179,7 @@ class cStringWork
 			unset($partUrl['query']);
 			foreach ($arrayQuery as $value) {
 				$partQuery = explode("=", $value);
-				$partUrl['query'][$partQuery[0]] = $partQuery[1];
+				$partUrl['query'][$partQuery[0]] = (isset($partQuery[1])?$partQuery[1]:'');
 			}
 		}
 		if (isset($partUrl['fragment'])) {
