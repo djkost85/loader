@@ -206,6 +206,15 @@ class cList {
 		}
 	}
 
+	public function shuffleList($levelName){
+		$level =& $this->getLevel($levelName);
+		if(is_array($level)){
+			return shuffle($level);
+		} else {
+			return false;
+		}
+	}
+
 	public function getNextRecord($levelName){
 		$level =& $this->getLevel($levelName);
 		$data = $level?next($level):null;
