@@ -20,14 +20,6 @@ class cProxy {
 	protected $_nameList;
 	protected $_defaultNameList = 'all';
 	protected $_deleteProxy = false;
-	protected $_listFunction = array(
-		'anonym',
-		'referer',
-		'post',
-		'get',
-		'cookie',
-		'country',
-	);
 	protected $_proxyFunction = array(
 		'anonym',
 		'referer',
@@ -121,10 +113,6 @@ class cProxy {
 		return $this->_list->getLevel($this->_list->getMainLevelName());
 	}
 
-	public function getListFunction(){
-		return $this->_listFunction;
-	}
-
 	function __construct(){
 		$this->setNameList($this->getDefaultListName());
 		$this->_list = new cList();
@@ -146,16 +134,14 @@ class cProxy {
 	 * @param string $checkUrl  Проверочный URL
 	 * @param array  $checkWord Проверочные регулярные выражения
 	 * @param array  $function  Перечень поддерживаемых функций
-	 * @param array  $country   Страны ip адреса
 	 * @param bool   $needUpdate
 	 */
-	public function createList($name, $checkUrl = "http://ya.ru", $checkWord = array("#yandex#iUm"), $function = array(), $country = array(), $needUpdate = false) {
+	public function createList($name, $checkUrl = "http://ya.ru", $checkWord = array("#yandex#iUm"), $function = array(), $needUpdate = false) {
 		$this->setNameList($name);
 		$this->_list->open($this->getListFileName());
 		$this->setListOption('url', $checkUrl);
 		$this->setListOption('check_word', $checkWord);
 		$this->setListOption('function', $function);
-		$this->setListOption('country', $country);
 		$this->setListOption('need_update', $needUpdate);
 		$this->setListOption('content', array());
 	}

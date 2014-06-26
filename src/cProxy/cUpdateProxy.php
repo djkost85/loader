@@ -174,34 +174,48 @@ class cUpdateProxy extends cProxy {
 		}
 		$goodProxy = array();
 		foreach ($proxyList as $challenger) {
-			$approach = false;
-			if (count($function)) {
-				foreach ($function as $nameFunction => $valueFunction) {
-					if (in_array($nameFunction, $this->_proxyFunction) && $challenger[$nameFunction] >= $valueFunction) {
-						if ($nameFunction == 'country') {
-							if ($valueFunction === $challenger[$nameFunction]) {
-								$approach = true;
-							} else {
-								$approach = false;
-								break;
-							}
-						} else {
-							$approach = true;
-						}
-					} else {
-						$approach = false;
-						break;
-					}
-				}
-			} else {
-				$approach = true;
-			}
-			if ($approach) {
+			if($this->checkProxyFunctions($challenger, $function)){
 				$goodProxy[] = $challenger;
 			}
 		}
 		if (count($goodProxy)) return $goodProxy;
 		return false;
+	}
+
+	protected function checkProxyFunctions($proxyFunctions, $needFunctions){
+		foreach($needFunctions as $name => $value){
+			switch(true){
+				case in_array( $name, array('anonym','referer','post','get','cookie')):
+					if($proxyFunctions[$name] != $value){
+						return false;
+					}
+					break;
+				case in_array($name, array('starttransfer')):
+					if($proxyFunctions[$name] >= $value){
+						return false;
+					}
+					break;
+				case in_array( $name, array('country')):
+					if($value){
+						if((is_array($value) && !in_array( $proxyFunctions[$name], $value))
+						|| (is_string($value) && $proxyFunctions[$name] != $value)){
+							return false;
+						}
+					}
+					break;
+				case in_array( $name, array('last_check', 'upload_speed', 'download_speed')):
+					if($proxyFunctions[$name] <= $value){
+						return false;
+					}
+					break;
+				case in_array( $name, array('source', 'protocol')):
+					if(!array_key_exists( $value, $proxyFunctions[$name])){
+						return false;
+					}
+					break;
+			}
+		}
+		return true;
 	}
 
 	private function checkProxyArray($arrayProxy) {

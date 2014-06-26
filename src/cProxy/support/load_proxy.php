@@ -14,21 +14,12 @@ $proxy = new cUpdateProxy();
 $name = 'all';
 $proxy->selectList($name);
 $list = $proxy->getList();
-$functionList = array(
-	'cookie',
-	'get',
-	'post',
-	'post',
-	'referer',
-	'anonym',
-	'country'
-);
 if(isset($_GET['filter'])){
 	$function = array();
-	foreach($functionList as $functionName){
-		if(isset($_GET[$functionName]) && $_GET[$functionName]) $function[$functionName] = $_GET[$functionName];
+	foreach($proxy->getProxyFunction() as $functionName){
+		if(isset($_GET[$functionName])) $function[$functionName] = $_GET[$functionName];
 	}
-	$proxyList = $proxy->getProxyByFunction($list['content'],$function);
+	$proxyList = $proxy->getProxyByFunction( $list['content'], $function);
 	foreach($proxyList as $ipProxy){
 		$data[] = $ipProxy['proxy'];
 	}
