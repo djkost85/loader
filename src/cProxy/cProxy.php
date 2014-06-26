@@ -157,7 +157,7 @@ class cProxy {
 		$this->setListOption('function', $function);
 		$this->setListOption('country', $country);
 		$this->setListOption('need_update', $needUpdate);
-		$this->_list->write($this->_list->getMainLevelName(), array(), 'content');
+		$this->setListOption('content', array());
 	}
 
 	public function deleteList($name = false){
@@ -216,6 +216,10 @@ class cProxy {
 	public function getProxy($key = false, $url = false){
 		$proxy = $this->_list->getNextRecord('content');
 		return is_array($proxy) ? $proxy : false;
+	}
+
+	public function shuffleProxyList(){
+		return $this->_list->shuffleList('content');
 	}
 
 	public function loadProxy($url){
