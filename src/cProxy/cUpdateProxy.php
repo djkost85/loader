@@ -191,7 +191,7 @@ class cUpdateProxy extends cProxy {
 					}
 					break;
 				case in_array($name, array('starttransfer')):
-					if($proxyFunctions[$name] >= $value){
+					if($proxyFunctions[$name] > $value){
 						return false;
 					}
 					break;
@@ -204,7 +204,7 @@ class cUpdateProxy extends cProxy {
 					}
 					break;
 				case in_array( $name, array('last_check', 'upload_speed', 'download_speed')):
-					if($proxyFunctions[$name] <= $value){
+					if($proxyFunctions[$name] < $value){
 						return false;
 					}
 					break;
