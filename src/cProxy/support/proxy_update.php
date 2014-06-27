@@ -27,8 +27,8 @@ foreach($proxy->getAllNameList() as $nameList){
 }
 echo date('[H:i:s Y/m/d]', $end);
 $time = round(($end-$start)/60);
-echo $echo = $time." m  $text";
+echo $text = $time." m  $text";
 function sendMessage(){
-	global $echo;
-	mail("zking.nothingz@gmail.com", "update proxy", $echo);
+	global $text;
+	mail("zking.nothingz@gmail.com", "update proxy", $text);
 }
