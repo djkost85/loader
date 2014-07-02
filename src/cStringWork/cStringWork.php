@@ -44,17 +44,18 @@ class cStringWork
 
 	/**
 	 * Стирание спец. символов, двойных и более пробелов, табуляций и переводов строки
-	 * @param string $text
-	 * @param array|string  $repTextArray массив регулярных выражений для замены на пробел
+	 * @param string       $text
+	 * @param array|string $repRegExArray массив регулярных выражений для замены на пробел
+	 * @param string       $repText
 	 * @return string
 	 */
-	public static function clearNote($text = "", $repTextArray = array('%\s+%')) {
-		if (is_string($repTextArray)) {
-			$text = preg_replace($repTextArray, " ", $text);
+	public static function clearNote($text = "", $repRegExArray = array('%\s+%'), $repText = " ") {
+		if (is_string($repRegExArray)) {
+			$text = preg_replace($repRegExArray, $repText, $text);
 		}
-		elseif (is_array($repTextArray)) {
-			foreach ($repTextArray as $value) {
-				$text = preg_replace($value, " ", $text);
+		elseif (is_array($repRegExArray)) {
+			foreach ($repRegExArray as $value) {
+				$text = preg_replace($value, $repText, $text);
 			}
 		}
 		return $text;
