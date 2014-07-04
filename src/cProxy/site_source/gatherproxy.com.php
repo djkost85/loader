@@ -9,11 +9,13 @@
  */
 
 use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://gatherproxy.com/subscribe/login";
 $nameSource = "gatherproxy.com";
 $proxyGatherproxyProxy = array();
 $curl = new cSingleCurl();
+$updateProxy = new cUpdateProxy();
 $curl->setDefaultOption(CURLOPT_REFERER, 'http://gatherproxy.com/subscribe/login');
 $curl->setTypeContent("html");
 $curl->setDefaultOption(CURLOPT_POSTFIELDS, 'Username=zking.nothingz@gmail.com&Password=)VQd$x;7');
@@ -23,12 +25,10 @@ if (!preg_match('%<a\s*href="(?<url>[^"]+)">Download\s*fully\s*\d+\s*proxies</a>
 }
 $curl->setDefaultOption(CURLOPT_REFERER, 'http://gatherproxy.com/subscribe/infos');
 $answerGatherproxy = $curl->load('http://gatherproxy.com' . $match['url']);
-if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerGatherproxy, $matchesGatherproxy)) return array();
-$tmpArray["source"][$nameSource] = true;
-$tmpArray["protocol"]['http'] = true;
-foreach ($matchesGatherproxy['ip'] as $valueGatherproxy) {
-	$tmpArray['proxy'] = trim($valueGatherproxy);
-	$proxyGatherproxyProxy['content'][$tmpArray['proxy']] = $tmpArray;
+if (preg_match_all('#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims', $answerGatherproxy, $matchesGatherproxy)){
+	foreach ($matchesGatherproxy['ip'] as $valueGatherproxy) {
+		$proxyGatherproxyProxy[] = trim($valueGatherproxy);
+	}
 }
-unset($curl, $answerGatherproxy);
-return is_array($proxyGatherproxyProxy) ? $proxyGatherproxyProxy : array();
+$updateProxy->saveSource($nameSource, $proxyGatherproxyProxy);
+return $proxyGatherproxyProxy;

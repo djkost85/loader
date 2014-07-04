@@ -11,18 +11,19 @@
 
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 //return array();
 $urlSource = "http://seprox.ru/ru/proxy_filter/0_0_0_0_0_0_0_0_0_";
 $nameSource = "seprox.ru";
 //return array();
 $curl = new cSingleCurl();
+$updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
 $pagenation = 0;
 $content = $curl->load($urlSource . $pagenation . ".html");
-if (!$content) return array();
-if (preg_match("/<div\s*class=\"countResult\">\s*Всего\s*найдено.\s*(\d+)\s*<\/div>/iUs", $content, $match)) $countPage = ceil($match[1] / 15);
-else return false;
+$countPage = 0;
+if (preg_match('/<div\s*class=\"countResult\">\s*Всего\s*найдено.\s*(\d+)\s*<\/div>/iUs', $content, $match)) $countPage = ceil($match[1] / 15);
 // JavaScript приколы с приведением типов. Расшифровка:
 $javascriptEncode = array(
 	"a" => "(![]+[])[+!+[]]",
@@ -43,7 +44,6 @@ $javascriptEncode = array(
 	"+" => "***"
 );
 $proxySeprox = array();
-$tmpArray["source"][$nameSource] = true;
 do {
 	$regEx = '#<tr\s*class="proxyStr">\s*<td>\s*<script\s*type="text/javascript">\s*(?<js>[^<]*)\s*</script>\s*</td>\s*<td>\s*(?<type_proxy>.*)\s*</td>#iUms';
 	if (!preg_match_all($regEx, $content, $matchesSecretCode)) break;
@@ -61,13 +61,12 @@ do {
 		foreach ($matchesSecretVar['ip'] as $valueIp)
 			if (preg_match('#' . $valueIp . '=\'(?<ip>[^\']*)\'#s', $strSecretCode, $matchIp)) $ip .= $matchIp['ip'];
 		if (cStringWork::isIp($ip)) {
-			$tmpArray['proxy'] = trim($ip);
-			$tmpArray["protocol"][trim($matchesSecretCode['type_proxy'][$keySecretCode])] = true;
-			$proxySeprox['content'][$tmpArray['proxy']] = $tmpArray;
+			$proxySeprox[] = trim($ip);
 		}
 	}
 	$pagenation++;
 	sleep(rand(1, 3));
 	if (!$content = $curl->load($urlSource . $pagenation . ".html")) continue;
 } while ($pagenation < $countPage);
-return is_array($proxySeprox) ? $proxySeprox : array();
+$updateProxy->saveSource($nameSource, $proxySeprox);
+return $proxySeprox;

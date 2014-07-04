@@ -10,28 +10,27 @@
 
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://foxtools.ru/Proxy?page=";
 $nameSource = "foxtools.ru";
 $curl = new cSingleCurl();
+$updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
 $proxyFoxtools = array();
-$tmpArray["source"][$nameSource] = true;
-$tmpArray["protocol"]['http'] = true;
 for ($nom = 1; $nom < 50; $nom++) {
 	$urlPage = $urlSource . $nom;
 	$answerFoxtools = $curl->load($urlPage);
-	if (!$answerFoxtools) return $proxyFoxtools;
+	if (!$answerFoxtools) break;
 	$answerFoxtools = cStringWork::betweenTag($answerFoxtools, '<table style="width:100%" id="theProxyList">');
 	if (!preg_match_all('%<td\s*style="[^"]*">(?<ip>\d+.\d+.\d+.\d+)</td>\s*<td\s*style="[^"]*">(?<port>\d+)</td>%imsu', $answerFoxtools, $matchesIp)) break;
 	foreach ($matchesIp['ip'] as $key => $proxyIp) {
 		$proxyAddress = $proxyIp . ':' . $matchesIp['port'][$key];
 		if (cStringWork::isIp($proxyAddress)) {
-			$tmpArray['proxy'] = trim($proxyAddress);
-			$proxyFoxtools['content'][$tmpArray['proxy']] = $tmpArray;
+			$proxyFoxtools[] = trim($proxyAddress);
 		}
 	}
 	sleep(rand(1, 3));
 }
-unset($urlSource, $nameSource, $curl, $urlPage, $answerFoxtools, $matchesIp);
-return is_array($proxyFoxtools) ? $proxyFoxtools : array();
+$updateProxy->saveSource($nameSource, $proxyFoxtools);
+return $proxyFoxtools;

@@ -9,23 +9,22 @@
  */
 
 use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 //return array();
 $urlSource = "http://stopinfection.narod.ru/Proxy.htm";
 $nameSource = "stopinfection.narod.ru";
 $curl = new cSingleCurl();
+$updateProxy = new cUpdateProxy();
 $curl->setEncodingAnswer(true);
 $curl->setEncodingName('UTF-8');
 $curl->setTypeContent("html");
 $answerStopinfection = $curl->load($urlSource);
 $proxyStopinfectionProxy = array();
-if (!$answerStopinfection) return array();
-if (!preg_match_all('#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu', $answerStopinfection, $matchesStopinfection)) return array();
-$tmpArray["source"][$nameSource] = true;
-$tmpArray["protocol"]['http'] = true;
-foreach ($matchesStopinfection['ip'] as $valueStopinfection) {
-	$tmpArray['proxy'] = trim($valueStopinfection);
-	$proxyStopinfectionProxy['content'][$tmpArray['proxy']] = $tmpArray;
+if ($answerStopinfection && preg_match_all('#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu', $answerStopinfection, $matchesStopinfection)){
+	foreach ($matchesStopinfection['ip'] as $valueStopinfection) {
+		$proxyStopinfectionProxy[] = trim($valueStopinfection);
+	}
 }
-unset($urlSource, $nameSource, $curl, $answerStopinfection, $matchesStopinfection, $valueStopinfection);
-return is_array($proxyStopinfectionProxy) ? $proxyStopinfectionProxy : array();
+$updateProxy->saveSource($nameSource, $proxyStopinfectionProxy);
+return $proxyStopinfectionProxy;

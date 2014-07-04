@@ -14,15 +14,17 @@ namespace GetContent;
 
 class cUpdateProxy extends cProxy {
 
-	private $_serverIp;
-	private $_checkFunctionUrl;
-	private $_dirSource;
-	private $_urlCheckServerIp;
-	private $_archiveProxyFile = 'archive';
+	protected $_serverIp;
+	protected $_checkFunctionUrl;
+	protected $_dirSiteSource;
+	protected $_dirSourceList;
+	protected $_sourceExt = 'source';
+	protected $_urlCheckServerIp;
+	protected $_archiveProxyFile = 'archive';
 	/**
 	 * @var cMultiCurl
 	 */
-	private $_curl;
+	protected $_curl;
 
 	/**
 	 * @param string $checkFunctionUrl
@@ -41,20 +43,20 @@ class cUpdateProxy extends cProxy {
 	/**
 	 * @param string $dirSource
 	 */
-	public function setDirSource($dirSource) {
-		$this->_dirSource = $dirSource;
+	public function setDirSiteSource($dirSource) {
+		$this->_dirSiteSource = $dirSource;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getDirSource() {
-		return $this->_dirSource;
+	public function getDirSiteSource() {
+		return $this->_dirSiteSource;
 	}
 
-	public function getAllSourceName(){
+	public function getAllSiteSourceName(){
 		$name = array();
-		foreach (glob($this->getDirSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
+		foreach (glob($this->getDirSiteSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
 			$name[] = basename($fileModule, '.php');
 		}
 		return $name;
@@ -74,6 +76,20 @@ class cUpdateProxy extends cProxy {
 		return $this->_urlCheckServerIp;
 	}
 
+	/**
+	 * @param string $dirSourceList
+	 */
+	public function setDirSourceList($dirSourceList) {
+		$this->_dirSourceList = $dirSourceList;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getDirSourceList() {
+		return $this->_dirSourceList;
+	}
+
 
 	function __construct($checkUrl = 'http://test1.ru/proxy_check.php', $port = 80, $serverIp = '', $urlCheckServerIp = 'http://bpteam.net/server_ip.php'){
 		parent::__construct();
@@ -82,7 +98,8 @@ class cUpdateProxy extends cProxy {
 		$this->_curl->setTypeContent('text');
 		$this->_curl->setEncodingAnswer(false);
 		$this->_curl->setDefaultOption(CURLOPT_PORT, $port);
-		$this->setDirSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
+		$this->setDirSiteSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
+		$this->setDirSourceList(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'proxy_list' . DIRECTORY_SEPARATOR . 'source');
 		$this->setCheckFunctionUrl($checkUrl);
 		$this->setServerIp($serverIp);
 	}
@@ -96,7 +113,7 @@ class cUpdateProxy extends cProxy {
 	 * @param null|array   $curlInfo
 	 * @return array|bool
 	 */
-	private function genInfo($proxy, $answer, $source = array(), $protocol = array('http'=> true), $curlInfo = null) {
+	protected function genInfo($proxy, $answer, $source = array(), $protocol = array('http'=> true), $curlInfo = null) {
 		if (preg_match('%^[01]{5}%', $answer) && preg_match_all('%(?<fun_status>[01])%', $answer, $matches)) {
 			$infoProxy['proxy'] = $proxy;
 			$infoProxy['source'] = $source;
@@ -122,22 +139,22 @@ class cUpdateProxy extends cProxy {
 	public function updateAllList() {
 		$this->updateDefaultList();
 		foreach ($this->getAllNameList() as $value) {
+			if ($value == $this->getDefaultListName()) {
+				continue;
+			}
 			$this->updateList($value);
 		}
 	}
 
 	public function updateDefaultList() {
 		$this->selectList($this->getDefaultListName());
-		$proxyList = $this->downloadAllSource();
+		$proxyList = $this->downloadAllProxy();
 		$proxyList['content'] = $this->checkProxyArray($proxyList['content']);
 		$this->_list->write('/', $proxyList['content'], 'content');
 		$this->_list->update();
 	}
 
 	public function updateList($nameList) {
-		if ($nameList == $this->getDefaultListName()) {
-			return null;
-		}
 		$this->selectList($this->getDefaultListName());
 		$allProxy = $this->getList();
 		$this->selectList($nameList);
@@ -148,24 +165,19 @@ class cUpdateProxy extends cProxy {
 		$this->_list->update();
 	}
 
-	public function downloadAllSource() {
+	public function downloadAllProxy() {
 		$proxy['content'] = array();
-		foreach (glob($this->getDirSource() . DIRECTORY_SEPARATOR . "*.php") as $fileModule) {
-			$tmpProxy = require $fileModule;
-			if (isset($tmpProxy['content'])) {
-				$proxy['content'] = array_merge($proxy['content'], $tmpProxy['content']);
+		foreach (glob($this->getDirSourceList() . DIRECTORY_SEPARATOR . '*.' . $this->_sourceExt) as $fileSource) {
+			$tmpProxy = file_get_contents($fileSource);
+			foreach(explode("\n", $tmpProxy) as $proxy){
+				$proxy['content'][$proxy]['proxy'] = $proxy;
 			}
 		}
 		return $proxy;
 	}
 
-	public function downloadSource($name){
-		if (in_array($name, $this->getAllSourceName())) {
-			$proxy = require $this->getDirSource() . DIRECTORY_SEPARATOR . $name . '.php';
-			return $proxy;
-		} else {
-			return array();
-		}
+	public function saveSource($name, $proxy){
+		return file_put_contents($this->getDirSourceList() . DIRECTORY_SEPARATOR . $name . '.' . $this->_sourceExt, implode("\n", $proxy));
 	}
 
 	public function getProxyByFunction($proxyList, $function = array()) {
@@ -218,7 +230,7 @@ class cUpdateProxy extends cProxy {
 		return true;
 	}
 
-	private function checkProxyArray($arrayProxy) {
+	protected function checkProxyArray($arrayProxy) {
 		if (is_array($arrayProxy)) {
 			$goodProxy = array();
 			$url = $this->getCheckFunctionUrl() . '?ip=' . $this->getServerIp() . '&proxy=yandex';
@@ -254,7 +266,7 @@ class cUpdateProxy extends cProxy {
 		return array();
 	}
 
-	private function checkProxyArrayToSite($arrayProxy, $url, $checkWord) {
+	protected function checkProxyArrayToSite($arrayProxy, $url, $checkWord) {
 		if (!is_array($arrayProxy)) return array();
 		$goodProxy = array();
 		$this->_curl->setCountStream(1);

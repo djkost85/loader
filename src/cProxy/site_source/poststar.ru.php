@@ -10,25 +10,20 @@
 
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://www.poststar.ru/proxy.htm";
 $nameSource = "poststar.ru";
 $curl = new cSingleCurl();
+$updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
-$tmpArray["source"][$nameSource] = true;
-$tmpArray["protocol"]['http'] = true;
 $answerPoststar = $curl->load($urlSource);
-if (!$answerPoststar) return array();
-if (!$answerPoststar = cStringWork::betweenTag($answerPoststar, '<table width="730" border="0" align="center">')) {
-	return array();
-}
-if (!preg_match_all("#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims", $answerPoststar, $matchesPoststar)) {
-	return array();
-}
+$answerPoststar = cStringWork::betweenTag($answerPoststar, '<table width="730" border="0" align="center">');
 $proxyPoststarProxy = array();
-foreach ($matchesPoststar['ip'] as $valuePoststar) {
-	$tmpArray['proxy'] = trim($valuePoststar);
-	$proxyPoststarProxy['content'][$tmpArray['proxy']] = $tmpArray;
+if(preg_match_all('#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims', $answerPoststar, $matchesPoststar)){
+	foreach ($matchesPoststar['ip'] as $valuePoststar) {
+		$proxyPoststarProxy[] = trim($valuePoststar);
+	}
 }
-unset($curl, $answerPoststar);
-return is_array($proxyPoststarProxy) ? $proxyPoststarProxy : array();
+$updateProxy->saveSource($nameSource, $proxyPoststarProxy);
+return $proxyPoststarProxy;

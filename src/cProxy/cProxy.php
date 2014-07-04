@@ -18,6 +18,7 @@ class cProxy {
 	protected $_list;
 	protected $_dirList;
 	protected $_nameList;
+	protected $_listExt = 'proxy';
 	protected $_defaultNameList = 'all';
 	protected $_deleteProxy = false;
 	protected $_proxyFunction = array(
@@ -50,7 +51,7 @@ class cProxy {
 	}
 
 	protected function getListFileName($name = false){
-		return $this->getDirList() . DIRECTORY_SEPARATOR . ($name ? $name : $this->getNameList()) . '.proxy';
+		return $this->getDirList() . DIRECTORY_SEPARATOR . ($name ? $name : $this->getNameList()) . '.' . $this->_listExt;
 	}
 
 	/**
@@ -163,10 +164,10 @@ class cProxy {
 	}
 
 	public function getAllNameList() {
-		$fileList = glob($this->getDirList() . DIRECTORY_SEPARATOR . "*.proxy");
+		$fileList = glob($this->getDirList() . DIRECTORY_SEPARATOR . '*.' . $this->_listExt);
 		$proxyListArray = array();
 		foreach ($fileList as $value) {
-			if (preg_match("%(?<name_list>[^/\\\\]+)\.proxy$%iUm", $value, $match)) {
+			if (preg_match("%(?<name_list>[^/\\\\]+)\." . $this->_listExt . "$%iUm", $value, $match)) {
 				$proxyListArray[] = $match['name_list'];
 			}
 		}

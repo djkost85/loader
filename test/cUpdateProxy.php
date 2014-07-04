@@ -27,12 +27,10 @@ $updateProxy = new cUpdateProxy(CHECK_URL);
 $start = microtime(true);
 echo date("[H:i:s Y/m/d]", $start)."\n<br>\n";
 echo "<table border='1'>";
-foreach($updateProxy->getAllSourceName() as $sourceName){
+foreach($updateProxy->getAllSiteSourceName() as $sourceName){
 	echo "<tr>";
 	echo "<td> $sourceName ";
 	$funStart = microtime(true);
-	$nameFunction = $prefix.'downloadSource';
-	$result = $nameFunction($sourceName);
 	echo "</td>";
 	if($result){
 		echo "<td> success </td>";
@@ -47,12 +45,3 @@ echo "</table>";
 $end = microtime(true);
 echo date('[H:i:s Y/m/d]', $end)."\n<br>\n";
 echo '[~'.($end-$start).']';
-
-function cUpdateProxy_downloadSource($sourceName){
-	$proxy = new cUpdateProxy(CHECK_URL);
-	$result = $proxy->downloadSource($sourceName);
-	if(isset($result['content']) && is_array($result['content'])){
-		echo count($result['content']);
-	}
-	return isset($result['content']) && is_array($result['content']) && $result['content'];
-}

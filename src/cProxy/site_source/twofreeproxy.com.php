@@ -9,11 +9,13 @@
  */
 
 use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://2freeproxy.com/wp-content/plugins/proxy/load_proxy.php";
 $nameSource = "2freeproxy.com";
 $proxyTwofreeproxyProxy = array();
 $curl = new cSingleCurl();
+$updateProxy = new cUpdateProxy();
 $curl->setTypeContent("text");
 $httpHead = array(
 	'Host: 2freeproxy.com',
@@ -63,11 +65,8 @@ if ($answerTwofreeproxy) {
 	$tmpProxyArray2 = explode('<br>', $tmpJsonProxy['proxy']);
 }
 $tmpProxyNew = array_merge($tmpProxyArray2, $tmpProxyArray);
-$tmpArray["source"][$nameSource] = true;
-$tmpArray["protocol"]['http'] = true;
 foreach ($tmpProxyNew as $valuePoststar) {
-	$tmpArray['proxy'] = trim($valuePoststar);
-	$proxyTwofreeproxyProxy['content'][$tmpArray['proxy']] = $tmpArray;
+	$proxyTwofreeproxyProxy[] = trim($valuePoststar);
 }
-unset($curl);
-return is_array($proxyTwofreeproxyProxy) ? $proxyTwofreeproxyProxy : array();
+$updateProxy->saveSource($nameSource, $proxyTwofreeproxyProxy);
+return $proxyTwofreeproxyProxy;

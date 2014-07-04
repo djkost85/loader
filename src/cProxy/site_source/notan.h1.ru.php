@@ -9,23 +9,22 @@
  */
 
 use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 $nameSource = "notan.h1.ru";
 $proxyNotanProxy = array();
-$tmpArray["source"][$nameSource] = true;
-$tmpArray["protocol"]['http'] = true;
+$updateProxy = new cUpdateProxy();
 for($i=1;$i<=10;$i++){
 	$urlSource="http://notan.h1.ru/hack/xwww/proxy".$i.".html";
 	$curl = new cSingleCurl();
 	$curl->setTypeContent("html");
 	$answerNotan = $curl->load($urlSource);
-	if(!$answerNotan) return $proxyNotanProxy;
-	if(!preg_match_all('%<TD\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</TD>%ims',$answerNotan,$matchesNotan)) return $proxyNotanProxy;
+	if(!$answerNotan) break;
+	if(!preg_match_all('%<TD\s*class=name>\s*(?<ip>\d+\.\d+\.\d+\.\d+\:\d+)\s*</TD>%ims',$answerNotan,$matchesNotan)) break;
 	foreach ($matchesNotan['ip'] as $valueNotan) {
-		$tmpArray['proxy'] = trim($valueNotan);
-		$proxyNotanProxy['content'][$tmpArray['proxy']] = $tmpArray;
+		$proxyNotanProxy[] = trim($valueNotan);
 	}
 	sleep(rand(1,3));
 }
-unset($nameSource, $curl, $answerNotan, $matchesNotan);
-return is_array($proxyNotanProxy) ? $proxyNotanProxy : array();
+$updateProxy->saveSource($nameSource, $proxyNotanProxy);
+return $proxyNotanProxy;

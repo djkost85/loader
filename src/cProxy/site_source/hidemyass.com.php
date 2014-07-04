@@ -10,18 +10,18 @@
 
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
+use GetContent\cUpdateProxy as cUpdateProxy;
 
 //return array();
 $urlSource = "http://hidemyass.com/proxy-list/";
 $nameSource = "hidemyass.com";
-$tmpArray["source"][$nameSource] = true;
-$tmpArray["protocol"]['http'] = true;
 $curl = new cSingleCurl();
+$updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
 $proxyHidemyass = array();
 do {
 	$answerHidemyass = $curl->load($urlSource);
-	if (!$answerHidemyass) return $proxyHidemyass;
+	if (!$answerHidemyass) break;
 	if (preg_match_all('%<tr\s*class="[^"]*"\s*rel="\d*">(?U)(?<proxyHtml>.*)</tr>%imsu', $answerHidemyass, $matchesHtml)) {
 		foreach ($matchesHtml['proxyHtml'] as $proxyHtml) {
 			preg_match_all('%\.(?<class>[\w_-]+){display\:\s*inline\s*}%imsu', $proxyHtml, $matchesClass);
@@ -32,8 +32,7 @@ do {
 			$proxyAddress = preg_replace('%<[^<>]*>%imsu', '', $proxyAddress);
 			$proxyAddress = preg_replace('%\s+%ms', '', $proxyAddress);
 			if (cStringWork::isIp($proxyAddress)) {
-				$tmpArray['proxy'] = trim($proxyAddress);
-				$proxyHidemyass['content'][$tmpArray['proxy']] = $tmpArray;
+				$proxyHidemyass[] = trim($proxyAddress);
 			}
 		}
 	}
@@ -44,5 +43,5 @@ do {
 	}
 	sleep(rand(1, 3));
 } while (isset($urlSource));
-unset($curl, $answerHidemyass);
-return is_array($proxyHidemyass) ? $proxyHidemyass : array();
+$updateProxy->saveSource($nameSource, $proxyHidemyass);
+return $proxyHidemyass;
