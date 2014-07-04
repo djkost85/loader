@@ -8,6 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
+require_once dirname(__FILE__)."/../../../include.php";
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cUpdateProxy as cUpdateProxy;
 

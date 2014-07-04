@@ -8,6 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
+require_once dirname(__FILE__)."/../../../include.php";
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
@@ -66,7 +67,9 @@ if ($answerTwofreeproxy) {
 }
 $tmpProxyNew = array_merge($tmpProxyArray2, $tmpProxyArray);
 foreach ($tmpProxyNew as $valuePoststar) {
-	$proxyTwofreeproxyProxy[] = trim($valuePoststar);
+	if(\GetContent\cStringWork::isIp(trim($valuePoststar))){
+		$proxyTwofreeproxyProxy[] = trim($valuePoststar);
+	}
 }
 $updateProxy->saveSource($nameSource, $proxyTwofreeproxyProxy);
 return $proxyTwofreeproxyProxy;

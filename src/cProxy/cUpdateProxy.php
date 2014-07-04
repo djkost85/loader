@@ -169,8 +169,10 @@ class cUpdateProxy extends cProxy {
 		$proxy['content'] = array();
 		foreach (glob($this->getDirSourceList() . DIRECTORY_SEPARATOR . '*.' . $this->_sourceExt) as $fileSource) {
 			$tmpProxy = file_get_contents($fileSource);
-			foreach(explode("\n", $tmpProxy) as $proxy){
-				$proxy['content'][$proxy]['proxy'] = $proxy;
+			foreach(explode("\n", $tmpProxy) as $challenger){
+				if(cStringWork::isIp($challenger)){
+					$proxy['content'][$challenger]['proxy'] = $challenger;
+				}
 			}
 		}
 		return $proxy;
@@ -220,11 +222,11 @@ class cUpdateProxy extends cProxy {
 						return false;
 					}
 					break;
-				case in_array( $name, array('source', 'protocol')):
+				/*case in_array( $name, array('source', 'protocol')):
 					if(!array_key_exists( $value, $proxyFunctions[$name])){
 						return false;
 					}
-					break;
+					break;*/
 			}
 		}
 		return true;

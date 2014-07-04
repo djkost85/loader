@@ -8,6 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
+require_once dirname(__FILE__)."/../../../include.php";
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
@@ -31,8 +32,9 @@ do {
 			$proxyAddress = implode('', $matchesProxy[0]) . ':' . $matchPort['port'];
 			$proxyAddress = preg_replace('%<[^<>]*>%imsu', '', $proxyAddress);
 			$proxyAddress = preg_replace('%\s+%ms', '', $proxyAddress);
+			$proxyAddress = trim($proxyAddress);
 			if (cStringWork::isIp($proxyAddress)) {
-				$proxyHidemyass[] = trim($proxyAddress);
+				$proxyHidemyass[] = $proxyAddress;
 			}
 		}
 	}

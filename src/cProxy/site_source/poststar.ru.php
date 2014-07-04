@@ -8,6 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
+require_once dirname(__FILE__)."/../../../include.php";
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
@@ -22,7 +23,10 @@ $answerPoststar = cStringWork::betweenTag($answerPoststar, '<table width="730" b
 $proxyPoststarProxy = array();
 if(preg_match_all('#(?<ip>\s*(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})\s*)#ims', $answerPoststar, $matchesPoststar)){
 	foreach ($matchesPoststar['ip'] as $valuePoststar) {
-		$proxyPoststarProxy[] = trim($valuePoststar);
+		$valuePoststar = trim($valuePoststar);
+		if(cStringWork::isIp($valuePoststar)){
+			$proxyPoststarProxy[] = $valuePoststar;
+		}
 	}
 }
 $updateProxy->saveSource($nameSource, $proxyPoststarProxy);

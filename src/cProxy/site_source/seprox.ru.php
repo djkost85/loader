@@ -9,6 +9,7 @@
  * Модуль к классу  cProxy для скачивания списка прокси адресов с сайта seprox.ru
  */
 
+require_once dirname(__FILE__)."/../../../include.php";
 use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
@@ -58,10 +59,12 @@ do {
 			$strSecretCode = preg_replace('#' . preg_quote($valueJavascript, '#') . '#', $keyJavascript, $strSecretCode);
 		preg_match_all('#(?:\(|\+)(?<ip>\w+)#s', $strSecretCode, $matchesSecretVar);
 		$ip = "";
-		foreach ($matchesSecretVar['ip'] as $valueIp)
+		foreach ($matchesSecretVar['ip'] as $valueIp){
 			if (preg_match('#' . $valueIp . '=\'(?<ip>[^\']*)\'#s', $strSecretCode, $matchIp)) $ip .= $matchIp['ip'];
+		}
+		$ip = trim($ip);
 		if (cStringWork::isIp($ip)) {
-			$proxySeprox[] = trim($ip);
+			$proxySeprox[] = $ip;
 		}
 	}
 	$pagenation++;

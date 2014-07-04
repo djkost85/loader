@@ -15,7 +15,7 @@ $start = time();
 echo date('[H:i:s Y/m/d]', $start);
 $proxy= new cUpdateProxy();
 foreach($proxy->getAllSiteSourceName() as $source){
-	$cmd = 'php -f ' . $source . ' > /dev/null &';
+	$cmd = 'php -f ' . $proxy->getDirSiteSource() . DIRECTORY_SEPARATOR . $source . '.php > /dev/null &';
 	exec($cmd);
 }
 $end = time();
@@ -23,6 +23,7 @@ $text = "\n";
 echo date('[H:i:s Y/m/d]', $end);
 $time = round(($end-$start)/60);
 echo $text = $time." m  $text";
+
 function sendMessage(){
 	global $text;
 	mail("zking.nothingz@gmail.com", "update proxy source", $text);
