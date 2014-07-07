@@ -113,11 +113,11 @@ class cUpdateProxy extends cProxy {
 	 * @param null|array   $curlInfo
 	 * @return array|bool
 	 */
-	protected function genInfo($proxy, $answer, $source = array(), $protocol = array('http'=> true), $curlInfo = null) {
+	protected function genInfo($proxy, $answer, $curlInfo = null) {
 		if (preg_match('%^[01]{5}%', $answer) && preg_match_all('%(?<fun_status>[01])%', $answer, $matches)) {
-			$infoProxy['proxy'] = $proxy;
-			$infoProxy['source'] = $source;
-			$infoProxy['protocol'] = $protocol;
+			$infoProxy['proxy'] = $proxy['proxy'];
+			$infoProxy['source'] = isset($proxy['source'])?$proxy['source']:null;
+			$infoProxy['protocol'] = isset($proxy['protocol'])?$proxy['protocol']:null;
 			$infoProxy['anonym'] = (bool)$matches['fun_status'][0];
 			$infoProxy['referer'] = (bool)$matches['fun_status'][1];
 			$infoProxy['post'] = (bool)$matches['fun_status'][2];
@@ -254,7 +254,7 @@ class cUpdateProxy extends cProxy {
 					$urlList[] = $url;
 				}
 				foreach ($this->_curl->load($urlList) as $key => $answer) {
-					$infoProxy = $this->genInfo($challenger[$key]['proxy'], $answer, $challenger[$key]['source'], $challenger[$key]['protocol'], $descriptorArray[$key]['info']);
+					$infoProxy = $this->genInfo($challenger[$key], $answer, $descriptorArray[$key]['info']);
 					if ($infoProxy) {
 						$goodProxy[] = $infoProxy;
 					}
