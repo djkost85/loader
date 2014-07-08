@@ -14,7 +14,7 @@ use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 //return array();
-$urlSource = "http://hidemyass.com/proxy-list/";
+$urlSource = "http://proxylist.hidemyass.com";
 $nameSource = "hidemyass.com";
 $curl = new cSingleCurl();
 $updateProxy = new cUpdateProxy();
@@ -38,8 +38,8 @@ do {
 			}
 		}
 	}
-	if (preg_match('%<a\s*href="(?<next>[^"]+)"\s*class="next">Next%imsu', $answerHidemyass, $matchNext)) {
-		$urlSource = "http://hidemyass.com" . $matchNext['next'];
+	if (preg_match('%<a\s*href="(?<next>[^"]+)"\s*class="next">%imsu', $answerHidemyass, $matchNext)) {
+		$urlSource = "http://proxylist.hidemyass.com" . $matchNext['next']. '#listable';
 	} else {
 		unset($urlSource);
 	}
