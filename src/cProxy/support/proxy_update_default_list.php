@@ -13,7 +13,7 @@ use GetContent\cUpdateProxy as cUpdateProxy;
 register_shutdown_function('sendMessage');
 $start = time();
 echo date('[H:i:s Y/m/d]', $start);
-$proxy= new cUpdateProxy('http://track.hamstersgangsters.com/proxy_check.php', 8888);
+$proxy= new cUpdateProxy('http://66.225.221.237/proxy_check.php', 8888);
 $proxy->updateDefaultList();
 $end = time();
 $text = "\n";
