@@ -11,11 +11,13 @@ require_once dirname(__FILE__)."/../../../include.php";
 
 use GetContent\cUpdateProxy as cUpdateProxy;
 register_shutdown_function('sendMessage');
-$start = time();
+$countStream = 1000;
+$start = microtime(true);
 echo date('[H:i:s Y/m/d]', $start);
 $proxy= new cUpdateProxy('http://66.225.221.237/proxy_check.php', 8888);
-$proxy->updateDefaultList();
-$end = time();
+$proxy->updateArchive();
+$proxy->updateDefaultList($countStream);
+$end = microtime(true);
 $text = "\n";
 $proxy->selectList($proxy->getDefaultListName());
 $list = $proxy->getList();
@@ -25,8 +27,8 @@ $proxy->selectList($nameList);
 $list = $proxy->getList();
 $text .= "$nameList " . count($list['content']) . "\n";
 echo date('[H:i:s Y/m/d]', $end);
-$time = round(($end-$start)/60);
-echo $text = $time." m  $text";
+$time = $end-$start;
+echo $text = $time." sec \n count stream $countStream \n $text";
 function sendMessage(){
 	global $text;
 	mail("zking.nothingz@gmail.com", "update default proxy", $text);

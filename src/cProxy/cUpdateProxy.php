@@ -20,7 +20,7 @@ class cUpdateProxy extends cProxy {
 	protected $_dirSourceList;
 	protected $_sourceExt = 'source';
 	protected $_urlCheckServerIp;
-	protected $_archiveProxyFile = 'archive';
+	protected $_archiveProxy = 'archive';
 	/**
 	 * @var cMultiCurl
 	 */
@@ -90,12 +90,16 @@ class cUpdateProxy extends cProxy {
 		return $this->_dirSourceList;
 	}
 
+	public function getFileNameSourceList($name){
+		return $this->getDirSourceList() . DIRECTORY_SEPARATOR . $name . '.' . $this->_sourceExt;
+	}
+
 
 	function __construct($checkUrl = 'http://test1.ru/proxy_check.php', $port = 80, $serverIp = '', $urlCheckServerIp = 'http://bpteam.net/server_ip.php'){
 		parent::__construct();
 		$this->_curl = new cMultiCurl();
 		$this->setUrlCheckServerIp($urlCheckServerIp);
-		$this->_curl->setTypeContent('text');
+		$this->_curl->setTypeContent('file');
 		$this->_curl->setEncodingAnswer(false);
 		$this->_curl->setDefaultOption(CURLOPT_PORT, $port);
 		$this->setDirSiteSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
@@ -106,11 +110,9 @@ class cUpdateProxy extends cProxy {
 
 
 	/**
-	 * @param string       $proxy
-	 * @param string       $answer
-	 * @param array        $source
-	 * @param array        $protocol
-	 * @param null|array   $curlInfo
+	 * @param string     $proxy
+	 * @param string     $answer
+	 * @param null|array $curlInfo
 	 * @return array|bool
 	 */
 	protected function genInfo($proxy, $answer, $curlInfo = null) {
@@ -145,10 +147,10 @@ class cUpdateProxy extends cProxy {
 		}
 	}
 
-	public function updateDefaultList() {
+	public function updateDefaultList($countStream = 1000000) {
 		$this->selectList($this->getDefaultListName());
-		$proxyList = $this->downloadAllProxy();
-		$proxyList['content'] = $this->checkProxyArray($proxyList['content'], 1000);
+		$proxyList = $this->downloadArchiveProxy();
+		$proxyList['content'] = $this->checkProxyArray($proxyList['content'], $countStream);
 		$this->_list->write('/', $proxyList['content'], 'content');
 		$this->_list->update();
 	}
@@ -172,6 +174,23 @@ class cUpdateProxy extends cProxy {
 				if(cStringWork::isIp($challenger)){
 					$proxy['content'][$challenger]['proxy'] = $challenger;
 				}
+			}
+		}
+		return $proxy;
+	}
+
+	public function updateArchive(){
+		$data = $this->downloadAllProxy();
+		$proxy = array_keys($data['content']);
+		$this->saveSource($this->_archiveProxy, $proxy);
+	}
+
+	public function downloadArchiveProxy(){
+		$proxy['content'] = array();
+		$tmpProxy = file_get_contents($this->getFileNameSourceList($this->_archiveProxy));
+		foreach(explode("\n", $tmpProxy) as $challenger){
+			if(cStringWork::isIp($challenger)){
+				$proxy['content'][$challenger]['proxy'] = $challenger;
 			}
 		}
 		return $proxy;
@@ -242,8 +261,6 @@ class cUpdateProxy extends cProxy {
 			$this->_curl->setDefaultOption(CURLOPT_REFERER, "proxy-check.net");
 			$this->_curl->setDefaultOption(CURLOPT_POST, true);
 			$this->_curl->setDefaultOption(CURLOPT_POSTFIELDS, "proxy=yandex");
-			$this->_curl->setTypeContent('text');
-			$this->_curl->setCheckAnswer(false);
 			foreach (array_chunk($arrayProxy, $chunk) as $challenger) {
 				$this->_curl->setCountCurl(count($challenger));
 				$urlList = array();
