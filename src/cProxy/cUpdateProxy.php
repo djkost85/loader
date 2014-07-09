@@ -137,7 +137,6 @@ class cUpdateProxy extends cProxy {
 	}
 
 	public function updateAllList() {
-		$this->updateDefaultList();
 		foreach ($this->getAllNameList() as $value) {
 			if ($value == $this->getDefaultListName()) {
 				continue;
@@ -149,7 +148,7 @@ class cUpdateProxy extends cProxy {
 	public function updateDefaultList() {
 		$this->selectList($this->getDefaultListName());
 		$proxyList = $this->downloadAllProxy();
-		$proxyList['content'] = $this->checkProxyArray($proxyList['content']);
+		$proxyList['content'] = $this->checkProxyArray($proxyList['content'], 1000);
 		$this->_list->write('/', $proxyList['content'], 'content');
 		$this->_list->update();
 	}
@@ -232,7 +231,7 @@ class cUpdateProxy extends cProxy {
 		return true;
 	}
 
-	protected function checkProxyArray($arrayProxy) {
+	protected function checkProxyArray($arrayProxy, $chunk = 150) {
 		if (is_array($arrayProxy)) {
 			$goodProxy = array();
 			$url = $this->getCheckFunctionUrl() . '?ip=' . $this->getServerIp() . '&proxy=yandex';
@@ -245,7 +244,7 @@ class cUpdateProxy extends cProxy {
 			$this->_curl->setDefaultOption(CURLOPT_POSTFIELDS, "proxy=yandex");
 			$this->_curl->setTypeContent('text');
 			$this->_curl->setCheckAnswer(false);
-			foreach (array_chunk($arrayProxy, 150) as $challenger) {
+			foreach (array_chunk($arrayProxy, $chunk) as $challenger) {
 				$this->_curl->setCountCurl(count($challenger));
 				$urlList = array();
 				$descriptorArray =& $this->_curl->getDescriptorArray();
@@ -268,7 +267,7 @@ class cUpdateProxy extends cProxy {
 		return array();
 	}
 
-	protected function checkProxyArrayToSite($arrayProxy, $url, $checkWord) {
+	protected function checkProxyArrayToSite($arrayProxy, $url, $checkWord, $chunk = 100) {
 		if (!is_array($arrayProxy)) return array();
 		$goodProxy = array();
 		$this->_curl->setCountStream(1);
@@ -276,7 +275,7 @@ class cUpdateProxy extends cProxy {
 		$this->_curl->setDefaultOption(CURLOPT_POST, false);
 		$this->_curl->setDefaultOption(CURLOPT_TIMEOUT, 30);
 		$this->_curl->setCheckAnswer(false);
-		foreach (array_chunk($arrayProxy, 100) as $challenger) {
+		foreach (array_chunk($arrayProxy, $chunk) as $challenger) {
 			$this->_curl->setCountCurl(count($challenger));
 			$descriptorArray =& $this->_curl->getDescriptorArray();
 			$urlList = array();
