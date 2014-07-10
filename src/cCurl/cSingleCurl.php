@@ -101,7 +101,7 @@ class cSingleCurl extends cCurl{
 				}
 			}
 			$this->setRedirectCount(0);
-			$regAnswer = ($checkRegEx && preg_match($checkRegEx, $answer));
+			$regAnswer = (($checkRegEx && preg_match($checkRegEx, $answer)) || !$checkRegEx);
 			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {
 				$this->endRepeat();
 				break;
