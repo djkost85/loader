@@ -81,7 +81,7 @@ class cSingleCurl extends cCurl{
 		if (!$this->getSaveOption()) unset($descriptor['option']);
 	}
 
-	public function load($url = '', $checkRegEx = '%%'){
+	public function load($url = '', $checkRegEx = false){
 		$descriptor =& $this->getDescriptor();
 		do {
 			$this->sleep();

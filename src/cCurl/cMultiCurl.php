@@ -132,7 +132,7 @@ class cMultiCurl extends cCurl{
 		}
 	}
 
-	public function load($url = array(), $checkRegEx = '##'){
+	public function load($url = array(), $checkRegEx = false){
 		if(is_string($url)){
 			$url = array($url);
 		}
