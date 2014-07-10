@@ -11,7 +11,7 @@ require_once dirname(__FILE__)."/../../../include.php";
 
 use GetContent\cUpdateProxy as cUpdateProxy;
 register_shutdown_function('sendMessage');
-$countStream = 2000;
+$countStream = 1000;
 $start = microtime(true);
 echo date('[H:i:s Y/m/d]', $start);
 $proxy= new cUpdateProxy('http://66.225.221.237/proxy_check.php', 8888);
