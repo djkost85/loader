@@ -102,6 +102,7 @@ class cUpdateProxy extends cProxy {
 		$this->_curl->setTypeContent('file');
 		$this->_curl->setEncodingAnswer(false);
 		$this->_curl->setDefaultOption(CURLOPT_PORT, $port);
+		$this->_curl->setDefaultOption(CURLOPT_TIMEOUT, 15);
 		$this->setDirSiteSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
 		$this->setDirSourceList(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'proxy_list' . DIRECTORY_SEPARATOR . 'source');
 		$this->setCheckFunctionUrl($checkUrl);
