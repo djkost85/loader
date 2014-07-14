@@ -163,7 +163,7 @@ class cMultiCurl extends cCurl{
 				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
 				$descriptorArray[$key]['info']['error'] = curl_error($descriptorArray[$key]['descriptor']);
 				$descriptorArray[$key]['info']['header'] = $this->getHeader($value);
-				$regAnswer = (($checkRegEx && preg_match($checkRegEx, $answer)) || !$checkRegEx);
+				$regAnswer = (($checkRegEx && preg_match($checkRegEx, $value)) || !$checkRegEx);
 				if ((!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
 					$linkKey = $this->getLinkKey($urlDescriptorsLink, $key);
 					unset($this->_url[$linkKey]);

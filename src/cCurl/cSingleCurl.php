@@ -95,7 +95,7 @@ class cSingleCurl extends cCurl{
 			if($this->isRedirect()){
 				if($this->useRedirect()){
 					$this->setReferer($descriptor, $url);
-					$answer = $this->load($descriptor['info']['redirect_url']);
+					$answer = $this->load($descriptor['info']['redirect_url'], $checkRegEx);
 				} else {
 					break;
 				}
