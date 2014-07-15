@@ -570,21 +570,21 @@ abstract class cCurl{
 			case 226:
 				return true;
 			case 300:
-				return false;
+				return true;
 			case 301:
-				return false;
+				return true;
 			case 302:
-				return false;
+				return true;
 			case 303:
-				return false;
+				return true;
 			case 304:
-				return false;
+				return true;
 			case 305:
-				return false;
+				return true;
 			case 306:
-				return false;
+				return true;
 			case 307:
-				return false;
+				return true;
 			case 400:
 				return false;
 			case 401:
