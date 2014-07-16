@@ -76,7 +76,8 @@ class cMultiCurl extends cCurl{
 
 	function __construct(){
 		$this->defaultOptions[CURLOPT_FOLLOWLOCATION] = true;
-		$this->defaultOptions[CURLOPT_MAXREDIRS] = 10;
+		$this->setDefaultOption(CURLOPT_FOLLOWLOCATION, true);
+		$this->setDefaultOption(CURLOPT_MAXREDIRS, 10);
 		$this->setCountDescriptor();
 		parent::__construct();
 	}

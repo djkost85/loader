@@ -123,6 +123,6 @@ class cSingleCurl extends cCurl{
 	}
 
 	private function isRedirect(){
-		return ($this->descriptor['info']['http_code'] == 301 || $this->descriptor['info']['http_code'] == 302);
+		return in_array($this->descriptor['info']['http_code'], $this->_redirectHttpCode);
 	}
 }

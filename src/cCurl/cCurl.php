@@ -26,6 +26,7 @@ abstract class cCurl{
 	protected $_encodingAnswerName;
 	protected $_saveOption = false;
 	protected $_sleepTime = 0;
+	protected $_redirectHttpCode = array(300,301,302,303,304,305,306,307);
 	/**
 	 * Тип получаемых данных
 	 * @var mixed
@@ -71,6 +72,7 @@ abstract class cCurl{
 		CURLOPT_COOKIEFILE => false,
 		CURLOPT_HTTPHEADER => array(),
 		CURLOPT_PORT => 80,
+		CURLOPT_MAXREDIRS => 25,
 	);
 
 	/**
@@ -413,7 +415,7 @@ abstract class cCurl{
 		$this->_cookie->deleteOldCookieFile(3600);
 	}
 
-	public abstract function load($url = '', $checkRegEx = '##');
+	public abstract function load($url, $checkRegEx = false);
 
 	protected abstract function init();
 
@@ -438,6 +440,7 @@ abstract class cCurl{
 			$descriptor['option'][$option] = $value;
 		}
 		$this->configOption($descriptor, $option, $descriptor['option'][$option]);
+		return true;
 	}
 
 	public final function setOptions(&$descriptor, $options = array()){
