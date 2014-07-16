@@ -13,7 +13,8 @@ use GetContent\cSingleCurl as cSingleCurl;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
-$urlSource = "http://checkerproxy.net/ru/all_proxy";
+return array();
+$urlSource = "http://checkerproxy.net/all_proxy";
 $nameSource = "checkerproxy.net";
 $curl = new cSingleCurl();
 $updateProxy = new cUpdateProxy();
