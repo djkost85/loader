@@ -27,6 +27,7 @@ abstract class cCurl{
 	protected $_saveOption = false;
 	protected $_sleepTime = 0;
 	protected $_redirectHttpCode = array(300,301,302,303,304,305,306,307);
+	protected $_useCookie = true;
 	/**
 	 * Тип получаемых данных
 	 * @var mixed
@@ -74,6 +75,20 @@ abstract class cCurl{
 		CURLOPT_PORT => 80,
 		CURLOPT_MAXREDIRS => 25,
 	);
+
+	/**
+	 * @param boolean $useCookie
+	 */
+	public function setUseCookie($useCookie) {
+		$this->_useCookie = $useCookie;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getUseCookie() {
+		return $this->_useCookie;
+	}
 
 	/**
 	 * @param int $millisecond 0.001 of second
@@ -370,9 +385,11 @@ abstract class cCurl{
 	}
 
 	private function setOptionCookie(&$descriptor){
-		$this->_cookie->open($descriptor['descriptor_key']);
-		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
-		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
+		if($this->getUseCookie()){
+			$this->_cookie->open($descriptor['descriptor_key']);
+			$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
+			$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
+		}
 	}
 
 	/**
