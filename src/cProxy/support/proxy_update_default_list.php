@@ -33,5 +33,5 @@ $time = $end-$start;
 echo $text = $time." sec \n count stream $countStream \n $text";
 function sendMessage(){
 	global $text;
-	//mail("zking.nothingz@gmail.com", "update default proxy", $text);
+	mail("zking.nothingz@gmail.com", "update default proxy", $text);
 }

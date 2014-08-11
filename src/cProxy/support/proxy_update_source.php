@@ -26,5 +26,5 @@ echo $text = $time." m  $text";
 
 function sendMessage(){
 	global $text;
-	//mail("zking.nothingz@gmail.com", "update proxy source", $text);
+	mail("zking.nothingz@gmail.com", "update proxy source", $text);
 }
