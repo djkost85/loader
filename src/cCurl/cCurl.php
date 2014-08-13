@@ -17,7 +17,7 @@ abstract class cCurl{
 	protected $_schemeDefaultPort = array('http' => 80, 'https' => 443);
 	protected $_url;
 	protected $_answer;
-	protected $_referer = 'http://google.com/';
+	protected $_referer = '';
 	protected $_maxRepeat = 10;
 	protected $_numRepeat = 0;
 	protected $_minSizeAnswer = 1000;
@@ -60,7 +60,7 @@ abstract class cCurl{
 		CURLOPT_TIMEOUT => 10,
 		CURLOPT_RETURNTRANSFER => true,
 		CURLOPT_FOLLOWLOCATION => false,
-		CURLOPT_REFERER => 'http://google.com/',
+		CURLOPT_REFERER => '',
 		CURLOPT_POST => false,
 		CURLOPT_POSTFIELDS => '',
 		CURLOPT_PROXY => false,

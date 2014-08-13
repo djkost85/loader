@@ -60,6 +60,9 @@ class cSingleCurl extends cCurl{
 		return ($this->getRedirectCount()<=$this->getMaxRedirectCount());
 	}
 
+	function __construct(){
+		parent::__construct();
+	}
 
 	public function init(){
 		$descriptor =& $this->getDescriptor();
