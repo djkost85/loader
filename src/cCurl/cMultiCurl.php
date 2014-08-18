@@ -94,6 +94,12 @@ class cMultiCurl extends cCurl{
 			$descriptorArray[$i]['descriptor'] = curl_init();
 			curl_multi_add_handle($descriptor['descriptor'], $descriptorArray[$i]['descriptor']);
 		}
+		$i = 0;
+		foreach($descriptorArray AS $keyCurl => &$descriptorCurl){
+			if($i < $this->getCountDescriptor()){
+
+			}
+		}
 	}
 
 	protected function exec(){
