@@ -23,7 +23,7 @@ $curl->setTypeContent("html");
 $curl->setDefaultOption(CURLOPT_REFERER, 'http://www.cool-tests.com');
 $answerCoolTests = $curl->load($urlSource);
 $proxyCoolTestsProxy = array();
-if (!preg_match_all("#(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})#imsu", $answerCoolTests, $matchesCoolTests)) return array();
+if (!preg_match_all('%(?<ip>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:{1}\d{1,10})%imsu', $answerCoolTests, $matchesCoolTests)) return array();
 foreach ($matchesCoolTests['ip'] as $valueCoolTests) {
 	$proxyCoolTestsProxy[] = trim($valueCoolTests);
 }

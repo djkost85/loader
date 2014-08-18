@@ -18,6 +18,7 @@ $proxy= new cUpdateProxy('http://66.225.221.237/proxy_check.php', 8888);
 $proxy->updateArchive();
 $proxyList = $proxy->downloadArchiveProxy();
 $countChallengers = count($proxyList['content']);
+unset($proxyList);
 $proxy->updateDefaultList($countStream);
 $end = microtime(true);
 $text = "\n";

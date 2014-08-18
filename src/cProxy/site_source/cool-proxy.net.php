@@ -20,9 +20,7 @@ $updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
 $i = 1;
 if (!$content = $curl->load($urlSource . $i . "/sort:working_average/direction:asc")) return array();
-if (preg_match_all('#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<pagenation>\d*)"#iUm', $content, $matches)) {
-	$countPage = max($matches['pagenation']);
-}
+$countPage = preg_match_all('#/proxies/http_proxy_list/sort:working_average/direction:asc/page:(?<pagination>\d*)"#iUm', $content, $matches) ? max($matches['pagination']) : 0;
 $proxyCoolProxy = array();
 do {
 	if ($countProxy = preg_match_all('#<td\s*style=\"text.align.left.\s*font.weight.bold.\"><script type="text/javascript">document\.write\(Base64\.decode\("(?<ip_base64>.*)"\)\)</script></td>\s*<td>(?<port>\d+)</td>#iUms', $content, $matches)) {
