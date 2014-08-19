@@ -18,7 +18,7 @@ class cMultiCurl extends cCurl{
 	private $_countDescriptor;
 	private $_countStream = 1;
 	private $_countCurl = 1;
-	private $_waitExecMSec = 1000;
+	private $_waitExecMSec = 10000;
 
 	public function &getDescriptorArray() {
 		return $this->descriptorArray;
@@ -26,10 +26,9 @@ class cMultiCurl extends cCurl{
 
 	public function setCountCurl($value = 1) {
 		if ($this->getCountCurl() != $value) {
-			$this->close();
 			$this->_countCurl = $value;
 			$this->setCountDescriptor();
-			$this->init();
+			$this->reInit();
 		}
 	}
 
@@ -39,10 +38,9 @@ class cMultiCurl extends cCurl{
 
 	public function setCountStream($value = 1) {
 		if ($this->getCountStream() != $value) {
-			$this->close();
 			$this->_countStream = $value;
 			$this->setCountDescriptor();
-			$this->init();
+			$this->reInit();
 		}
 	}
 
@@ -90,15 +88,11 @@ class cMultiCurl extends cCurl{
 			$descriptorArray = array_slice($descriptorArray, 0, $this->getCountDescriptor());
 		}
 		for ($i = 0; $i < $this->getCountDescriptor(); $i++) {
-			if (!isset($descriptorArray[$i]['descriptor_key'])) $descriptorArray[$i]['descriptor_key'] = microtime(1) . mt_rand();
+			if (!isset($descriptorArray[$i]['descriptor_key'])) {
+				$descriptorArray[$i]['descriptor_key'] = $this->genDescriptorKey();
+			}
 			$descriptorArray[$i]['descriptor'] = curl_init();
 			curl_multi_add_handle($descriptor['descriptor'], $descriptorArray[$i]['descriptor']);
-		}
-		$i = 0;
-		foreach($descriptorArray AS $keyCurl => &$descriptorCurl){
-			if($i < $this->getCountDescriptor()){
-
-			}
 		}
 	}
 
@@ -119,15 +113,21 @@ class cMultiCurl extends cCurl{
 	public function close(){
 		$descriptor =& $this->getDescriptor();
 		$descriptorArray =& $this->getDescriptorArray();
-		if (isset($descriptor['descriptor'])) {
-			foreach ($descriptorArray as $key => $value) {
-				if (isset($descriptorArray[$key]['descriptor'])) {
-					@curl_multi_remove_handle($descriptor['descriptor'], $descriptorArray[$key]['descriptor']);
-					curl_close($descriptorArray[$key]['descriptor']);
-					unset($descriptorArray[$key]['descriptor']);
-					if (!$this->getSaveOption()) unset($descriptorArray[$key]['option']);
+		foreach ($descriptorArray as $key => &$descriptorCurl) {
+			if (isset($descriptorCurl['descriptor'])) {
+				if(is_resource($descriptorCurl['descriptor'])){
+					if(is_resource($descriptor['descriptor'])){
+						curl_multi_remove_handle($descriptor['descriptor'], $descriptorCurl['descriptor']);
+					}
+					curl_close($descriptorCurl['descriptor']);
+				}
+				unset($descriptorArray[$key]['descriptor']);
+				if (!$this->getSaveOption()){
+					unset($descriptorCurl['option']);
 				}
 			}
+		}
+		if (isset($descriptor['descriptor']) && is_resource($descriptor['descriptor'])) {
 			curl_multi_close($descriptor['descriptor']);
 		}
 	}
@@ -135,7 +135,7 @@ class cMultiCurl extends cCurl{
 	public function genNewKeyStream(){
 		$descriptorArray =& $this->getDescriptorArray();
 		foreach ($descriptorArray as &$subDescriptor) {
-			$subDescriptor['descriptor_key'] = microtime(1) . mt_rand();
+			$subDescriptor['descriptor_key'] = $this->genDescriptorKey();
 		}
 	}
 
@@ -147,8 +147,6 @@ class cMultiCurl extends cCurl{
 		$goodAnswer = array();
 		$countMultiStream = $this->getCountStream();
 		do {
-			$this->sleep();
-			if ($this->getNumRepeat() > 0) $this->reinit();
 			$this->setCountCurl(count($this->_url));
 			$descriptorArray =& $this->getDescriptorArray();
 			$j = 0;
@@ -170,7 +168,7 @@ class cMultiCurl extends cCurl{
 				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
 				$descriptorArray[$key]['info']['error'] = curl_error($descriptorArray[$key]['descriptor']);
 				$descriptorArray[$key]['info']['header'] = $this->getHeader($value);
-				$regAnswer = (($checkRegEx && preg_match($checkRegEx, $value)) || !$checkRegEx);
+				$regAnswer = (!$checkRegEx || ($checkRegEx && preg_match($checkRegEx, $value)));
 				if ((!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
 					$linkKey = $this->getLinkKey($urlDescriptorsLink, $key);
 					unset($this->_url[$linkKey]);
@@ -183,6 +181,8 @@ class cMultiCurl extends cCurl{
 					}
 				}
 			}
+			$this->reInit();
+			$this->sleep();
 			if (!$this->_url) {
 				$this->endRepeat();
 				break;
@@ -190,7 +190,6 @@ class cMultiCurl extends cCurl{
 		} while ($this->repeat());
 		$this->_url = $url;
 		$this->setAnswer($goodAnswer);
-		$this->reinit();
 		return $this->getAnswer();
 	}
 

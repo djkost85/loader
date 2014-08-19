@@ -167,7 +167,7 @@ class cProxy {
 		$fileList = glob($this->getDirList() . DIRECTORY_SEPARATOR . '*.' . $this->_listExt);
 		$proxyListArray = array();
 		foreach ($fileList as $value) {
-			if (preg_match("%(?<name_list>[^/\\\\]+)\." . $this->_listExt . "$%iUm", $value, $match)) {
+			if (preg_match('%(?<name_list>[^/\\\\]+)\.' . $this->_listExt . '$%iUm', $value, $match)) {
 				$proxyListArray[] = $match['name_list'];
 			}
 		}

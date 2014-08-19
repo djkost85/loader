@@ -227,31 +227,17 @@ abstract class cCurl{
 	 * @return bool
 	 */
 	public function setTypeContent($typeContent = "text") {
-		switch ($typeContent) {
-			case 'file':
-				$this->_typeContent = 'file';
-				$this->setEncodingAnswer(false);
-				return true;
-				break;
-			case 'img':
-				$this->_typeContent = 'img';
-				$this->setEncodingAnswer(false);
-				return true;
-				break;
-			case 'text':
-				$this->_typeContent = 'text';
-				$this->setEncodingAnswer(true);
-				return true;
-				break;
-			case 'html':
-				$this->_typeContent = 'html';
-				$this->setEncodingAnswer(true);
-				break;
-			default:
-				$this->setTypeContent('file');
-				break;
+		if($typeContent == 'img'){
+			$this->setEncodingAnswer(false);
+		} elseif($typeContent == 'text'){
+			$this->setEncodingAnswer(false);
+		} elseif($typeContent == 'html'){
+			$this->setEncodingAnswer(true);
+		} else {
+			$typeContent = 'file';
+			$this->setEncodingAnswer(false);
 		}
-		return false;
+		$this->_typeContent = $typeContent;
 	}
 
 	public function getTypeContent(){
@@ -314,7 +300,7 @@ abstract class cCurl{
 		return $this->_saveOption;
 	}
 
-	protected function reinit(){
+	protected function reInit(){
 		$this->close();
 		$this->init();
 	}
@@ -368,28 +354,22 @@ abstract class cCurl{
 	}
 
 	private function setOptionProxy(&$descriptor){
-		if ($this->getUseProxy()) {
-			if (is_object($this->proxy)) {
-				$proxy = $this->proxy->getProxy($descriptor['descriptor_key'], $descriptor['option'][CURLOPT_URL]);
-				if (is_string($proxy['proxy']) && cStringWork::isIp($proxy['proxy'])){
-					$this->setOption($descriptor, CURLOPT_PROXY, $proxy['proxy']);
-				} else {
-					$descriptor['option'][CURLOPT_URL] = false;
-				}
-			} elseif (is_string($this->proxy)){
-				$this->setOption($descriptor, CURLOPT_PROXY, $this->proxy);
+		if (is_object($this->proxy)) {
+			$proxy = $this->proxy->getProxy($descriptor['descriptor_key'], $descriptor['option'][CURLOPT_URL]);
+			if (is_string($proxy['proxy']) && cStringWork::isIp($proxy['proxy'])){
+				$this->setOption($descriptor, CURLOPT_PROXY, $proxy['proxy']);
+			} else {
+				$descriptor['option'][CURLOPT_URL] = false;
 			}
-		} elseif(isset($descriptor['option'][CURLOPT_PROXY])) {
-			unset($descriptor['option'][CURLOPT_PROXY]);
+		} elseif (is_string($this->proxy)){
+			$this->setOption($descriptor, CURLOPT_PROXY, $this->proxy);
 		}
 	}
 
 	private function setOptionCookie(&$descriptor){
-		if($this->getUseCookie()){
-			$this->_cookie->open($descriptor['descriptor_key']);
-			$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
-			$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
-		}
+		$this->_cookie->open($descriptor['descriptor_key']);
+		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
+		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
 	}
 
 	/**
@@ -472,8 +452,14 @@ abstract class cCurl{
 				$this->setOption($descriptor, $keySetting);
 			}
 		}
-		$this->setOptionProxy($descriptor);
-		$this->setOptionCookie($descriptor);
+		if ($this->getUseProxy()) {
+			$this->setOptionProxy($descriptor);
+		} elseif(isset($descriptor['option'][CURLOPT_PROXY])) {
+			unset($descriptor['option'][CURLOPT_PROXY]);
+		}
+		if($this->getUseCookie()){
+			$this->setOptionCookie($descriptor);
+		}
 		return curl_setopt_array($descriptor['descriptor'], $descriptor['option']);
 	}
 
@@ -515,7 +501,7 @@ abstract class cCurl{
 	protected function getHeader(&$answer){
 		$header = array();
 		if($answer){
-				while(preg_match("%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums",$answer,$data)){
+				while(preg_match('%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums',$answer,$data)){
 					$header[] = $data['head'];
 					$answer = ltrim(preg_replace('%'.preg_quote($data['head'],'%').'%ims', '', $answer));
 				}
@@ -606,19 +592,19 @@ abstract class cCurl{
 			case 307:
 				return true;
 			case 400:
-				return false;
+				return true;
 			case 401:
 				return false;
 			case 402:
 				return false;
 			case 403:
-				return false;
+				return true;
 			case 404:
-				return false;
+				return true;
 			case 405:
-				return false;
+				return true;
 			case 406:
-				return false;
+				return true;
 			case 407:
 				return false;
 			case 408:
@@ -704,15 +690,11 @@ abstract class cCurl{
 
 	protected function prepareContent($answer) {
 		switch ($this->getTypeContent()) {
-			case 'file':
-				break;
 			case 'text':
 				$answer = $this->encodingAnswerText($answer);
 				break;
 			case 'html':
 				$answer = $this->encodingAnswerText($answer);
-				break;
-			default:
 				break;
 		}
 		return $answer;
@@ -728,5 +710,9 @@ abstract class cCurl{
 			}
 		}
 		return $text;
+	}
+
+	protected function genDescriptorKey(){
+		return microtime(1) . mt_rand();
 	}
 }

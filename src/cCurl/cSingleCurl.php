@@ -88,7 +88,7 @@ class cSingleCurl extends cCurl{
 		$descriptor =& $this->getDescriptor();
 		do {
 			$this->sleep();
-			if ($this->getNumRepeat() > 0) $this->reinit();
+			if ($this->getNumRepeat() > 0) $this->reInit();
 			$this->setOption($descriptor, CURLOPT_URL, $url);
 			$this->setOptions($descriptor);
 			$answer = $this->exec();
@@ -104,7 +104,7 @@ class cSingleCurl extends cCurl{
 				}
 			}
 			$this->setRedirectCount(0);
-			$regAnswer = (($checkRegEx && preg_match($checkRegEx, $answer)) || !$checkRegEx);
+			$regAnswer = (!$checkRegEx || ($checkRegEx && preg_match($checkRegEx, $answer)));
 			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {
 				$this->endRepeat();
 				break;
@@ -117,7 +117,7 @@ class cSingleCurl extends cCurl{
 		} while ($this->repeat());
 		$this->setReferer($descriptor, $url);
 		$this->setAnswer($this->prepareContent($answer));
-		$this->reinit();
+		$this->reInit();
 		return $this->getAnswer();
 	}
 
