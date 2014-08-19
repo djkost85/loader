@@ -19,6 +19,7 @@ $functions = array(
 	'betweenTag',
 	'translitCyrillicToLatin',
 	'clearNote',
+	'getEncodingName',
 );
 
 runTest($functions, 'cStringWork_');
@@ -58,4 +59,13 @@ function cStringWork_clearNote(){
 	Как<h1> tak!';
 	$trueText = ' Hello Мир!!! фывпфывап asdfsd agjas;dgl Как tak!';
 	return $trueText == cStringWork::clearNote( $text, array('%<[^>]+>%ims', '%\s+%',));
+}
+
+function cStringWork_getEncodingName(){
+	$dir = dirname(__FILE__);
+	$text_cp1251 = file_get_contents($dir . '/support/cp1251.txt');
+	$text_utf8 = file_get_contents($dir . '/support/utf8.txt');
+	$cp1251 = cStringWork::getEncodingName($text_cp1251);
+	$utf8 = cStringWork::getEncodingName($text_utf8);
+	return $cp1251 == 'windows-1251' && $utf8 == 'UTF-8';
 }

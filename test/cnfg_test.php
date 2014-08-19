@@ -15,12 +15,15 @@ echo "<a href='index.php'>..</a>";
 
 function runTest($functions, $prefix = ''){
 	$start = microtime(true);
-	echo date("[H:i:s Y/m/d]", $start)."\n<br>\n";
+	$memStart = memory_get_usage(true);
+	echo date("[H:i:s Y/m/d]", $start)."[$memStart]\n<br>\n";
 	echo "<table border='1'>";
+	echo "<tr><td>Method</td><td>Result</td><td>time</td><td>memory</td></tr>";
 	foreach($functions as $function){
 		echo "<tr>";
 		echo "<td> $function </td>";
 		$funStart = microtime(true);
+		$memFunStart = memory_get_usage(true);
 		$nameFunction = $prefix.$function;
 		if($nameFunction()){
 			echo "<td> success </td>";
@@ -29,11 +32,15 @@ function runTest($functions, $prefix = ''){
 			//break;
 		}
 		$funTime = microtime(true) - $funStart;
+		$memFunEnd = memory_get_usage(true) - $memFunStart;
 		echo " <td> $funTime </td>";
+		echo "<td> $memFunEnd </td>";
 		echo "</tr>";
 	}
 	echo "</table>";
+	$memEnd = memory_get_usage(true);
 	$end = microtime(true);
 	echo date('[H:i:s Y/m/d]', $end)."\n<br>\n";
 	echo '[~'.($end-$start).']';
+	echo '['.($memEnd - $memStart).']';
 }

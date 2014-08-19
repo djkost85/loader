@@ -17,6 +17,7 @@ class cStringWork
 	 * @var array
 	 */
 	private $_cryptTagArray;
+	public static $encodingDetection = array('windows-1251' , 'koi8-r', 'iso8859-5');
 	private static $_ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(?<port>\d{1,10})?)';
 
 	/**
@@ -245,15 +246,14 @@ class cStringWork
 		if (mb_detect_encoding($text, array('UTF-8'), true) == 'UTF-8') {
 			return 'UTF-8';
 		}
-		$encodingDetection = array('windows-1251' , 'koi8-r', 'iso8859-5');
 		$weights = array();
 		$specters = array();
-		foreach ($encodingDetection as $encoding) {
+		foreach (self::$encodingDetection as $encoding) {
 			$weights[$encoding] = 0;
 			$specters[$encoding] = require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'specters' . DIRECTORY_SEPARATOR . $encoding . '.php';
 		}
 		foreach (str_split($text, 2) as $key) {
-			foreach ($encodingDetection as $encoding) {
+			foreach (self::$encodingDetection as $encoding) {
 				if (isset($specters[$encoding][$key])) {
 					$weights[$encoding] += $specters[$encoding][$key];
 				}
@@ -265,7 +265,9 @@ class cStringWork
 			$weights[$encoding] = $sumWeight ? $weight / $sumWeight : 0;
 		}
 		arsort($weights, SORT_NUMERIC);
-		return key($weights);
+		$encodingName = key($weights);
+		unset($weights, $specters, $text);
+		return $encodingName;
 	}
 
 	/**
