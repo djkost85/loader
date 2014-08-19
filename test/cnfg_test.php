@@ -33,14 +33,18 @@ function runTest($functions, $prefix = ''){
 		}
 		$funTime = microtime(true) - $funStart;
 		$memFunEnd = memory_get_usage(true) - $memFunStart;
+		gc_collect_cycles();
+		$memFunEndAfterGC = memory_get_usage(true) - $memFunStart;
+		$memoryFunPeak = memory_get_peak_usage(true);
 		echo " <td> $funTime </td>";
-		echo "<td> $memFunEnd </td>";
+		echo "<td> $memFunEnd ($memFunEndAfterGC)[$memoryFunPeak]</td>";
 		echo "</tr>";
 	}
 	echo "</table>";
 	$memEnd = memory_get_usage(true);
+	$memoryPeak = memory_get_peak_usage(true);
 	$end = microtime(true);
 	echo date('[H:i:s Y/m/d]', $end)."\n<br>\n";
 	echo '[~'.($end-$start).']';
-	echo '['.($memEnd - $memStart).']';
+	echo '['.($memEnd - $memStart).'](' . $memoryPeak .')';
 }
