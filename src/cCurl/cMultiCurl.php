@@ -99,10 +99,12 @@ class cMultiCurl extends cCurl{
 	protected function exec(){
 		$descriptor =& $this->getDescriptor();
 		$descriptorArray =& $this->getDescriptorArray();
+		$start = microtime(true);
 		do {
 			curl_multi_exec($descriptor['descriptor'], $running);
-			usleep($this->getWaitExecMSec());
+			usleep($this->_waitExecMSec);
 		} while ($running > 0);
+		var_dump(microtime(true) - $start);
 		$answer = array();
 		foreach ($descriptorArray as $key => $value){
 			$answer[$key] = curl_multi_getcontent($descriptorArray[$key]['descriptor']);
