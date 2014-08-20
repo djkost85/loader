@@ -9,10 +9,20 @@
 require_once dirname(__FILE__) . '/cnfg_test.php';
 use GetContent\cMultiCurl as cMultiCurl;
 $maxIterations = 7;
+$gc = new cMultiCurl();
+$url = array(
+	'vk.com',
+	'mail.ru',
+	'torg.ua',
+	//'google.com.ua',
+	'ya.ru',
+	'vk.com',
+	'odnoklassniki.ru',
+	'slando.ua',
+	'vk.lg.ua',
+);
 for($i=0; $i < $maxIterations; $i++){
-	$url = array('vk.com', 'mail.ru');
 	$needEncoding = 'UTF-8';
-	$gc = new cMultiCurl();
 	$gc->setEncodingAnswer(false);
 	$gc->load($url);
 	$gc->setEncodingAnswer(true);

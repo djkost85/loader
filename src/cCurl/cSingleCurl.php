@@ -67,7 +67,7 @@ class cSingleCurl extends cCurl{
 	public function init(){
 		$descriptor =& $this->getDescriptor();
 		if (!isset($descriptor['descriptor_key']) || !$descriptor['descriptor_key']){
-			$descriptor['descriptor_key'] = microtime(1) . mt_rand();
+			$descriptor['descriptor_key'] = $this->genDescriptorKey();
 		}
 		$descriptor['descriptor'] = curl_init();
 	}
@@ -81,7 +81,7 @@ class cSingleCurl extends cCurl{
 		$descriptor =& $this->getDescriptor();
 		curl_close($descriptor['descriptor']);
 		unset($descriptor['descriptor']);
-		if (!$this->getSaveOption()) unset($descriptor['option']);
+		$this->saveOption($descriptor);
 	}
 
 	public function load($url = '', $checkRegEx = false){

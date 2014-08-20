@@ -24,7 +24,7 @@ abstract class cCurl{
 	protected $_encodingAnswer = true;
 	protected $_encodingName = 'utf-8';
 	protected $_encodingAnswerName;
-	protected $_saveOption = false;
+	protected $_saveOption = true;
 	protected $_sleepTime = 0;
 	protected $_redirectHttpCode = array(300,301,302,303,304,305,306,307);
 	protected $_useCookie = true;
@@ -54,6 +54,7 @@ abstract class cCurl{
 	 */
 	public $userAgent;
 	public $descriptor;
+	protected $_shareDescriptor;
 	public $defaultOptions = array(
 		CURLOPT_URL => '',
 		CURLOPT_HEADER => true,
@@ -64,14 +65,14 @@ abstract class cCurl{
 		CURLOPT_POST => false,
 		CURLOPT_POSTFIELDS => '',
 		CURLOPT_PROXY => false,
-		CURLOPT_FRESH_CONNECT => true,
-		CURLOPT_FORBID_REUSE => true,
+		CURLOPT_FRESH_CONNECT => false,
+		CURLOPT_FORBID_REUSE => false,
 		CURLOPT_AUTOREFERER => true,
 		CURLOPT_SSL_VERIFYHOST => false,
 		CURLOPT_SSL_VERIFYPEER => false,
 		CURLOPT_COOKIEJAR => false,
 		CURLOPT_COOKIEFILE => false,
-		CURLOPT_HTTPHEADER => array(),
+		//CURLOPT_HTTPHEADER => array(),
 		CURLOPT_PORT => 80,
 		CURLOPT_MAXREDIRS => 25,
 	);
@@ -372,6 +373,10 @@ abstract class cCurl{
 		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
 	}
 
+	protected function setOptionShare(&$descriptor){
+		$this->setOption($descriptor, CURLOPT_SHARE, $this->_shareDescriptor);
+	}
+
 	/**
 	 * @param boolean $useStaticCookie
 	 */
@@ -405,10 +410,12 @@ abstract class cCurl{
 		$this->userAgent = new cUserAgent('desktop');
 		$this->setDefaultOption(CURLOPT_USERAGENT, $this->userAgent->getRandomUserAgent());
 		$this->_cookie = new cCookie();
+		$this->shareInit();
 		$this->init();
 	}
 
 	function __destruct(){
+		curl_share_close($this->_shareDescriptor);
 		$this->_cookie->deleteOldCookieFile(3600);
 	}
 
@@ -426,14 +433,15 @@ abstract class cCurl{
 		}
 	}
 
+	protected function shareInit(){
+		$this->_shareDescriptor = curl_share_init();
+		curl_share_setopt($this->_shareDescriptor, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+	}
+
 	public final function setOption(&$descriptor, $option, $value = null){
-		if(!in_array($option, array_keys($this->getDefaultOptions()))){
-			return false;
-		}
 		if ($value === null){
 			$descriptor['option'][$option] = $this->getDefaultOption($option);
-		}
-		else{
+		} else {
 			$descriptor['option'][$option] = $value;
 		}
 		$this->configOption($descriptor, $option, $descriptor['option'][$option]);
@@ -441,14 +449,11 @@ abstract class cCurl{
 	}
 
 	public final function setOptions(&$descriptor, $options = array()){
+		foreach($options as $keySetting => $value){
+			$this->setOption($descriptor, $keySetting, $options[$keySetting]);
+		}
 		foreach ($this->defaultOptions as $keySetting => $value) {
-			if (isset($options[$keySetting])){
-				$this->setOption($descriptor, $keySetting, $options[$keySetting]);
-			}
-			elseif(isset($descriptor['option'][$keySetting])) {
-				$this->setOption($descriptor,$keySetting,$descriptor['option'][$keySetting]);
-			}
-			else {
+			if(!isset($descriptor['option'][$keySetting])) {
 				$this->setOption($descriptor, $keySetting);
 			}
 		}
@@ -460,6 +465,7 @@ abstract class cCurl{
 		if($this->getUseCookie()){
 			$this->setOptionCookie($descriptor);
 		}
+		$this->setOptionShare($descriptor);
 		return curl_setopt_array($descriptor['descriptor'], $descriptor['option']);
 	}
 
@@ -495,6 +501,12 @@ abstract class cCurl{
 				break;
 			default:
 				break;
+		}
+	}
+
+	protected function saveOption(&$descriptorCurl){
+		if (!$this->getSaveOption()){
+			unset($descriptorCurl['option']);
 		}
 	}
 

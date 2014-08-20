@@ -18,7 +18,7 @@ class cMultiCurl extends cCurl{
 	private $_countDescriptor;
 	private $_countStream = 1;
 	private $_countCurl = 1;
-	private $_waitExecMSec = 10000;
+	private $_waitExecMSec = 100000;
 
 	public function &getDescriptorArray() {
 		return $this->descriptorArray;
@@ -92,19 +92,25 @@ class cMultiCurl extends cCurl{
 				$descriptorArray[$i]['descriptor_key'] = $this->genDescriptorKey();
 			}
 			$descriptorArray[$i]['descriptor'] = curl_init();
-			curl_multi_add_handle($descriptor['descriptor'], $descriptorArray[$i]['descriptor']);
+			$this->addDescriptors($descriptor, $descriptorArray[$i]);
 		}
+	}
+
+	protected function addDescriptors(&$descriptor, &$descriptorCurl){
+		if(is_resource($descriptor['descriptor']) && is_resource($descriptorCurl['descriptor'])){
+			return curl_strerror(curl_multi_add_handle($descriptor['descriptor'], $descriptorCurl['descriptor']));
+		}
+		return false;
 	}
 
 	protected function exec(){
 		$descriptor =& $this->getDescriptor();
 		$descriptorArray =& $this->getDescriptorArray();
-		$start = microtime(true);
+		$running = null;
 		do {
 			curl_multi_exec($descriptor['descriptor'], $running);
 			usleep($this->_waitExecMSec);
 		} while ($running > 0);
-		var_dump(microtime(true) - $start);
 		$answer = array();
 		foreach ($descriptorArray as $key => $value){
 			$answer[$key] = curl_multi_getcontent($descriptorArray[$key]['descriptor']);
@@ -118,19 +124,32 @@ class cMultiCurl extends cCurl{
 		foreach ($descriptorArray as $key => &$descriptorCurl) {
 			if (isset($descriptorCurl['descriptor'])) {
 				if(is_resource($descriptorCurl['descriptor'])){
-					if(is_resource($descriptor['descriptor'])){
-						curl_multi_remove_handle($descriptor['descriptor'], $descriptorCurl['descriptor']);
-					}
+					$this->removeDescriptors($descriptor, $descriptorCurl);
 					curl_close($descriptorCurl['descriptor']);
 				}
-				unset($descriptorArray[$key]['descriptor']);
-				if (!$this->getSaveOption()){
-					unset($descriptorCurl['option']);
-				}
+				unset($descriptorCurl['descriptor']);
+				$this->saveOption($descriptorCurl);
 			}
 		}
 		if (isset($descriptor['descriptor']) && is_resource($descriptor['descriptor'])) {
 			curl_multi_close($descriptor['descriptor']);
+		}
+	}
+
+	protected function removeDescriptors(&$descriptor, &$descriptorCurl){
+		if(is_resource($descriptor['descriptor']) && is_resource($descriptorCurl['descriptor'])){
+			return curl_strerror(curl_multi_remove_handle($descriptor['descriptor'], $descriptorCurl['descriptor']));
+		}
+		return false;
+	}
+
+	protected function resetDescriptors(){
+		$descriptor =& $this->getDescriptor();
+		$descriptorArray =& $this->getDescriptorArray();
+		foreach ($descriptorArray as &$descriptorCurl) {
+			$this->removeDescriptors($descriptor, $descriptorCurl);
+			$this->addDescriptors($descriptor, $descriptorCurl);
+			$this->saveOption($descriptorCurl);
 		}
 	}
 
@@ -165,6 +184,7 @@ class cMultiCurl extends cCurl{
 			foreach ($descriptorArray as &$value){
 				$this->setOptions($value);
 			}
+			$this->resetDescriptors();
 			$answer = $this->exec();
 			foreach ($answer as $key => &$value) {
 				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
@@ -183,7 +203,6 @@ class cMultiCurl extends cCurl{
 					}
 				}
 			}
-			$this->reInit();
 			$this->sleep();
 			if (!$this->_url) {
 				$this->endRepeat();
