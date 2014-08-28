@@ -98,7 +98,7 @@ class cMultiCurl extends cCurl{
 
 	protected function addDescriptors(&$descriptor, &$descriptorCurl){
 		if(is_resource($descriptor['descriptor']) && is_resource($descriptorCurl['descriptor'])){
-			return curl_strerror(curl_multi_add_handle($descriptor['descriptor'], $descriptorCurl['descriptor']));
+			return curl_multi_add_handle($descriptor['descriptor'], $descriptorCurl['descriptor']);
 		}
 		return false;
 	}
@@ -138,7 +138,7 @@ class cMultiCurl extends cCurl{
 
 	protected function removeDescriptors(&$descriptor, &$descriptorCurl){
 		if(is_resource($descriptor['descriptor']) && is_resource($descriptorCurl['descriptor'])){
-			return curl_strerror(curl_multi_remove_handle($descriptor['descriptor'], $descriptorCurl['descriptor']));
+			return curl_multi_remove_handle($descriptor['descriptor'], $descriptorCurl['descriptor']);
 		}
 		return false;
 	}
