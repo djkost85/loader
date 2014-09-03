@@ -23,7 +23,7 @@ abstract class cCurl{
 	protected $_minSizeAnswer = 1000;
 	protected $_encodingAnswer = true;
 	protected $_encodingName = 'utf-8';
-	protected $_encodingAnswerName;
+	protected $_encodingAnswerName = false;
 	protected $_saveOption = true;
 	protected $_sleepTime = 0;
 	protected $_redirectHttpCode = array(300,301,302,303,304,305,306,307);
@@ -714,9 +714,11 @@ abstract class cCurl{
 
 	public function encodingAnswerText($text) {
 		if ($this->getEncodingAnswer()) {
-			$to = $this->getEncodingName();
-			$this->setEncodingAnswerName(cStringWork::getEncodingName($text));
 			$from = $this->getEncodingAnswerName();
+			$to = $this->getEncodingName();
+			if(!$from){
+				$from = cStringWork::getEncodingName($text);
+			}
 			if (!preg_match('%'.preg_quote($from,'%').'%i',$to)){
 				$text = mb_convert_encoding( $text, $to, $from);
 			}
