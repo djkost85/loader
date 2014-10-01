@@ -21,13 +21,13 @@ abstract class cCurl{
 	protected $_maxRepeat = 10;
 	protected $_numRepeat = 0;
 	protected $_minSizeAnswer = 1000;
-	protected $_encodingAnswer = true;
+	protected $_encodingAnswer = false;
 	protected $_encodingName = 'utf-8';
 	protected $_encodingAnswerName = false;
 	protected $_saveOption = true;
 	protected $_sleepTime = 0;
 	protected $_redirectHttpCode = array(300,301,302,303,304,305,306,307);
-	protected $_useCookie = true;
+	protected $_useCookie = false;
 	/**
 	 * Тип получаемых данных
 	 * @var mixed
