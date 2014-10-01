@@ -1,0 +1,127 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: EC
+ * Date: 01.10.2014
+ * Time: 9:17
+ * Project: parser_ge
+ * @author: Evgeny Pynykh bpteam22@gmail.com
+ */
+
+namespace GetContent;
+
+class cSavePage {
+
+	/**
+	 * @var \mysqli
+	 */
+	private $dbConnect;
+	private $dbHost = 'localhost';
+	private $dbName = 'save_page';
+	private $dbUser = 'Z';
+	private $dbPassword = '123456';
+
+	private $tablePrefix;
+	private $session;
+
+	/**
+	 * @return mixed
+	 */
+	public function getTablePrefix() {
+		return $this->tablePrefix;
+	}
+
+	/**
+	 * @param mixed $tablePrefix
+	 */
+	public function setTablePrefix($tablePrefix) {
+		$this->tablePrefix = $tablePrefix;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getSession() {
+		return $this->session;
+	}
+
+	/**
+	 * @param mixed $session
+	 */
+	public function setSession($session) {
+		$this->session = $session;
+	}
+
+
+
+	function __construct($tablePrefix){
+		$this->setTablePrefix($tablePrefix);
+		$this->InitTable();
+		$this->setSession(time());
+	}
+
+	public function InitTable(){
+		$query = "CREATE TABLE IF NOT EXISTS `{$this->dbName}`.`sp_{$this->tablePrefix}` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  `session` VARCHAR(45) NULL,
+  `parameter` VARCHAR(255) NULL,
+  `url` VARCHAR(255) NULL,
+  `options` LONGTEXT NULL,
+  `page` LONGTEXT NULL,
+  `timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`));
+";
+		$this->query($query);
+	}
+
+	private function query($query) {
+		$this->connect();
+		return $this->dbConnect->query($query);
+	}
+
+	private function connect() {
+		if(is_null($this->dbConnect) || !is_object($this->dbConnect) || (is_object($this->dbConnect) && get_class($this->dbConnect) == 'mysqli' && !$this->dbConnect->ping())){
+			$this->dbConnect = new \mysqli($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
+			if ($this->dbConnect->connect_error) {
+				exit("Не удалось подключиться к БД.(" . $this->dbConnect->connect_errno . ')' . $this->dbConnect->connect_error);
+			}
+			$this->dbConnect->set_charset("utf8");
+		}
+	}
+
+	private function escape($string){
+		$this->connect();
+		return $this->dbConnect->real_escape_string($string);
+	}
+
+	public function save($parameter, $url, $page, $options = ''){
+
+		$query = sprintf(
+			'INSERT INTO `%s`.`sp_%s` (`session`, `parameter`, `url`, `options`, `page`) VALUE (\'%s\', \'%s\', \'%s\', \'%s\', \'%s\')',
+			$this->dbName,
+			$this->tablePrefix,
+			$this->escape($this->session),
+			$this->escape($parameter),
+			$this->escape($url),
+			$this->escape($options),
+			$this->escape($page)
+		);
+		return $this->query($query);
+
+	}
+
+	public function getPage($parameter, $url, $session = ''){
+		$query = sprintf(
+			"SELECT page FROM `%s`.`sp_%s` WHERE `parameter` = '%s' AND `url` = '%s' AND `session` = '%s' LIMIT 1",
+			$this->dbName,
+			$this->tablePrefix,
+			$this->escape($parameter),
+			$this->escape($url),
+			$this->escape($session)
+		);
+		$result = $this->query($query);
+		$data = $result->fetch_assoc();
+		$result->free();
+		return $data['page'];
+	}
+} 
