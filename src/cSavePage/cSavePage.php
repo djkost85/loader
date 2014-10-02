@@ -110,7 +110,8 @@ class cSavePage {
 
 	}
 
-	public function getPage($parameter, $url, $session = ''){
+	public function getPage($parameter, $url, $session = false){
+		$session = $session ? $session : $this->getLastSession($parameter, $url);
 		$query = sprintf(
 			"SELECT page FROM `%s`.`sp_%s` WHERE `parameter` = '%s' AND `url` = '%s' AND `session` = '%s' LIMIT 1",
 			$this->dbName,
@@ -123,5 +124,25 @@ class cSavePage {
 		$data = $result->fetch_assoc();
 		$result->free();
 		return $data['page'];
+	}
+
+	public function getLastSession($parameter = false, $url = false){
+		$where = array();
+		if($parameter){
+			$where[] = sprintf("`parameter` = '%s'", $this->escape($parameter));
+		}
+		if($url){
+			$where[] = sprintf("`url` = '%s'", $this->escape($url));
+		}
+		$query = sprintf(
+			"SELECT MAX(session) as last_session FROM `%s`.`sp_%s` %s",
+			$this->dbName,
+			$this->tablePrefix,
+			$where ? 'WHERE ' . implode( ' AND ', $where) : ''
+			);
+		$result = $this->query($query);
+		$data = $result->fetch_assoc();
+		$result->free();
+		return $data['last_session'];
 	}
 } 
