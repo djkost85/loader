@@ -123,9 +123,13 @@ class cSavePage {
 			$this->escape($session)
 		);
 		$result = $this->query($query);
-		$data = $result->fetch_assoc();
-		$result->free();
-		return $data['page'];
+		if($result){
+			$data = $result->fetch_assoc();
+			$result->free();
+			return $data['page'];
+		} else {
+			return false;
+		}
 	}
 
 	public function getLastSession($parameter = false, $url = false){
