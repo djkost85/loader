@@ -69,7 +69,9 @@ class cSavePage {
   `options` LONGTEXT NULL,
   `page` LONGTEXT NULL,
   `timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`));
+    PRIMARY KEY (`id`),
+  INDEX `page` (`parameter` ASC, `url` ASC, `session` ASC))
+  ENGINE = InnoDB;
 ";
 		$this->query($query);
 	}
