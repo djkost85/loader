@@ -8,7 +8,6 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 require_once dirname(__FILE__) . "/cnfg.php";
-require_once dirname(__FILE__) . "/vendor/include.php";
 
 require_once dirname(__FILE__) . "/src/cFile/cFile.php";
 require_once dirname(__FILE__) . "/src/cList/cList.php";
@@ -21,5 +20,6 @@ require_once dirname(__FILE__) . "/src/cCurl/cMultiCurl.php";
 require_once dirname(__FILE__) . "/src/cProxy/cProxy.php";
 require_once dirname(__FILE__) . "/src/cProxy/cUpdateProxy.php";
 require_once dirname(__FILE__) . "/src/cPhantomJS/cPhantomJS.php";
+require_once dirname(__FILE__) . "/src/cSimpleHTTP/cSimpleHTTP.php";
 require_once dirname(__FILE__) . "/src/cUserAgent/cUserAgent.php";
 require_once dirname(__FILE__) . "/src/cSavePage/cSavePage.php";

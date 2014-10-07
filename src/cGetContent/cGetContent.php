@@ -21,6 +21,10 @@ class cGetContent {
 	 */
 	public $phantomjs;
 	/**
+	 * @var cSimpleHTTP
+	 */
+	public $simpleHTTP;
+	/**
 	 * @var cCookie
 	 */
 	public $cookie;
@@ -41,6 +45,9 @@ class cGetContent {
 			case 'phantom':
 				$this->_mode = $mode;
 				$this->curlToPhantom();
+				break;
+			case 'simpleHTTP':
+				$this->_mode = $mode;
 				break;
 			default:
 				return false;
@@ -108,7 +115,7 @@ class cGetContent {
 		}
 	}
 
-	public function getContent($url, $checkRegEx='%%'){
+	public function getContent($url, $checkRegEx = false){
 		switch($this->getMode()){
 			case 'curl':
 				$answer = $this->curl->load($url, $checkRegEx);
@@ -116,8 +123,8 @@ class cGetContent {
 			case 'phantom':
 				do{
 					$answer = $this->phantomjs->renderText($url);
-					if($this->checkAnswerValid($answer) && preg_match($checkRegEx, $answer)){
-						$answer = $this->encodingAnswerText($answer);
+					if($this->checkAnswerValid($answer) && $checkRegEx && preg_match($checkRegEx, $answer)){
+						$answer = $this->curl->encodingAnswerText($answer);
 						$this->endRepeat();
 						break;
 					} else {
