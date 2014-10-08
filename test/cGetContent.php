@@ -25,32 +25,32 @@ runTest($functions, 'cGetContent_');
 
 function cGetContent_getContentCurl(){
 	$gc = new cGetContent();
-	$gc->setMode('curl');
-	$answer = $gc->getContent('http://ya.ru');
+	$gc->setLoader('curl');
+	$answer = $gc->load('http://ya.ru');
 	return preg_match('%yandex%ims',$answer);
 }
 
 function cGetContent_getContentPhantom(){
 	$gc = new cGetContent();
-	$gc->setMode('phantom');
-	$answer = $gc->getContent('http://ya.ru');
+	$gc->setLoader('phantom');
+	$answer = $gc->load('http://ya.ru');
 	return preg_match('%yandex%ims',$answer);
 }
 
 function cGetContent_getContentCurlToPhantom(){
 	$gc = new cGetContent();
-	$gc->setMode('curl');
-	$gc->getContent('http://ya.ru');
-	$gc->setMode('phantom');
+	$gc->setLoader('curl');
+	$gc->load('http://ya.ru');
+	$gc->setLoader('phantom');
 	$cookies = $gc->cookie->fromFilePhantomJS();
 	return isset($cookies['yandexuid']);
 }
 
 function cGetContent_getContentPhantomToCurl(){
 	$gc = new cGetContent();
-	$gc->setMode('phantom');
-	$gc->getContent('http://ya.ru');
-	$gc->setMode('curl');
+	$gc->setLoader('phantom');
+	$gc->load('http://ya.ru');
+	$gc->setLoader('curl');
 	$cookies = $gc->cookie->fromFileCurl();
 	return isset($cookies['yandexuid']);
 }

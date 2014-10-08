@@ -13,33 +13,33 @@ namespace GetContent;
 
 class cPhantomJS {
 
-	private $_answer;
-	private $_phantomFilesPath;
-	private $_dirForFile = 'files';
-	private $_dirForScript = 'script';
-	private $_dirForStorage = 'storage';
-	private $_keyStream = 'phantomjs';
-	private $_options;
-	private $_defaultOptions = array(
-		'cookies-file' => null, // /path/to/cookies.txt
-		'ignore-ssl-errors' => 'true',
-		'load-images' => 'true',
-		'local-storage-path' => null, // /some/path
-		'output-encoding' => 'utf-8',
-		'proxy' => null, // 192.168.1.42:8080
-		'proxy-type' => null, // http|socks5|none
-		'proxy-auth' => null, // username:password
-		'local-to-remote-url-access' => 'true',
-	);
-	private $_scriptName;
-	private $_phantomExePath;
-	private $_arguments = array();
-	private $_url = 'http://ya.ru';
-	private $_referer = 'http://google.com/';
+	private $url;
+	private $info;
+	private $answer;
+	private $phantomFilesPath;
+	private $dirForFile = 'files';
+	private $dirForScript = 'script';
+	private $dirForStorage = 'storage';
+	private $keyStream = 'phantomjs';
+	const optCookiesFile = 'cookies-file';
+	const optIgnoreSslErrors = 'ignore-ssl-errors';
+	const optLoadImages = 'load-images';
+	const optLocalStoragePath = 'local-storage-path';
+	const optOutputEncoding = 'output-encoding';
+	const optProxy = 'proxy';
+	const optProxyType = 'proxy-type';
+	const optProxyAuth = 'proxy-auth';
+	const optLocalToRemoteUrlAccess = 'local-to-remote-url-access';
+	private $options;
+	private $defaultOptions;
+	private $scriptName;
+	private $phantomExePath;
+	private $arguments = array();
+	private $referer = 'http://google.com/';
 	/**
 	 * @var cCookie
 	 */
-	private $_cookie;
+	private $cookie;
 	/**
 	 * @var cUserAgent
 	 */
@@ -47,38 +47,38 @@ class cPhantomJS {
 	/**
 	 * @var bool
 	 */
-	private $_useProxy;
+	private $useProxy;
 	/**
 	 * @var string|cProxy
 	 */
 	public $proxy;
 
 	/**
-	 * @param string $url
+	 * @return mixed
 	 */
-	public function setUrl($url) {
-		$this->_url = $url;
+	public function getUrl() {
+		return $this->url;
 	}
 
 	/**
-	 * @return string
+	 * @param mixed $url
 	 */
-	public function getUrl() {
-		return $this->_url;
+	public function setUrl($url) {
+		$this->url = $url;
 	}
 
 	/**
 	 * @param mixed $answer
 	 */
 	public function setAnswer($answer) {
-		$this->_answer = $answer;
+		$this->answer = $answer;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getAnswer() {
-		return $this->_answer;
+		return $this->answer;
 	}
 
 	private function getPathToPhantomDir($dirName){
@@ -89,86 +89,86 @@ class cPhantomJS {
 	 * @param string $dirForFile
 	 */
 	public function setDirForFile($dirForFile) {
-		$this->_dirForFile = $dirForFile;
+		$this->dirForFile = $dirForFile;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getDirForFile() {
-		return $this->getPathToPhantomDir($this->_dirForFile);
+		return $this->getPathToPhantomDir($this->dirForFile);
 	}
 
 	/**
 	 * @param string $dirForScript
 	 */
 	public function setDirForScript($dirForScript) {
-		$this->_dirForScript = $dirForScript;
+		$this->dirForScript = $dirForScript;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getDirForScript() {
-		return $this->getPathToPhantomDir($this->_dirForScript);
+		return $this->getPathToPhantomDir($this->dirForScript);
 	}
 
 	/**
 	 * @param string $dirForStorage
 	 */
 	public function setDirForStorage($dirForStorage) {
-		$this->_dirForStorage = $dirForStorage;
+		$this->dirForStorage = $dirForStorage;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getDirForStorage() {
-		return $this->getPathToPhantomDir($this->_dirForStorage);
+		return $this->getPathToPhantomDir($this->dirForStorage);
 	}
 
 	/**
 	 * @param mixed $phantomFilesPath
 	 */
 	public function setPhantomFilesPath($phantomFilesPath) {
-		$this->_phantomFilesPath = $phantomFilesPath;
+		$this->phantomFilesPath = $phantomFilesPath;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getPhantomFilesPath() {
-		return $this->_phantomFilesPath;
+		return $this->phantomFilesPath;
 	}
 
 	/**
 	 * @param mixed $keyStream
 	 */
 	public function setKeyStream($keyStream) {
-		$this->_keyStream = $keyStream;
-		$this->_cookie = new cCookie($keyStream);
-		$this->setDefaultOption('cookies-file', $this->_cookie->getFilePhantomJSName());
+		$this->keyStream = $keyStream;
+		$this->cookie = new cCookie($keyStream);
+		$this->setDefaultOption(self::optCookiesFile, $this->cookie->getFilePhantomJSName());
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getKeyStream() {
-		return $this->_keyStream;
+		return $this->keyStream;
 	}
 
 	/**
 	 * @param mixed $options
 	 */
 	public function setOptions($options) {
-		$this->_options = $options;
+		$this->options = $options;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getOptions() {
-		return $this->_options;
+		return $this->options;
 	}
 
 	/**
@@ -176,7 +176,7 @@ class cPhantomJS {
 	 * @param bool|string $value
 	 */
 	public function setOption($option, $value) {
-		$this->_options[$option] = $value;
+		$this->options[$option] = $value;
 	}
 
 	/**
@@ -184,21 +184,21 @@ class cPhantomJS {
 	 * @return bool|string
 	 */
 	public function getOption($option) {
-		return isset($this->_options[$option]) ? $this->_options[$option] : null;
+		return isset($this->options[$option]) ? $this->options[$option] : null;
 	}
 
 	/**
 	 * @param array $defaultOptions
 	 */
 	public function setDefaultOptions($defaultOptions) {
-		$this->_defaultOptions = $defaultOptions;
+		$this->defaultOptions = $defaultOptions;
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getDefaultOptions() {
-		return $this->_defaultOptions;
+		return $this->defaultOptions;
 	}
 
 	/**
@@ -206,7 +206,7 @@ class cPhantomJS {
 	 * @param $value
 	 */
 	public function setDefaultOption($option, $value) {
-		$this->_defaultOptions[$option] = $value;
+		$this->defaultOptions[$option] = $value;
 	}
 
 	/**
@@ -214,56 +214,56 @@ class cPhantomJS {
 	 * @return array
 	 */
 	public function getDefaultOption($option) {
-		return $this->_defaultOptions[$option];
+		return $this->defaultOptions[$option];
 	}
 
 	/**
 	 * @param mixed $name
 	 */
 	public function setScriptName($name) {
-		$this->_scriptName = $name;
+		$this->scriptName = $name;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getScriptName() {
-		return $this->_scriptName;
+		return $this->scriptName;
 	}
 
 	/**
 	 * @param $phantomExePath
 	 */
 	public function setPhantomExePath($phantomExePath) {
-		$this->_phantomExePath = $phantomExePath;
+		$this->phantomExePath = $phantomExePath;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getPhantomExePath() {
-		return $this->_phantomExePath;
+		return $this->phantomExePath;
 	}
 
 	/**
 	 * @param array $arguments
 	 */
 	public function setArguments($arguments) {
-		$this->_arguments = $arguments;
+		$this->arguments = $arguments;
 	}
 
 	/**
 	 * @return array
 	 */
 	public function getArguments() {
-		return $this->_arguments;
+		return $this->arguments;
 	}
 
 	/**
 	 * @param string|bool|int $useProxy 1/0 true/false '123.123.123.123:8080'
 	 */
 	public function setUseProxy($useProxy) {
-		$this->_useProxy = $this->setProxy($useProxy);
+		$this->useProxy = $this->setProxy($useProxy);
 
 	}
 
@@ -271,7 +271,7 @@ class cPhantomJS {
 	 * @return mixed
 	 */
 	public function getUseProxy() {
-		return $this->_useProxy;
+		return $this->useProxy;
 	}
 
 	/**
@@ -309,29 +309,48 @@ class cPhantomJS {
 	 * @param string $referer
 	 */
 	public function setReferer($referer) {
-		$this->_referer = $referer;
+		$this->referer = $referer;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getReferer() {
-		return $this->_referer;
+		return $this->referer;
 	}
 
 
 
 	function __construct($phantomExePath){
+		$this->setDefaultOptions(
+			array(
+				self::optCookiesFile => null, // /path/to/cookies.txt
+				self::optIgnoreSslErrors => 'true',
+				self::optLoadImages => 'false',
+				self::optLocalStoragePath => $this->getDirForStorage(), // /some/path
+				self::optOutputEncoding => 'utf-8',
+				self::optProxy => null, // 192.168.1.42:8080
+				self::optProxyType => null, // http|socks5|none
+				self::optProxyAuth => null, // username:password
+				self::optLocalToRemoteUrlAccess => 'true',
+			)
+		);
 		$this->setPhantomExePath($phantomExePath);
 		$this->setPhantomFilesPath(dirname(__FILE__));
-		$this->setDefaultOption('local-storage-path', $this->getDirForStorage());
 		$this->setKeyStream(microtime(1) . mt_rand());
 		$this->userAgent = new cUserAgent('desktop');
 	}
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
 		$this->setUrl($path);
-		return $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $screenWidthPx, $screenHeightPx));
+		$answer = $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $screenWidthPx, $screenHeightPx));
+		$this->info['header'] = $this->cutHeader($answer);
+		return $answer;
+	}
+
+	public function load($url){
+		$this->setOption(self::optLoadImages,'false');
+		return $this->renderText($url);
 	}
 
 	public function sendPost($path, $postStr, $screenWidthPx = 1280, $screenHeightPx = 720){
@@ -394,18 +413,18 @@ class cPhantomJS {
 			if (is_object($this->proxy)) {
 				$proxy = $this->proxy->getProxy($this->getKeyStream(), $this->getUrl());
 				if (is_string($proxy['proxy']) && cStringWork::isIp($proxy['proxy'])){
-					$this->setOption('proxy', $proxy['proxy']);
-					$this->setOption('proxy-type', $proxy['protocol']);
+					$this->setOption(self::optProxy, $proxy['proxy']);
+					$this->setOption(self::optProxyType, $proxy['protocol']);
 				}
 			} elseif (is_string($this->proxy['proxy'])){
-				$this->setOption('proxy', $this->proxy['proxy']);
-				$this->setOption('proxy-type', $this->proxy['type']);
-				$this->setOption('proxy-auth', $this->proxy['auth']);
+				$this->setOption(self::optProxy, $this->proxy['proxy']);
+				$this->setOption(self::optProxyType, $this->proxy['type']);
+				$this->setOption(self::optProxyAuth, $this->proxy['auth']);
 			}
 		} elseif($this->getOption('proxy') !== null) {
-			$this->setOption('proxy', null);
-			$this->setOption('proxy-type', null);
-			$this->setOption('proxy-auth', null);
+			$this->setOption(self::optProxy, null);
+			$this->setOption(self::optProxyType, null);
+			$this->setOption(self::optProxyAuth, null);
 		}
 	}
 
@@ -419,6 +438,21 @@ class cPhantomJS {
 
 	private function createScriptName(){
 		return "'" . $this->getDirForScript() . DIRECTORY_SEPARATOR . $this->getScriptName() . '.js' . "'";
+	}
+
+	public function getInfo(){
+		return $this->info;
+	}
+
+	protected function cutHeader(&$answer){
+		$header = array();
+		if($answer){
+			while(preg_match('%^<HEADER>\[\[(?<head>.*?)\]\]</HEADER>%Ums',$answer,$data)){
+				$header = explode("\n\n",$data['head']);
+				$answer = ltrim(preg_replace('%<HEADER>\[\['.preg_quote($data['head'],'\]\]</HEADER>%ms').'%ims', '', $answer));
+			}
+		}
+		return $header;
 	}
 
 } 

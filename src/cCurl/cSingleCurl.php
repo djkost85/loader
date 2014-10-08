@@ -14,35 +14,35 @@ namespace GetContent;
 
 class cSingleCurl extends cCurl{
 
-	private $_redirectCount;
-	private $_maxRedirectCount = 10;
+	private $redirectCount;
+	private $maxRedirectCount = 10;
 
 	/**
 	 * @param mixed $redirectCount
 	 */
 	public function setRedirectCount($redirectCount) {
-		$this->_redirectCount = $redirectCount;
+		$this->redirectCount = $redirectCount;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getRedirectCount() {
-		return $this->_redirectCount;
+		return $this->redirectCount;
 	}
 
 	/**
 	 * @param mixed $maxRedirectCount
 	 */
 	public function setMaxRedirectCount($maxRedirectCount) {
-		$this->_maxRedirectCount = $maxRedirectCount;
+		$this->maxRedirectCount = $maxRedirectCount;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getMaxRedirectCount() {
-		return $this->_maxRedirectCount;
+		return $this->maxRedirectCount;
 	}
 
 	public function setKeyStream($key){
@@ -84,48 +84,32 @@ class cSingleCurl extends cCurl{
 		$this->saveOption($descriptor);
 	}
 
-	public function load($url = '', $checkRegEx = false){
+	public function load($url){
 		$descriptor =& $this->getDescriptor();
-		do {
-			$this->sleep();
-			if ($this->getNumRepeat() > 0) $this->reInit();
-			$this->setOption($descriptor, CURLOPT_URL, $url);
-			$this->setOptions($descriptor);
-			$answer = $this->exec();
-			$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
-			$descriptor['info']['error'] = curl_error($descriptor['descriptor']);
-			$descriptor['info']['header'] = $this->getHeader($answer);
-			if($this->isRedirect()){
-				if($this->useRedirect()){
-					$this->setReferer($descriptor, $url);
-					$answer = $this->load($descriptor['info']['redirect_url'], $checkRegEx);
-				} else {
-					break;
-				}
+		$this->setOption($descriptor, CURLOPT_URL, $url);
+		$this->setOptions($descriptor);
+		$answer = $this->exec();
+		$descriptor['info'] = curl_getinfo($descriptor['descriptor']);
+		$descriptor['info']['error'] = curl_error($descriptor['descriptor']);
+		$descriptor['info']['header'] = cHeaderHTTP::cutHeader($answer);
+		if(cHeaderHTTP::isRedirect($descriptor['info']['http_code'])){
+			if($this->useRedirect()){
+				$this->setReferer($descriptor, $url);
+				$answer = $this->load($descriptor['info']['redirect_url']);
 			}
-			$this->setRedirectCount(0);
-			$regAnswer = (!$checkRegEx || ($checkRegEx && preg_match($checkRegEx, $answer)));
-			if ((!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $descriptor['info'])) && $regAnswer) {
-				$this->endRepeat();
-				break;
-			} else {
-				$answer = false;
-				if ($this->getUseProxy() && is_object($this->proxy) && isset($descriptor['option'][CURLOPT_PROXY])) {
-					$this->proxy->deleteInList($descriptor['option'][CURLOPT_PROXY]);
-				}
-			}
-		} while ($this->repeat());
-		$this->setReferer($descriptor, $url);
-		$this->setAnswer($this->prepareContent($answer));
+		}
+		$this->setRedirectCount(0);
+		$this->setAnswer($answer);
 		$this->reInit();
 		return $this->getAnswer();
 	}
 
 	public function getAnswer(){
-		return $this->_answer;
+		return $this->answer;
 	}
 
-	private function isRedirect(){
-		return in_array($this->descriptor['info']['http_code'], $this->_redirectHttpCode);
+	public function getInfo(){
+		$descriptor = $this->getDescriptor();
+		return isset($descriptor['info'])?$descriptor['info']:false;
 	}
 }

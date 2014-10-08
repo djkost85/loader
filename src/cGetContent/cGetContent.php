@@ -12,63 +12,162 @@ namespace GetContent;
 
 
 class cGetContent {
+
 	/**
-	 * @var cSingleCurl
+	 * @var cSingleCurl|cMultiCurl|cPhantomJS|cSimpleHTTP
 	 */
-	public $curl;
-	/**
-	 * @var cPhantomJS
-	 */
-	public $phantomjs;
-	/**
-	 * @var cSimpleHTTP
-	 */
-	public $simpleHTTP;
+	public $loader;
+
 	/**
 	 * @var cCookie
 	 */
 	public $cookie;
-	private $_mode;
-	private $_key;
-	private $_referer = 'http://google.com';
+
+	/**
+	 * @var cHeaderHTTP
+	 */
+	public $http;
+	private $loaderName;
+	private $oldLoadName = false;
+	private $key;
+
+	protected $encodingAnswer = false;
+	protected $encodingName = 'utf-8';
+	protected $encodingAnswerName = false;
+
+	protected $maxRepeat = 10;
+	protected $numRepeat = 0;
+	protected $minSizeAnswer = 1000;
+
+	protected $sleepTime = 0;
+
+	/**
+	 * @var cUserAgent
+	 */
+	public $userAgent;
+
+	/**
+	 * Тип получаемых данных
+	 * @var mixed
+	 * [file] Файл
+	 * [img] Изображение
+	 * [text] Текст
+	 * [html] html страницы
+	 */
+	protected $typeContent = 'text';
+
+	protected $checkAnswer = false;
+
+	public function setCheckAnswer($value) {
+		$this->checkAnswer = $value;
+	}
+
+	public function getCheckAnswer() {
+		return $this->checkAnswer;
+	}
+
+	/**
+	 * @param string $typeContent text | img | html | file
+	 * @return bool
+	 */
+	public function setTypeContent($typeContent = "text") {
+		$this->typeContent = $typeContent;
+	}
+
+	public function getTypeContent(){
+		return $this->typeContent;
+	}
 
 	/**
 	 * @param string $mode curl | phantom
 	 * @return bool
 	 */
-	public function setMode($mode) {
+	public function setLoader($mode) {
+		$this->setOldLoadName($this->getLoaderName());
 		switch($mode){
-			case 'curl' :
-				$this->_mode = $mode;
-				$this->phantomToCurl();
-				break;
-			case 'phantom':
-				$this->_mode = $mode;
-				$this->curlToPhantom();
-				break;
-			case 'simpleHTTP':
-				$this->_mode = $mode;
+			case 'cSingleCurl' :
+			case 'cMultiCurl':
+			case 'cPhantomJS':
+			case 'cSimpleHTTP':
+				unset($this->loader);
+				$this->loaderName = $mode;
+				$this->loader = new $mode();
 				break;
 			default:
 				return false;
 		}
+
 		return true;
 	}
 
 	/**
 	 * @return string
 	 */
-	public function getMode() {
-		return $this->_mode;
+	public function getLoaderName() {
+		return $this->loaderName;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getOldLoadName() {
+		return $this->oldLoadName;
+	}
+
+	/**
+	 * @param string $oldLoadName
+	 */
+	public function setOldLoadName($oldLoadName) {
+		$this->oldLoadName = $oldLoadName;
+	}
+
+	/**
+	 * @param boolean $encodingAnswer
+	 */
+	public function setEncodingAnswer($encodingAnswer) {
+		$this->encodingAnswer = $encodingAnswer;
+	}
+
+	/**
+	 * @return boolean
+	 */
+	public function getEncodingAnswer() {
+		return $this->encodingAnswer;
+	}
+
+	/**
+	 * @param string $encodingName
+	 */
+	public function setEncodingName($encodingName) {
+		$this->encodingName = $encodingName;
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getEncodingName() {
+		return $this->encodingName;
+	}
+
+	/**
+	 * @param mixed $encodingAnswerName
+	 */
+	public function setEncodingAnswerName($encodingAnswerName) {
+		$this->encodingAnswerName = $encodingAnswerName;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getEncodingAnswerName() {
+		return $this->encodingAnswerName;
 	}
 
 	/**
 	 * @param string $key
 	 */
 	public function setKey($key) {
-		$this->_key = $key;
-		$this->curl->setKeyStream($this->getKey());
-		$this->phantomjs->setKeyStream($this->getKey());
+		$this->key = $key;
 		$this->cookie->open($this->getKey());
 	}
 
@@ -76,86 +175,235 @@ class cGetContent {
 	 * @return string
 	 */
 	public function getKey() {
-		return $this->_key;
+		return $this->key;
+	}
+
+	public function setReferer($referer){
+		$this->loader->setReferer($referer);
+	}
+
+	public function getReferer(){
+		return $this->loader->getReferer();
 	}
 
 	/**
-	 * @param string $referer
+	 * @param int $maxRepeat
 	 */
-	public function setReferer($referer) {
-		$this->_referer = $referer;
-		$this->curl->setReferer($this->curl->getDescriptor(), $this->_referer);
-		$this->phantomjs->setReferer($this->_referer);
+	public function setMaxRepeat($maxRepeat) {
+		$this->maxRepeat = $maxRepeat;
 	}
 
 	/**
-	 * @return string
+	 * @return int
 	 */
-	public function getReferer() {
-		return $this->_referer;
+	public function getMaxRepeat() {
+		return $this->maxRepeat;
+	}
+
+	protected function nextRepeat(){
+		$this->setNumRepeat($this->getNumRepeat() + 1);
+	}
+
+	public function endRepeat() {
+		$this->setNumRepeat(0);
+	}
+
+	public function repeat() {
+		if ($this->getNumRepeat() < $this->getMaxRepeat()) {
+			$this->nextRepeat();
+			return true;
+		} else {
+			$this->endRepeat();
+			return false;
+		}
+	}
+	/**
+	 * @param int $numRepeat
+	 */
+	public function setNumRepeat($numRepeat) {
+		$this->numRepeat = $numRepeat;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getNumRepeat() {
+		return $this->numRepeat;
+	}
+
+	/**
+	 * @param int $minSizeAnswer
+	 */
+	public function setMinSizeAnswer($minSizeAnswer) {
+		$this->minSizeAnswer = $minSizeAnswer;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getMinSizeAnswer() {
+		return $this->minSizeAnswer;
+	}
+
+	/**
+	 * @param int $millisecond 0.000001 of second
+	 */
+	public function setSleepTime($millisecond) {
+		$this->sleepTime = $millisecond;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getSleepTime() {
+		return $this->sleepTime;
+	}
+
+	protected final function sleep(){
+		if($this->getSleepTime()){
+			usleep($this->getSleepTime());
+		}
+	}
+
+	protected function moveCookies(){
+		$old = $this->getOldLoadName();
+		$new = $this->getLoaderName();
+		if($new && $old && $this->canMoveCookies($new) && $this->canMoveCookies($old)){
+			$name = $old . 'To' . $new;
+			if(method_exists($this, $name)) {
+				return call_user_func(array($this, $name));
+			}
+		}
+		return false;
+	}
+
+	protected function canMoveCookies($name){
+		return $name != 'cMultiCurl' && $name != 'cSimpleHTTP';
+	}
+
+	public function setUserAgent($userAgent = false){
+		$this->loader->setUserAgent($userAgent?:$this->userAgent->getRandomUserAgent());
 	}
 
 
-
-	function __construct(){
-		$this->curl = new cSingleCurl();
-		$this->phantomjs = new cPhantomJS(PHANTOMJS_EXE);
+	function __construct($loaderName = 'cSimpleHTTP'){
 		$this->cookie = new cCookie();
-		$this->phantomjs->setDefaultOption('load-images', 'false');
 		$this->genKey();
-		$this->setMode('curl');
+		$this->userAgent = new cUserAgent('desktop');
+		$this->setLoader($loaderName);
+		$this->setUserAgent();
 	}
 
 	public function __call($name, $arguments){
-		if(method_exists($this->phantomjs, $name)){
-			return call_user_func_array(array($this->phantomjs, $name), $arguments);
+		if(method_exists($this->loader, $name)) {
+			return call_user_func_array(array($this->loader, $name), $arguments);
 		}
-		if(method_exists($this->curl, $name)) {
-			return call_user_func_array(array($this->curl, $name), $arguments);
-		}
+		return false;
 	}
 
-	public function getContent($url, $checkRegEx = false){
-		switch($this->getMode()){
-			case 'curl':
-				$answer = $this->curl->load($url, $checkRegEx);
-				break;
-			case 'phantom':
-				do{
-					$answer = $this->phantomjs->renderText($url);
-					if($this->checkAnswerValid($answer) && $checkRegEx && preg_match($checkRegEx, $answer)){
-						$answer = $this->curl->encodingAnswerText($answer);
-						$this->endRepeat();
-						break;
-					} else {
-						$answer = false;
-					}
-				}while($this->repeat());
-				break;
-			default:
-				return false;
-		}
+	public function load($url, $checkRegEx = false){
+		return is_array($url) ? $this->multiQuery($url, $checkRegEx) : $this->singleQuery($url, $checkRegEx);
+	}
+
+	protected function singleQuery($url, $checkRegEx = false){
+		do {
+			$answer = $this->loader->load($url);
+			$this->sleep();
+		} while ($this->repeat() && !$this->isGoodAnswer($answer, $this->loader->getInfo(), $checkRegEx));
 		$this->setReferer($url);
-		return $answer;
+		$this->endRepeat();
+		return $this->prepareContent($answer);
+	}
+
+	protected function multiQuery($url, $checkRegEx = false){
+		if(is_string($url)){
+			$url = array($url);
+		}
+		$activeUrl = array_values($url);
+		$goodAnswer = array();
+		do {
+			$answer = $this->loader->load($activeUrl);
+			foreach($answer as $key => &$value){
+				if($this->isGoodAnswer($value, $this->loader->getInfo($key), $checkRegEx)){
+					unset($activeUrl[$key]);
+					$goodAnswer[$key] = $this->prepareContent($value);
+				} else {
+					$value = false;
+				}
+			}
+			$this->sleep();
+		} while($this->repeat() && $activeUrl);
+		$this->endRepeat();
+		return $goodAnswer;
 	}
 
 	public function genKey(){
 		$this->setKey(microtime(true).rand());
 	}
 
-	private function curlToPhantom(){
+	private function cSingleCurlTocPgantomJS(){
 		$cookies = $this->cookie->fromFileCurl();
 		$this->cookie->creates($cookies);
-		$this->cookie->toFilePhantomJS($cookies);
+		return $this->cookie->toFilePhantomJS($cookies);
 	}
 
-	private function phantomToCurl(){
+	private function cPgantomJSTocSingleCurl(){
 		$cookies = $this->cookie->fromFilePhantomJS();
 		$this->cookie->creates($cookies);
-		$this->cookie->toFileCurl($cookies);
+		return $this->cookie->toFileCurl($cookies);
 	}
 
-	private function checkAnswerValid($answer){
-		return (strlen($answer) >= $this->curl->getMinSizeAnswer());
+	protected function isGoodAnswer($answer, $info, $checkRegEx = false){
+		$regAnswer = (!$checkRegEx || ($checkRegEx && preg_match($checkRegEx, $answer)));
+		return (!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $info)) && !$regAnswer;
 	}
+
+	protected function checkAnswerValid($answer, $info = array()) {
+		return (!isset($info['http_code']) || $this->http->checkCode($info['http_code'])) && $this->checkSizeAnswer($answer) && (!isset($info['content_type']) || $this->checkTypeContent($info['content_type']));
+	}
+
+	protected function checkSizeAnswer($answer){
+		return strlen($answer) < $this->getMinSizeAnswer();
+	}
+
+	protected function checkTypeContent($type){
+		switch ($this->getTypeContent()) {
+			case 'file':
+				return ($this->http->checkMimeType($type, 'file'));
+			case 'img':
+				return ($this->http->checkMimeType($type, 'img'));
+			case 'html':
+				return ($this->http->checkMimeType($type, 'html'));
+			default:
+				return true;
+		}
+	}
+
+	protected function prepareContent($answer) {
+		switch ($this->getTypeContent()) {
+			case 'text':
+				$answer = $this->encodingAnswerText($answer);
+				break;
+			case 'html':
+				$answer = $this->encodingAnswerText($answer);
+				break;
+		}
+		return $answer;
+	}
+
+	public function encodingAnswerText($text) {
+		if ($this->getEncodingAnswer()) {
+			$from = $this->getEncodingAnswerName();
+			$to = $this->getEncodingName();
+			if(!$from){
+				$from = cStringWork::getEncodingName($text);
+			}
+			if (!preg_match('%'.preg_quote($from,'%').'%i',$to)){
+				$text = mb_convert_encoding( $text, $to, $from);
+			}
+		}
+		return $text;
+	}
+
+
 }

@@ -13,37 +13,23 @@ namespace GetContent;
 
 abstract class cCurl{
 
-	protected $_scheme = 'http';
-	protected $_schemeDefaultPort = array('http' => 80, 'https' => 443);
-	protected $_url;
-	protected $_answer;
-	protected $_referer = '';
-	protected $_maxRepeat = 10;
-	protected $_numRepeat = 0;
-	protected $_minSizeAnswer = 1000;
-	protected $_encodingAnswer = false;
-	protected $_encodingName = 'utf-8';
-	protected $_encodingAnswerName = false;
-	protected $_saveOption = true;
-	protected $_sleepTime = 0;
-	protected $_redirectHttpCode = array(300,301,302,303,304,305,306,307);
-	protected $_useCookie = false;
-	/**
-	 * Тип получаемых данных
-	 * @var mixed
-	 * [file] Файл
-	 * [img] Изображение
-	 * [text] Текст
-	 * [html] html страницы
-	 */
-	protected $_typeContent = 'text';
-	protected $_useProxy;
+	protected $scheme = 'http';
+	protected $schemeDefaultPort = array('http' => 80, 'https' => 443);
+	protected $url;
+	protected $answer;
+	protected $referer = '';
+
+	protected $saveOption = true;
+
+
+	protected $useCookie = false;
+	protected $useProxy;
 	/**
 	 * @var cCookie
 	 */
-	protected $_cookie;
-	protected $_useStaticCookie = false;
-	protected $_staticCookieFileName;
+	protected $cookie;
+	protected $useStaticCookie = false;
+	protected $staticCookieFileName;
 
 	/**
 	 * @var string|cProxy
@@ -54,7 +40,7 @@ abstract class cCurl{
 	 */
 	public $userAgent;
 	public $descriptor;
-	protected $_shareDescriptor;
+	protected $shareDescriptor;
 	public $defaultOptions = array(
 		CURLOPT_URL => '',
 		CURLOPT_HEADER => true,
@@ -72,7 +58,7 @@ abstract class cCurl{
 		CURLOPT_SSL_VERIFYPEER => false,
 		CURLOPT_COOKIEJAR => false,
 		CURLOPT_COOKIEFILE => false,
-		//CURLOPT_HTTPHEADER => array(),
+		CURLOPT_HTTPHEADER => array(),
 		CURLOPT_PORT => 80,
 		CURLOPT_MAXREDIRS => 25,
 	);
@@ -81,49 +67,29 @@ abstract class cCurl{
 	 * @param boolean $useCookie
 	 */
 	public function setUseCookie($useCookie) {
-		$this->_useCookie = $useCookie;
+		$this->useCookie = $useCookie;
 	}
 
 	/**
 	 * @return boolean
 	 */
 	public function getUseCookie() {
-		return $this->_useCookie;
-	}
-
-	/**
-	 * @param int $millisecond 0.000001 of second
-	 */
-	public function setSleepTime($millisecond) {
-		$this->_sleepTime = $millisecond;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getSleepTime() {
-		return $this->_sleepTime;
+		return $this->useCookie;
 	}
 
 
 	protected function setAnswer($newAnswer){
-		$this->_answer = $newAnswer;
+		$this->answer = $newAnswer;
 	}
 
 	public abstract function getAnswer();
 
+	public function setUserAgent($userAgent){
+		$this->setDefaultOption(CURLOPT_USERAGENT, $userAgent);
+	}
+
 	public function &getDescriptor() {
 		return $this->descriptor;
-	}
-
-	protected $_checkAnswer = false;
-
-	public function setCheckAnswer($value) {
-		$this->_checkAnswer = $value;
-	}
-
-	public function getCheckAnswer() {
-		return $this->_checkAnswer;
 	}
 
 	/**
@@ -131,15 +97,15 @@ abstract class cCurl{
 	 * @param               $newReferer
 	 */
 	public function setReferer(&$descriptor, $newReferer){
-		$this->_referer = $newReferer;
-		$this->setOption($descriptor, CURLOPT_REFERER, $this->_referer);
+		$this->referer = $newReferer;
+		$this->setOption($descriptor, CURLOPT_REFERER, $this->referer);
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getReferer() {
-		return $this->_referer;
+		return $this->referer;
 	}
 
 	/**
@@ -165,140 +131,17 @@ abstract class cCurl{
 	}
 
 	/**
-	 * @param int $maxRepeat
-	 */
-	public function setMaxRepeat($maxRepeat) {
-		$this->_maxRepeat = $maxRepeat;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getMaxRepeat() {
-		return $this->_maxRepeat;
-	}
-
-	protected function nextRepeat(){
-		$this->setNumRepeat($this->getNumRepeat() + 1);
-	}
-
-	public function endRepeat() {
-		$this->setNumRepeat(0);
-	}
-
-	public function repeat() {
-		if ($this->getNumRepeat() < $this->getMaxRepeat()) {
-			$this->nextRepeat();
-			return true;
-		} else {
-			$this->endRepeat();
-			return false;
-		}
-	}
-	/**
-	 * @param int $numRepeat
-	 */
-	public function setNumRepeat($numRepeat) {
-		$this->_numRepeat = $numRepeat;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getNumRepeat() {
-		return $this->_numRepeat;
-	}
-
-	/**
-	 * @param int $minSizeAnswer
-	 */
-	public function setMinSizeAnswer($minSizeAnswer) {
-		$this->_minSizeAnswer = $minSizeAnswer;
-	}
-
-	/**
-	 * @return int
-	 */
-	public function getMinSizeAnswer() {
-		return $this->_minSizeAnswer;
-	}
-
-	/**
-	 * @param string $typeContent text | img | html | file
-	 * @return bool
-	 */
-	public function setTypeContent($typeContent = "text") {
-		if($typeContent == 'img'){
-			$this->setEncodingAnswer(false);
-		} elseif($typeContent == 'text'){
-			$this->setEncodingAnswer(false);
-		} elseif($typeContent == 'html'){
-			$this->setEncodingAnswer(true);
-		} else {
-			$typeContent = 'file';
-			$this->setEncodingAnswer(false);
-		}
-		$this->_typeContent = $typeContent;
-	}
-
-	public function getTypeContent(){
-		return $this->_typeContent;
-	}
-
-	/**
-	 * @param boolean $encodingAnswer
-	 */
-	public function setEncodingAnswer($encodingAnswer) {
-		$this->_encodingAnswer = $encodingAnswer;
-	}
-
-	/**
-	 * @return boolean
-	 */
-	public function getEncodingAnswer() {
-		return $this->_encodingAnswer;
-	}
-
-	/**
-	 * @param string $encodingName
-	 */
-	public function setEncodingName($encodingName) {
-		$this->_encodingName = $encodingName;
-	}
-
-	/**
-	 * @return string
-	 */
-	public function getEncodingName() {
-		return $this->_encodingName;
-	}
-
-	/**
-	 * @param mixed $encodingAnswerName
-	 */
-	public function setEncodingAnswerName($encodingAnswerName) {
-		$this->_encodingAnswerName = $encodingAnswerName;
-	}
-
-	/**
-	 * @return mixed
-	 */
-	public function getEncodingAnswerName() {
-		return $this->_encodingAnswerName;
-	}
-
-	/**
 	 * @param mixed $saveOption
 	 */
 	public function setSaveOption($saveOption) {
-		$this->_saveOption = $saveOption;
+		$this->saveOption = $saveOption;
 	}
 
 	/**
 	 * @return mixed
 	 */
 	public function getSaveOption() {
-		return $this->_saveOption;
+		return $this->saveOption;
 	}
 
 	protected function reInit(){
@@ -310,7 +153,7 @@ abstract class cCurl{
 	 * @param mixed $useProxy
 	 */
 	public function setUseProxy($useProxy) {
-		$this->_useProxy = $this->setProxy($useProxy);
+		$this->useProxy = $this->setProxy($useProxy);
 
 	}
 
@@ -318,7 +161,7 @@ abstract class cCurl{
 	 * @return mixed
 	 */
 	public function getUseProxy() {
-		return $this->_useProxy;
+		return $this->useProxy;
 	}
 
 	/**
@@ -368,27 +211,27 @@ abstract class cCurl{
 	}
 
 	private function setOptionCookie(&$descriptor){
-		$this->_cookie->open($descriptor['descriptor_key']);
-		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->_cookie->getFileCurlName());
-		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->_cookie->getFileCurlName());
+		$this->cookie->open($descriptor['descriptor_key']);
+		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->cookie->getFileCurlName());
+		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->cookie->getFileCurlName());
 	}
 
 	protected function setOptionShare(&$descriptor){
-		$this->setOption($descriptor, CURLOPT_SHARE, $this->_shareDescriptor);
+		$this->setOption($descriptor, CURLOPT_SHARE, $this->shareDescriptor);
 	}
 
 	/**
 	 * @param boolean $useStaticCookie
 	 */
 	public function setUseStaticCookie($useStaticCookie) {
-		$this->_useStaticCookie = (bool)$useStaticCookie;
+		$this->useStaticCookie = (bool)$useStaticCookie;
 	}
 
 	/**
 	 * @return boolean
 	 */
 	public function getUseStaticCookie() {
-		return $this->_useStaticCookie;
+		return $this->useStaticCookie;
 	}
 
 	/**
@@ -396,30 +239,30 @@ abstract class cCurl{
 	 */
 	public function setStaticCookieFileName($staticCookieFileName) {
 		$this->setUseStaticCookie(true);
-		$this->_staticCookieFileName = $staticCookieFileName;
+		$this->staticCookieFileName = $staticCookieFileName;
 	}
 
 	/**
 	 * @return string
 	 */
 	public function getStaticCookieFileName() {
-		return $this->_staticCookieFileName;
+		return $this->staticCookieFileName;
 	}
 
 	function __construct(){
 		$this->userAgent = new cUserAgent('desktop');
 		$this->setDefaultOption(CURLOPT_USERAGENT, $this->userAgent->getRandomUserAgent());
-		$this->_cookie = new cCookie();
+		$this->cookie = new cCookie();
 		$this->shareInit();
 		$this->init();
 	}
 
 	function __destruct(){
-		curl_share_close($this->_shareDescriptor);
-		$this->_cookie->deleteOldCookieFile(3600);
+		curl_share_close($this->shareDescriptor);
+		$this->cookie->deleteOldCookieFile(3600);
 	}
 
-	public abstract function load($url, $checkRegEx = false);
+	public abstract function load($url);
 
 	protected abstract function init();
 
@@ -427,15 +270,9 @@ abstract class cCurl{
 
 	protected abstract function close();
 
-	protected final function sleep(){
-		if($this->getSleepTime()){
-			usleep($this->getSleepTime());
-		}
-	}
-
 	protected function shareInit(){
-		$this->_shareDescriptor = curl_share_init();
-		curl_share_setopt($this->_shareDescriptor, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+		$this->shareDescriptor = curl_share_init();
+		curl_share_setopt($this->shareDescriptor, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
 	}
 
 	public final function setOption(&$descriptor, $option, $value = null){
@@ -490,13 +327,13 @@ abstract class cCurl{
 			case CURLOPT_URL:
 				if (!preg_match("%^(http|https)://%iUm", $descriptor['option'][$option])) $descriptor['option'][$option] = "http://" . $value;
 				$urlInfo = cStringWork::parseUrl($descriptor['option'][$option]);
-				if($urlInfo['scheme'] != $this->_scheme){
+				if($urlInfo['scheme'] != $this->scheme){
 					$this->setScheme($urlInfo['scheme']);
 				}
 				break;
 			case CURLOPT_PROXY:
 				if(cStringWork::isIp($value)){
-					$this->_useProxy = true;
+					$this->useProxy = true;
 				}
 				break;
 			default:
@@ -510,220 +347,13 @@ abstract class cCurl{
 		}
 	}
 
-	protected function getHeader(&$answer){
-		$header = array();
-		if($answer){
-				while(preg_match('%(?<head>^[^<>]*HTTP/\d+\.\d+.*)(\r\n\r\n|\r\r|\n\n)%Ums',$answer,$data)){
-					$header[] = $data['head'];
-					$answer = ltrim(preg_replace('%'.preg_quote($data['head'],'%').'%ims', '', $answer));
-				}
-		}
-		return $header;
-	}
 
-	protected function checkAnswerValid($answer, $curlData) {
-		if (!$this->checkHttpCode($curlData['http_code'])
-			|| ($curlData['size_download'] < $curlData['download_content_length'] && $curlData['download_content_length'] != -1)
-			|| $curlData['size_download'] < $this->getMinSizeAnswer()) {
-			return false;
-		}
-		switch ($this->getTypeContent()) {
-			case 'file':
-				return ($this->mimeType($curlData['content_type'], 'file'));
-			case 'img':
-				return ($this->mimeType($curlData['content_type'], 'img'));
-			case 'html':
-				return ($this->mimeType($curlData['content_type'], 'html') && preg_match('%<\s*/\s*(html|body)[^<>]*>%ims', $answer));
-			default:
-				return true;
-		}
-	}
-
-	public function mimeType($mime, $type) {
-		switch ($type) {
-			case 'file':
-				return true;
-			case 'img':
-				return preg_match('%image/(gif|p?jpeg|png|svg\+xml|tiff|vnd\.microsoft\.icon|vnd\.wap\.wbmp)%i', $mime);
-			case 'html':
-				return (preg_match('%text/html%i', $mime));
-			default:
-				return true;
-		}
-	}
-
-	/**
-	 * Проверает HTTP код ответа на запрос
-	 * @url http://goo.gl/KKiFi
-	 * @param int $httpCode
-	 * @return bool
-	 * @internal в будущем планируется вести лог с ошибками и из этой функции будет записываться ошибки
-	 * @internal в запросах и дополнительо будет приниматься решения больше на посылать заросы на текуший URL
-	 * @internal Пример: Если вернуло ошибку 500, то не повторять запрос
-	 */
-	public function checkHttpCode($httpCode) {
-		switch ((int)$httpCode) {
-			case 100:
-				return false;
-			case 101:
-				return false;
-			case 102:
-				return false;
-			case 200:
-				return true;
-			case 201:
-				return true;
-			case 202:
-				return true;
-			case 203:
-				return true;
-			case 204:
-				return true;
-			case 205:
-				return true;
-			case 206:
-				return true;
-			case 207:
-				return true;
-			case 226:
-				return true;
-			case 300:
-				return true;
-			case 301:
-				return true;
-			case 302:
-				return true;
-			case 303:
-				return true;
-			case 304:
-				return true;
-			case 305:
-				return true;
-			case 306:
-				return true;
-			case 307:
-				return true;
-			case 400:
-				return true;
-			case 401:
-				return false;
-			case 402:
-				return false;
-			case 403:
-				return true;
-			case 404:
-				return true;
-			case 405:
-				return true;
-			case 406:
-				return true;
-			case 407:
-				return false;
-			case 408:
-				return false;
-			case 409:
-				return false;
-			case 410:
-				return false;
-			case 411:
-				return false;
-			case 412:
-				return false;
-			case 413:
-				return false;
-			case 414:
-				return false;
-			case 415:
-				return false;
-			case 416:
-				return false;
-			case 417:
-				return false;
-			case 422:
-				return false;
-			case 423:
-				return false;
-			case 424:
-				return false;
-			case 425:
-				return false;
-			case 426:
-				return false;
-			case 428:
-				return false;
-			case 429:
-				return false;
-			case 431:
-				return false;
-			case 449:
-				return false;
-			case 451:
-				return false;
-			case 456:
-				return false;
-			case 499:
-				return false;
-			case 500:
-				return false;
-			case 501:
-				return false;
-			case 502:
-				return false;
-			case 503:
-				return false;
-			case 504:
-				return false;
-			case 505:
-				return false;
-			case 506:
-				return false;
-			case 507:
-				return false;
-			case 508:
-				return false;
-			case 509:
-				return false;
-			case 510:
-				return false;
-			case 511:
-				return false;
-			default:
-				false;
-		}
-		return false;
-	}
 
 	protected function setScheme($schemeName){
-		$this->_scheme = $schemeName;
-		if(isset($this->_schemeDefaultPort[$schemeName])){
-			$this->setDefaultOption(CURLOPT_PORT, $this->_schemeDefaultPort[$schemeName]);
+		$this->scheme = $schemeName;
+		if(isset($this->schemeDefaultPort[$schemeName])){
+			$this->setDefaultOption(CURLOPT_PORT, $this->schemeDefaultPort[$schemeName]);
 		}
-	}
-
-	protected function prepareContent($answer) {
-		switch ($this->getTypeContent()) {
-			case 'text':
-				$answer = $this->encodingAnswerText($answer);
-				break;
-			case 'html':
-				$answer = $this->encodingAnswerText($answer);
-				break;
-		}
-		return $answer;
-	}
-
-	public function encodingAnswerText($text) {
-		if ($this->getEncodingAnswer()) {
-			$from = $this->getEncodingAnswerName();
-			$to = $this->getEncodingName();
-			if(!$from){
-				$from = cStringWork::getEncodingName($text);
-			}
-			if (!preg_match('%'.preg_quote($from,'%').'%i',$to)){
-				$text = mb_convert_encoding( $text, $to, $from);
-			}
-		}
-		return $text;
 	}
 
 	protected function genDescriptorKey(){

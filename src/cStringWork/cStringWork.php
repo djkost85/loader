@@ -11,14 +11,14 @@ class cStringWork
 {
 	/**
 	 * Массив с тегами и хеш кодами для обработки через синонимайзер или переводчик, чтоб не потерять HTML теги
-	 * $_cryptTagArray['tag'] набор тегов
-	 * $_cryptTagArray['hash'] набор хешей
+	 * $cryptTagArray['tag'] набор тегов
+	 * $cryptTagArray['hash'] набор хешей
 	 * Порядок тегов и хешей соответстует их положению в строке.
 	 * @var array
 	 */
-	private $_cryptTagArray;
+	private $cryptTagArray;
 	public static $encodingDetection = array('windows-1251' , 'koi8-r', 'iso8859-5');
-	private static $_ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(?<port>\d{1,10})?)';
+	private static $ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(?<port>\d{1,10})?)';
 
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
@@ -72,9 +72,9 @@ class cStringWork
 		$count = preg_match_all($reg, $text, $matches);
 		for ($i = 0; $i < $count; $i++) {
 			$str = $matches[0][$i];
-			$this->_cryptTagArray['hash'][$i] = " " . microtime(1) . mt_rand() . " ";
-			$this->_cryptTagArray['tag'][$i] = $str;
-			$text = preg_replace("#" . preg_quote($this->_cryptTagArray['tag'][$i], '#') . "#ms", $this->_cryptTagArray['hash'][$i], $text);
+			$this->cryptTagArray['hash'][$i] = " " . microtime(1) . mt_rand() . " ";
+			$this->cryptTagArray['tag'][$i] = $str;
+			$text = preg_replace("#" . preg_quote($this->cryptTagArray['tag'][$i], '#') . "#ms", $this->cryptTagArray['hash'][$i], $text);
 		}
 		return $text;
 	}
@@ -85,8 +85,8 @@ class cStringWork
 	 * @return string
 	 */
 	public function decryptTag($text) {
-		foreach ($this->_cryptTagArray['hash'] as $key => $value) {
-			$text = preg_replace("#" . preg_quote($this->_cryptTagArray['hash'][$key], '#') . "#ms", $this->_cryptTagArray['tag'][$key], $text);
+		foreach ($this->cryptTagArray['hash'] as $key => $value) {
+			$text = preg_replace("#" . preg_quote($this->cryptTagArray['hash'][$key], '#') . "#ms", $this->cryptTagArray['tag'][$key], $text);
 		}
 		return $text;
 	}
@@ -95,7 +95,7 @@ class cStringWork
 	 * @return array
 	 */
 	public function getCryptTagArray() {
-		return $this->_cryptTagArray;
+		return $this->cryptTagArray;
 	}
 
 	/**
@@ -225,11 +225,11 @@ class cStringWork
 	 * @return bool
 	 */
 	public static function isIp($str) {
-		return (bool)preg_match('%^' .self::$_ipRegEx. '$%i', $str);
+		return (bool)preg_match('%^' .self::$ipRegEx. '$%i', $str);
 	}
 
 	public static function getIp($str){
-		if(preg_match_all('%' . self::$_ipRegEx . '%ms', $str, $matches)){
+		if(preg_match_all('%' . self::$ipRegEx . '%ms', $str, $matches)){
 			return $matches['address'];
 		}
 		return array();
@@ -286,9 +286,10 @@ class cStringWork
 
 	/**
 	 * @param array $text
+	 * @param bool  $bestKey
 	 * @return string
 	 */
-	public static function getBiggestString($text) {
+	public static function getBiggestString($text, &$bestKey = false) {
 		$bigA = 0;
 		$bigKey = 0;
 		foreach ($text as $key => $value) {
@@ -298,6 +299,7 @@ class cStringWork
 				$bigKey = $key;
 			}
 		}
+		$bestKey = $bigKey;
 		return $text[$bigKey];
 	}
 }

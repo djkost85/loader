@@ -14,11 +14,12 @@ namespace GetContent;
 class cMultiCurl extends cCurl{
 
 	public $descriptorArray;
+	protected $answerInfo;
 
-	private $_countDescriptor;
-	private $_countStream = 1;
-	private $_countCurl = 1;
-	private $_waitExecMSec = 100000;
+	private $countDescriptor;
+	private $countStream = 1;
+	private $countCurl = 1;
+	private $waitExecMSec = 100000;
 
 	public function &getDescriptorArray() {
 		return $this->descriptorArray;
@@ -26,48 +27,48 @@ class cMultiCurl extends cCurl{
 
 	public function setCountCurl($value = 1) {
 		if ($this->getCountCurl() != $value) {
-			$this->_countCurl = $value;
+			$this->countCurl = $value;
 			$this->setCountDescriptor();
 			$this->reInit();
 		}
 	}
 
 	public function getCountCurl() {
-		return $this->_countCurl;
+		return $this->countCurl;
 	}
 
 	public function setCountStream($value = 1) {
 		if ($this->getCountStream() != $value) {
-			$this->_countStream = $value;
+			$this->countStream = $value;
 			$this->setCountDescriptor();
 			$this->reInit();
 		}
 	}
 
 	public function getCountStream() {
-		return $this->_countStream;
+		return $this->countStream;
 	}
 
 	private function setCountDescriptor() {
-		$this->_countDescriptor = $this->getCountCurl() * $this->getCountStream();
+		$this->countDescriptor = $this->getCountCurl() * $this->getCountStream();
 	}
 
 	private function getCountDescriptor() {
-		return $this->_countDescriptor;
+		return $this->countDescriptor;
 	}
 
 	/**
 	 * @param int $waitExecMSec
 	 */
 	public function setWaitExecMSec($waitExecMSec) {
-		$this->_waitExecMSec = $waitExecMSec;
+		$this->waitExecMSec = $waitExecMSec;
 	}
 
 	/**
 	 * @return int
 	 */
 	public function getWaitExecMSec() {
-		return $this->_waitExecMSec;
+		return $this->waitExecMSec;
 	}
 
 
@@ -109,7 +110,7 @@ class cMultiCurl extends cCurl{
 		$running = null;
 		do {
 			curl_multi_exec($descriptor['descriptor'], $running);
-			usleep($this->_waitExecMSec);
+			usleep($this->waitExecMSec);
 		} while ($running > 0);
 		$answer = array();
 		foreach ($descriptorArray as $key => $value){
@@ -160,56 +161,34 @@ class cMultiCurl extends cCurl{
 		}
 	}
 
-	public function load($url = array(), $checkRegEx = false){
-		if(is_string($url)){
-			$url = array($url);
-		}
-		$this->_url = array_values($url);
+	public function load($url = array()){
 		$goodAnswer = array();
 		$countMultiStream = $this->getCountStream();
-		do {
-			$this->setCountCurl(count($this->_url));
-			$descriptorArray =& $this->getDescriptorArray();
-			$j = 0;
-			$urlDescriptorsLink = array();
-			foreach ($this->_url as $keyUrl => $valueUrl) {
-				for ($i = 0; $i < $countMultiStream; $i++) {
-					$urlDescriptorsLink[$keyUrl][] = $j;
-					if (isset($descriptorArray[$j]['descriptor'])) {
-						$this->setOption($descriptorArray[$j], CURLOPT_URL, $valueUrl);
-					}
-					$j++;
+		$this->setCountCurl(count($url));
+		$descriptorArray =& $this->getDescriptorArray();
+		$j = 0;
+		$urlDescriptorsLink = array();
+		foreach ($url as $keyUrl => $valueUrl) {
+			for ($i = 0; $i < $countMultiStream; $i++) {
+				$urlDescriptorsLink[$keyUrl][] = $j;
+				if (isset($descriptorArray[$j]['descriptor'])) {
+					$this->setOption($descriptorArray[$j], CURLOPT_URL, $valueUrl);
 				}
+				$j++;
 			}
-			foreach ($descriptorArray as &$value){
-				$this->setOptions($value);
-			}
-			$this->resetDescriptors();
-			$answer = $this->exec();
-			foreach ($answer as $key => &$value) {
-				$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
-				$descriptorArray[$key]['info']['error'] = curl_error($descriptorArray[$key]['descriptor']);
-				$descriptorArray[$key]['info']['header'] = $this->getHeader($value);
-				$regAnswer = (!$checkRegEx || ($checkRegEx && preg_match($checkRegEx, $value)));
-				if ((!$this->getCheckAnswer() || $this->checkAnswerValid($value, $descriptorArray[$key]['info'])) && $regAnswer) {
-					$linkKey = $this->getLinkKey($urlDescriptorsLink, $key);
-					unset($this->_url[$linkKey]);
-					$descriptorArray[$key]['info']['good_answer'] = true;
-					$goodAnswer[$linkKey][] = $this->prepareContent($value);
-				} else{
-					$descriptorArray[$key]['info']['good_answer'] = false;
-					if ($this->getUseProxy() && is_object($this->proxy)) {
-						$this->proxy->deleteInList($descriptorArray[$key]['option'][CURLOPT_PROXY]);
-					}
-				}
-			}
-			$this->sleep();
-			if (!$this->_url) {
-				$this->endRepeat();
-				break;
-			}
-		} while ($this->repeat());
-		$this->_url = $url;
+		}
+		foreach ($descriptorArray as &$value){
+			$this->setOptions($value);
+		}
+		$this->resetDescriptors();
+		$answer = $this->exec();
+		foreach ($answer as $key => &$value) {
+			$descriptorArray[$key]['info'] = curl_getinfo($descriptorArray[$key]['descriptor']);
+			$descriptorArray[$key]['info']['error'] = curl_error($descriptorArray[$key]['descriptor']);
+			$descriptorArray[$key]['info']['header'] = cHeaderHTTP::cutHeader($value);
+			$linkKey = $this->getLinkKey($urlDescriptorsLink, $key);
+			$goodAnswer[$linkKey][$key] = $value;
+		}
 		$this->setAnswer($goodAnswer);
 		return $this->getAnswer();
 	}
@@ -226,12 +205,19 @@ class cMultiCurl extends cCurl{
 	public function getAnswer($getAllAnswer = false){
 		if (!$getAllAnswer) {
 			$a = array();
-			foreach ($this->_answer as $key => $value) $a[$key] = cStringWork::getBiggestString($value);
+			$descriptorArray = $this->getDescriptorArray();
+			foreach ($this->answer as $key => $value) {
+				$a[$key] = cStringWork::getBiggestString($value, $descriptorKey);
+				$this->answerInfo[$key] = $descriptorArray[$descriptorKey]['info'];
+			}
 			return $a;
 		} else{
-			return $this->_answer;
+			return $this->answer;
 		}
 	}
 
+	public function getInfo($key){
+		return $this->answerInfo[$key];
+	}
 
 }

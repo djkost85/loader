@@ -13,8 +13,8 @@ use GetContent\cGetContent as cGetContent;
 
 $gc = new cGetContent();
 
-$gc->setMode('curl');
-$gc->getContent('http://ya.ru'); // Get content use curl
+$gc->setLoader('curl');
+$gc->load('http://ya.ru'); // Get content use curl
 
-$gc->setMode('phantom');
-$gc->getContent('http://ya.ru'); // Render page in phantomjs, page render without images. If you need to load image use curl
+$gc->setLoader('phantom');
+$gc->load('http://ya.ru'); // Render page in phantomjs, page render without images. If you need to load image use curl
