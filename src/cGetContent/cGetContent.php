@@ -83,12 +83,12 @@ class cGetContent {
 	 * @return bool
 	 */
 	public function setLoader($mode) {
-		$this->setOldLoadName($this->getLoaderName());
 		switch($mode){
 			case 'cSingleCurl' :
 			case 'cMultiCurl':
 			case 'cPhantomJS':
 			case 'cSimpleHTTP':
+				$this->setOldLoadName($this->getLoaderName());
 				unset($this->loader);
 				$this->loaderName = $mode;
 				$this->loader = new $mode();
