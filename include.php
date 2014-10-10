@@ -22,4 +22,5 @@ require_once dirname(__FILE__) . "/src/cProxy/cUpdateProxy.php";
 require_once dirname(__FILE__) . "/src/cPhantomJS/cPhantomJS.php";
 require_once dirname(__FILE__) . "/src/cSimpleHTTP/cSimpleHTTP.php";
 require_once dirname(__FILE__) . "/src/cUserAgent/cUserAgent.php";
+require_once dirname(__FILE__) . "/src/cHTTP/cHeaderHTTP.php";
 require_once dirname(__FILE__) . "/src/cSavePage/cSavePage.php";

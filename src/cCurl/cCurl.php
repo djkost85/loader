@@ -96,7 +96,10 @@ abstract class cCurl{
 	 * @param bool|resource $descriptor
 	 * @param               $newReferer
 	 */
-	public function setReferer(&$descriptor, $newReferer){
+	public function setReferer($newReferer,&$descriptor = false){
+		if(!$descriptor){
+			$descriptor = $this->getDescriptor();
+		}
 		$this->referer = $newReferer;
 		$this->setOption($descriptor, CURLOPT_REFERER, $this->referer);
 	}
@@ -259,7 +262,9 @@ abstract class cCurl{
 
 	function __destruct(){
 		curl_share_close($this->shareDescriptor);
-		$this->cookie->deleteOldCookieFile(3600);
+		if($this->getUseCookie()){
+			$this->cookie->deleteOldCookieFile(3600);
+		}
 	}
 
 	public abstract function load($url);
@@ -325,7 +330,6 @@ abstract class cCurl{
 				}
 				break;
 			case CURLOPT_URL:
-				if (!preg_match("%^(http|https)://%iUm", $descriptor['option'][$option])) $descriptor['option'][$option] = "http://" . $value;
 				$urlInfo = cStringWork::parseUrl($descriptor['option'][$option]);
 				if($urlInfo['scheme'] != $this->scheme){
 					$this->setScheme($urlInfo['scheme']);

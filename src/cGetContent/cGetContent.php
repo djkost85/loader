@@ -91,6 +91,7 @@ class cGetContent {
 				$this->setOldLoadName($this->getLoaderName());
 				unset($this->loader);
 				$this->loaderName = $mode;
+				$mode = '\GetContent\\' . $mode;
 				$this->loader = new $mode();
 				break;
 			default:
@@ -176,14 +177,6 @@ class cGetContent {
 	 */
 	public function getKey() {
 		return $this->key;
-	}
-
-	public function setReferer($referer){
-		$this->loader->setReferer($referer);
-	}
-
-	public function getReferer(){
-		return $this->loader->getReferer();
 	}
 
 	/**
@@ -281,17 +274,12 @@ class cGetContent {
 		return $name != 'cMultiCurl' && $name != 'cSimpleHTTP';
 	}
 
-	public function setUserAgent($userAgent = false){
-		$this->loader->setUserAgent($userAgent?:$this->userAgent->getRandomUserAgent());
-	}
-
-
 	function __construct($loaderName = 'cSimpleHTTP'){
 		$this->cookie = new cCookie();
 		$this->genKey();
 		$this->userAgent = new cUserAgent('desktop');
 		$this->setLoader($loaderName);
-		$this->setUserAgent();
+		$this->setUserAgent($this->userAgent->getRandomUserAgent());
 	}
 
 	public function __call($name, $arguments){
@@ -302,6 +290,7 @@ class cGetContent {
 	}
 
 	public function load($url, $checkRegEx = false){
+		$url = cStringWork::checkUrlProtocol($url);
 		return is_array($url) ? $this->multiQuery($url, $checkRegEx) : $this->singleQuery($url, $checkRegEx);
 	}
 
@@ -309,7 +298,10 @@ class cGetContent {
 		do {
 			$answer = $this->loader->load($url);
 			$this->sleep();
-		} while ($this->repeat() && !$this->isGoodAnswer($answer, $this->loader->getInfo(), $checkRegEx));
+			if(!$this->isGoodAnswer($answer, $this->getInfo(), $checkRegEx)){
+				$answer = false;
+			}
+		} while ($this->repeat() && !$answer);
 		$this->setReferer($url);
 		$this->endRepeat();
 		return $this->prepareContent($answer);
@@ -355,7 +347,7 @@ class cGetContent {
 
 	protected function isGoodAnswer($answer, $info, $checkRegEx = false){
 		$regAnswer = (!$checkRegEx || ($checkRegEx && preg_match($checkRegEx, $answer)));
-		return (!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $info)) && !$regAnswer;
+		return (!$this->getCheckAnswer() || $this->checkAnswerValid($answer, $info)) && $regAnswer;
 	}
 
 	protected function checkAnswerValid($answer, $info = array()) {
@@ -363,7 +355,7 @@ class cGetContent {
 	}
 
 	protected function checkSizeAnswer($answer){
-		return strlen($answer) < $this->getMinSizeAnswer();
+		return strlen($answer) > $this->getMinSizeAnswer();
 	}
 
 	protected function checkTypeContent($type){

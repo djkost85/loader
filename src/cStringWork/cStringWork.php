@@ -206,6 +206,11 @@ class cStringWork
 		return self::parsePath($url);
 	}
 
+	public static function checkUrlProtocol($url){
+		if (!preg_match("%^(http|https)://%iUm", $url)) $url = "http://" . $url;
+		return $url;
+	}
+
 	/**
 	 * @param string $url исходный адрес
 	 * @param int    $level

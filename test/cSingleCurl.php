@@ -18,9 +18,6 @@ $functions = array(
 	'setReferer',
 	'getContent',
 	'getHeader',
-	'mimeType',
-	'checkAnswerValid',
-	'prepareContent',
 	'usePort',
 );
 
@@ -67,42 +64,6 @@ function cSingleCurl_getHeader(){
 	$gc->load('ya.ru', '%yandex%ims');
 	$descriptor = $gc->getDescriptor();
 	return $descriptor['info']['header'];
-}
-
-function cSingleCurl_mimeType(){
-	$gc = new cSingleCurl();
-	return $gc->mimeType('audio/mpeg', 'file')
-	       && $gc->mimeType('image/png', 'img')
-	       && $gc->mimeType('text/html', 'html')
-	       && !$gc->mimeType('image/png', 'html');
-}
-
-function cSingleCurl_checkAnswerValid() {
-	$url = 'ya.ru';
-	$gc = new cSingleCurl();
-	$gc->setCheckAnswer(true);
-	$gc->setMinSizeAnswer(1000);
-	$gc->load($url);
-	$answerTrue = $gc->getAnswer();
-	$gc->setMinSizeAnswer(strlen($answerTrue) + 100000);
-	$gc->load($url);
-	$answerFalse = $gc->getAnswer();
-	return $answerTrue && !(bool)$answerFalse;
-}
-
-function cSingleCurl_prepareContent(){
-	$url = 'vk.com';
-	$withoutEncoding = 'windows-1251';
-	$needEncoding = 'UTF-8';
-	$gc = new cSingleCurl();
-	$gc->setEncodingAnswer(false);
-	$gc->load($url);
-	$encoding1 = \GetContent\cStringWork::getEncodingName($gc->getAnswer());
-	$gc->setEncodingAnswer(true);
-	$gc->setEncodingName($needEncoding);
-	$gc->load($url);
-	$encoding2 = \GetContent\cStringWork::getEncodingName($gc->getAnswer());
-	return $encoding1 == $withoutEncoding && $needEncoding == $encoding2;
 }
 
 function cSingleCurl_setReferer(){

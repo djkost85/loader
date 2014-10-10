@@ -321,7 +321,7 @@ class cPhantomJS {
 
 
 
-	function __construct($phantomExePath){
+	function __construct($phantomExePath = PHANTOMJS_EXE){
 		$this->setDefaultOptions(
 			array(
 				self::optCookiesFile => null, // /path/to/cookies.txt
