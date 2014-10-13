@@ -122,6 +122,10 @@ abstract class cCurl{
 		$this->defaultOptions[$option] = $value;
 	}
 
+	public function unsetDefaultOption($option){
+		unset($this->defaultOptions[$option]);
+	}
+
 	/**
 	 * @return array
 	 */
@@ -154,9 +158,10 @@ abstract class cCurl{
 
 	/**
 	 * @param mixed $useProxy
+	 * @param int   $type
 	 */
-	public function setUseProxy($useProxy) {
-		$this->useProxy = $this->setProxy($useProxy);
+	public function setUseProxy($useProxy, $type = CURLPROXY_HTTP) {
+		$this->useProxy = $this->setProxy($useProxy, $type);
 
 	}
 
@@ -169,16 +174,18 @@ abstract class cCurl{
 
 	/**
 	 * @param bool|string $proxy
+	 * @param int         $type CURLPROXY_HTTP | CURLPROXY_SOCKS4 | CURLPROXY_SOCKS5
 	 * @return bool
 	 */
-	protected function setProxy($proxy) {
+	protected function setProxy($proxy, $type = CURLPROXY_HTTP) {
 		switch ((bool)$proxy) {
 			case true:
 				if (is_string($proxy)){
 					if(cStringWork::isIp($proxy)){
 						$this->proxy = $proxy;
+						$this->setDefaultOption(CURLOPT_PROXYTYPE, $type);
 					} else {
-						$proxy = false;
+						$this->setProxy(false);
 					}
 				} elseif(!is_object($this->proxy)) {
 					$this->proxy = new cProxy();
@@ -186,6 +193,7 @@ abstract class cCurl{
 				break;
 			case false:
 				$proxy = false;
+				$this->unsetDefaultOption(CURLOPT_PROXYTYPE);
 				break;
 			default:
 				return false;

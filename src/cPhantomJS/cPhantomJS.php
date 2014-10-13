@@ -33,7 +33,7 @@ class cPhantomJS {
 	private $options;
 	private $defaultOptions;
 	private $scriptName;
-	private $phantomExePath;
+	private $exePath = '/var/phantomjs';
 	private $arguments = array();
 	private $referer = 'http://google.com/';
 	/**
@@ -234,15 +234,15 @@ class cPhantomJS {
 	/**
 	 * @param $phantomExePath
 	 */
-	public function setPhantomExePath($phantomExePath) {
-		$this->phantomExePath = $phantomExePath;
+	public function setExePath($phantomExePath) {
+		$this->exePath = $phantomExePath;
 	}
 
 	/**
 	 * @return mixed
 	 */
-	public function getPhantomExePath() {
-		return $this->phantomExePath;
+	public function getExePath() {
+		return $this->exePath;
 	}
 
 	/**
@@ -321,7 +321,7 @@ class cPhantomJS {
 
 
 
-	function __construct($phantomExePath = PHANTOMJS_EXE){
+	function __construct($phantomExePath = false){
 		$this->setDefaultOptions(
 			array(
 				self::optCookiesFile => null, // /path/to/cookies.txt
@@ -335,7 +335,9 @@ class cPhantomJS {
 				self::optLocalToRemoteUrlAccess => 'true',
 			)
 		);
-		$this->setPhantomExePath($phantomExePath);
+		if($phantomExePath){
+			$this->setExePath($phantomExePath);
+		}
 		$this->setPhantomFilesPath(dirname(__FILE__));
 		$this->setKeyStream(microtime(1) . mt_rand());
 		$this->userAgent = new cUserAgent('desktop');
@@ -392,7 +394,7 @@ class cPhantomJS {
 	}
 
 	public function createCommand(){
-		return $this->getPhantomExePath() . ' ' . $this->createOptions() . ' ' . $this->createScriptName() . ' ' . $this->createArguments();
+		return $this->getExePath() . ' ' . $this->createOptions() . ' ' . $this->createScriptName() . ' ' . $this->createArguments();
 	}
 
 	private function createOptions(){
