@@ -289,6 +289,13 @@ class cGetContent {
 		return false;
 	}
 
+	public function __get($name){
+		if(property_exists($this->loader, $name)){
+			return $this->loader->$name;
+		}
+		return false;
+	}
+
 	public function load($url, $checkRegEx = false){
 		$url = cStringWork::checkUrlProtocol($url);
 		return is_array($url) ? $this->multiQuery($url, $checkRegEx) : $this->singleQuery($url, $checkRegEx);
