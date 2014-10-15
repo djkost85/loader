@@ -189,7 +189,7 @@ class cFile {
 
 	public function write($data){
 		$res = $this->access('fwrite', $this->getHead(), $data);
-		fflush ($this->getHead());
+		fflush($this->getHead());
 		return $res;
 	}
 
@@ -217,6 +217,15 @@ class cFile {
 			return unlink($this->getName());
 		}
 		return false;
+	}
+
+	public function clearDir(){
+		$fileList = glob($this->getCurrentPath() . "/*");
+		foreach ($fileList as $value) {
+			if(file_exists($value)){
+				unlink($value);
+			}
+		}
 	}
 
 	public function clear(){

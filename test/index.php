@@ -8,5 +8,6 @@
 <a href="cProxy.php">cProxy</a><br/>
 <a href="cUpdateProxy.php">cUpdateProxy</a><br/>
 <a href="cGetContent.php">cGetContent</a><br/>
+<a href="cTor.php">cTor</a><br/>
 
 <br/><br/><br/><br/><br/>
