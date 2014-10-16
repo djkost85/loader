@@ -14,9 +14,9 @@ use GetContent\cGetContent as cGetContent;
 echo "cSingleCurl<br/>\n";
 
 $functions = array(
-	'searchFreePort',
-	'createConfig',
-	'getTorConnection',
+	//'searchFreePort',
+	//'createConfig',
+	//'getTorConnection',
 	'start',
 	'stop',
 	'restart',
@@ -45,12 +45,18 @@ function cTor_getTorConnection(){
 
 function cTor_start(){
 	$serverIpPull = array('66.225.221.237','66.225.221.238');
-	$tor = new cTor();
+	//$tor = new cTor();
 	$gc = new cGetContent('cSingleCurl');
-	$tor->start();
-	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	//$tor->start();
+	//$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$gc->setUseProxy('127.0.0.1:20001', CURLPROXY_SOCKS5);
 	$answer = $gc->load('2ip.ru');
 	$newIp = \GetContent\cStringWork::getIp($answer);
+	var_dump($newIp,'---------');
+	$gc->setUseProxy('127.0.0.1:20002', CURLPROXY_SOCKS5);
+	$answer = $gc->load('2ip.ru');
+	$newIp = \GetContent\cStringWork::getIp($answer);
+	var_dump($newIp);
 	echo (isset($newIp[0])?$newIp[0]:'not found IP')."\n";
 }
 

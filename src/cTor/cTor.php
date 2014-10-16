@@ -17,13 +17,23 @@ class cTor {
 	 */
 	private $file;
 	private $exePath = '/etc/init.d/tor';
+	const dataDirectory = '/etc/tor';
 	private $pathToConfig;
 	private $host = '127.0.0.1';
 	private $port = '9050';
-	private $configPattern = 'server = %s
-server_port = %d';
+	private $configPattern = 'SocksListenAddress = %s
+SocksPort = %d
+PidFile %s/tor%d.pid
+RunAsDaemon 1
+DataDirectory %s/tor%d
+ControlPort %d
+ORPort %d
+ORListenAddress %s:%d
+Nickname tor%d
+DirPort %d
+DirListenAddress %s:%d';
 	const keyPullStart = 20000;
-	const keyPullEnd = 60000;
+	const keyPullEnd = 29999;
 
 	/**
 	 * @return string
@@ -40,7 +50,7 @@ server_port = %d';
 	}
 
 	/**
-	 * @return string
+	 * @return string|integer
 	 */
 	public function getPort() {
 		return $this->port;
@@ -53,6 +63,18 @@ server_port = %d';
 		if(preg_match('%^\d+$%',$port) && $port >= self::keyPullStart && $port <= self::keyPullEnd && $this->isFreePort($port)){
 			$this->port = $port;
 		}
+	}
+
+	public function getControlPort(){
+		return $this->getPort() + 10000;
+	}
+
+	public function getORPort(){
+		return $this->getPort() + 20000;
+	}
+
+	public function getDirPort(){
+		return $this->getPort() + 30000;
 	}
 
 	function __construct($port = false){
@@ -82,7 +104,7 @@ server_port = %d';
 	public function start(){
 		echo $this->exePath . ' start ' . $this->getPort();
 		if($this->createConfig()) {
-			$result = $this->execCommand($this->exePath . ' start ' . $this->getPort());
+			$result = $this->execCommand($this->exePath . ' start tor' . $this->getPort());
 			return $result;
 		} else {
 			return false;
@@ -91,7 +113,7 @@ server_port = %d';
 	}
 
 	public function stop(){
-		$result = $this->execCommand($this->exePath.' stop '.$this->getPort());
+		$result = $this->execCommand($this->exePath.' stop tor'.$this->getPort());
 		$this->file->delete();
 		return $result;
 	}
@@ -128,7 +150,18 @@ server_port = %d';
 		if($this->isFreePort($this->port)){
 			if($this->file->open($this->getPortFileName($this->getPort())) && $this->file->lock()){
 				$this->file->clear();
-				$config = sprintf($this->configPattern, $this->host, $this->getPort());
+				$config = sprintf(
+					$this->configPattern,
+					$this->host,
+					$this->getPort(),
+					self::dataDirectory,$this->getPort(),
+					$this->getControlPort(),
+					$this->getORPort(),
+					$this->host,$this->getORPort(),
+					$this->getPort(),
+					$this->getDirPort(),
+					$this->host,$this->getDirPort()
+				);
 				return $this->file->write($config);
 			}
 		}
