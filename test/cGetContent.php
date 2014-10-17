@@ -90,16 +90,22 @@ function cGetContent_useTor(){
 	$gc = new cGetContent('cSingleCurl');
 	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
 	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$answer = $gc->load('bpteam.net');
+	return  preg_match('%380632359213%ims', $answer);
+}
+
+function setTorCountry(){
+	$tor = new \GetContent\cTor();
+	$tor->start();
+	$gc = new cGetContent('cSingleCurl');
+	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
+	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
 	$start = time();
 	for($i = 0 ; $i < 4; $i++){
-		$gc->load('2ip.ru');
-		$answer = $gc->getAnswer();
+		$answer = $gc->load('2ip.ru');
 		$newIp = \GetContent\cStringWork::getIp($answer);
 		echo (isset($newIp[0])?$newIp[0]:'not found IP')."\n";
 		echo '['.(time() - $start) . "]\n";
-		var_dump($tor->stop());
-		var_dump($tor->status());
-		var_dump($tor->start());
 	}
 	return preg_match('%380632359213%ims', $answer);
 }

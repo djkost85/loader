@@ -230,11 +230,13 @@ class cFile {
 
 	public function delDir($dir = false) {
 		$dir = $dir?:$this->getCurrentPath();
-		$files = array_diff(scandir($dir), array('.','..'));
-		foreach ($files as $file) {
-			(is_dir("$dir/$file")) ? $this->delDir("$dir/$file") : unlink("$dir/$file");
+		if(file_exists($dir)) {
+			$files = array_diff(scandir($dir), array('.', '..'));
+			foreach ($files as $file) {
+				(is_dir("$dir/$file")) ? $this->delDir("$dir/$file") : unlink("$dir/$file");
+			}
+			rmdir($dir);
 		}
-		return rmdir($dir);
 	}
 
 	public function clear(){

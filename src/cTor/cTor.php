@@ -17,6 +17,8 @@ class cTor {
 	 */
 	private $file;
 	private $exePath = '/etc/init.d/tor';
+	private $ipCountries = array();
+	private $geoIpFile = '/usr/share/tor/geoip';
 	const dataDirectory = '/etc/tor';
 	private $pathToConfig;
 	private $host = '127.0.0.1';
@@ -32,6 +34,8 @@ ORListenAddress %s:%d
 Nickname tor%d
 DirPort %d
 DirListenAddress %s:%d';
+	private $geoIpPattern = 'ExcludeNodes {%s}
+GeoIPFile %s';
 	const keyPullStart = 20000;
 	const keyPullEnd = 29999;
 
@@ -75,6 +79,13 @@ DirListenAddress %s:%d';
 
 	public function getDirPort(){
 		return $this->getPort() + 30000;
+	}
+
+	/**
+	 * @param array $ipCountries
+	 */
+	public function setIpCountries($ipCountries) {
+		$this->ipCountries = $ipCountries;
 	}
 
 	function __construct($port = false){
@@ -174,6 +185,13 @@ DirListenAddress %s:%d';
 					$this->getDirPort(),
 					$this->host,$this->getDirPort()
 				);
+				if($this->ipCountries){
+					$config .= "\n" . sprintf(
+							$this->geoIpPattern,
+							implode('},{',$this->ipCountries),
+							$this->geoIpFile
+						);
+				}
 				return $this->file->write($config);
 			}
 		}

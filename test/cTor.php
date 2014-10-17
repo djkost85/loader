@@ -14,9 +14,9 @@ use GetContent\cGetContent as cGetContent;
 echo "cSingleCurl<br/>\n";
 
 $functions = array(
-	//'searchFreePort',
-	//'createConfig',
-	//'getTorConnection',
+	'searchFreePort',
+	'createConfig',
+	'getTorConnection',
 	'start',
 	'stop',
 	'restart',
@@ -32,8 +32,9 @@ function cTor_searchFreePort(){
 
 function cTor_createConfig(){
 	$tor = new cTor();
+	$tor2 = new cTor();
 	$tor->createConfig();
-	return !$tor->isFreePort($tor->getPort());
+	return !$tor2->isFreePort($tor->getPort());
 }
 
 function cTor_getTorConnection(){
@@ -44,30 +45,31 @@ function cTor_getTorConnection(){
 }
 
 function cTor_start(){
-	$serverIpPull = array('66.225.221.237','66.225.221.238');
-	//$tor = new cTor();
-	$gc = new cGetContent('cSingleCurl');
-	//$tor->start();
-	//$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	$gc->setUseProxy('127.0.0.1:20001', CURLPROXY_SOCKS5);
-	$answer = $gc->load('2ip.ru');
-	$newIp = \GetContent\cStringWork::getIp($answer);
-	var_dump($newIp,'---------');
-	$gc->setUseProxy('127.0.0.1:20002', CURLPROXY_SOCKS5);
-	$answer = $gc->load('2ip.ru');
-	$newIp = \GetContent\cStringWork::getIp($answer);
-	var_dump($newIp);
-	echo (isset($newIp[0])?$newIp[0]:'not found IP')."\n";
+	$tor = new cTor();
+	$tor->start();
+	return $tor->isExist();
 }
 
 function cTor_stop(){
-
+	$tor = new cTor();
+	$tor->start();
+	$tor->stop();
+	return !$tor->isExist();
 }
 
 function cTor_restart(){
-
+	$tor = new cTor();
+	$tor->restart();
+	return $tor->isExist();
 }
 
 function cTor_stopAll(){
-
+	$tor1 = new cTor();
+	$tor2 = new cTor();
+	$tor3 = new cTor();
+	$tor1->start();
+	$tor2->start();
+	$tor3->start();
+	$tor1->stopAll();
+	return !$tor1->isExist() && !$tor2->isExist() && !$tor3->isExist();
 }
