@@ -151,4 +151,15 @@ class cSavePage {
 		$result->free();
 		return $data['last_session'];
 	}
+
+	public function getAllSessions($url = ''){
+		$where = $url? "WHERE url = '$url'" : '';
+		$query = sprintf(
+			"SELECT count(session) AS count_row, session, timestamp FROM `%s`.`sp_%s` %s GROUP BY session",
+			$this->dbName,
+			$this->tablePrefix,
+			$where
+		);
+		$result = $this->query($query);
+	}
 } 

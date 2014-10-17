@@ -18,7 +18,7 @@ class cStringWork
 	 */
 	private $cryptTagArray;
 	public static $encodingDetection = array('windows-1251' , 'koi8-r', 'iso8859-5');
-	private static $ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(?<port>\d{1,10})?)';
+	private static $ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(?<port>\d{1,5})?)';
 
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений

@@ -16,6 +16,7 @@ class cSimpleHTTP {
 	protected $shame = 'http';
 	protected $url;
 	protected $context;
+	protected $useProxy;
 
 	public function setOption($name, $value){
 		$methodName = 'set'.ucfirst($name);
@@ -128,6 +129,43 @@ class cSimpleHTTP {
 				$this->shame = 'http';
 		}
 		$this->shame = $shame;
+	}
+
+	/**
+	 * @param mixed $useProxy
+	 */
+	public function setUseProxy($useProxy) {
+		$this->useProxy = $this->setProxy($useProxy);
+	}
+
+	/**
+	 * @param bool|string $proxy
+	 * @return bool
+	 */
+	protected function setProxy($proxy) {
+		switch ((bool)$proxy) {
+			case true:
+				if (is_string($proxy)){
+					if(cStringWork::isIp($proxy)){
+						$this->setOption('proxy', 'tcp://'.$proxy);
+						//$this->setOption('request_fulluri', true);
+					} else {
+						$this->setProxy(false);
+					}
+				}
+				break;
+			default:
+				$this->unSetOption('proxy');
+				//$this->unSetOption('request_fulluri');
+		}
+		return (bool)$proxy;
+	}
+
+	/**
+	 * @return mixed
+	 */
+	public function getUseProxy() {
+		return $this->useProxy;
 	}
 
 	protected function onHTTPS(){
