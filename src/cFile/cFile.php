@@ -228,6 +228,15 @@ class cFile {
 		}
 	}
 
+	public function delDir($dir = false) {
+		$dir = $dir?:$this->getCurrentPath();
+		$files = array_diff(scandir($dir), array('.','..'));
+		foreach ($files as $file) {
+			(is_dir("$dir/$file")) ? $this->delDir("$dir/$file") : unlink("$dir/$file");
+		}
+		return rmdir($dir);
+	}
+
 	public function clear(){
 		return $this->access('ftruncate', $this->getHead(), 0);
 	}

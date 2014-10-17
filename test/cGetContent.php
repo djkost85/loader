@@ -86,17 +86,20 @@ function cGetContent_prepareContent(){
 
 function cGetContent_useTor(){
 	$tor = new \GetContent\cTor();
+	$tor->start();
 	$gc = new cGetContent('cSingleCurl');
 	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
-	$gc->loader->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
 	$start = time();
-	for($i = 0 ; $i < 5; $i++){
+	for($i = 0 ; $i < 4; $i++){
 		$gc->load('2ip.ru');
 		$answer = $gc->getAnswer();
 		$newIp = \GetContent\cStringWork::getIp($answer);
 		echo (isset($newIp[0])?$newIp[0]:'not found IP')."\n";
 		echo '['.(time() - $start) . "]\n";
-		$tor->flush();
+		var_dump($tor->stop());
+		var_dump($tor->status());
+		var_dump($tor->start());
 	}
 	return preg_match('%380632359213%ims', $answer);
 }

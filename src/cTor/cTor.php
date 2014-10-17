@@ -21,8 +21,8 @@ class cTor {
 	private $pathToConfig;
 	private $host = '127.0.0.1';
 	private $port = '9050';
-	private $configPattern = 'SocksListenAddress = %s
-SocksPort = %d
+	private $configPattern = 'SocksListenAddress %s
+SocksPort %d
 PidFile %s/tor%d.pid
 RunAsDaemon 1
 DataDirectory %s/tor%d
@@ -87,7 +87,9 @@ DirListenAddress %s:%d';
 	}
 
 	function __destruct(){
-		//$this->stop();
+		$this->stop();
+		$this->file->delDir($this->pathToConfig.'/tor'.$this->getPort());
+		$this->file->delete();
 	}
 
 	public function getTorConnection(){
@@ -95,6 +97,7 @@ DirListenAddress %s:%d';
 	}
 
 	private function execCommand($command){
+		//echo $command . "\n";
 		$output = array();
 		$return_val = null;
 		exec($command, $output, $return_val);
@@ -102,7 +105,6 @@ DirListenAddress %s:%d';
 	}
 
 	public function start(){
-		echo $this->exePath . ' start ' . $this->getPort();
 		if($this->createConfig()) {
 			$result = $this->execCommand($this->exePath . ' start tor' . $this->getPort());
 			return $result;
@@ -113,14 +115,18 @@ DirListenAddress %s:%d';
 	}
 
 	public function stop(){
-		$result = $this->execCommand($this->exePath.' stop tor'.$this->getPort());
-		$this->file->delete();
+		for($i = 0; $i < 10; $i++) {
+			$result = $this->execCommand($this->exePath . ' stop tor' . $this->getPort());
+			if(!$this->isExist()){
+				break;
+			}
+			usleep(100000);
+		}
 		return $result;
 	}
 
 	public function stopAll(){
 		$result = $this->execCommand('killall tor');
-		$this->file->clearDir();
 		return $result;
 	}
 
@@ -131,6 +137,11 @@ DirListenAddress %s:%d';
 	public function restart(){
 		$this->stop();
 		$this->start();
+	}
+
+	public function status(){
+		$result = $this->execCommand($this->exePath.' status tor'.$this->getPort());
+		return $result;
 	}
 
 	public function searchFreePort(){
@@ -155,6 +166,7 @@ DirListenAddress %s:%d';
 					$this->host,
 					$this->getPort(),
 					self::dataDirectory,$this->getPort(),
+					self::dataDirectory,$this->getPort(),
 					$this->getControlPort(),
 					$this->getORPort(),
 					$this->host,$this->getORPort(),
@@ -169,11 +181,15 @@ DirListenAddress %s:%d';
 	}
 
 	public function isFreePort($port){
-		return !file_exists($this->getPortFileName($port));
+		return !file_exists($this->getPortFileName($port)) || $this->getPortFileName($port) == $this->file->getName();
+	}
+
+	public function isExist(){
+		return preg_match('%is running%', $this->status());
 	}
 
 	public function getPortFileName($port){
-		return $this->pathToConfig.'/'.$port.'.cfg';
+		return $this->pathToConfig.'/tor'.$port.'.cfg';
 	}
 
 } 

@@ -9,5 +9,6 @@
 <a href="cUpdateProxy.php">cUpdateProxy</a><br/>
 <a href="cGetContent.php">cGetContent</a><br/>
 <a href="cTor.php">cTor</a><br/>
+<a href="cSimpleHTTP.php">cSimpleHTTP</a><br/>
 
 <br/><br/><br/><br/><br/>
