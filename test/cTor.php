@@ -10,8 +10,7 @@
 require_once dirname(__FILE__) . '/cnfg_test.php';
 
 use GetContent\cTor as cTor;
-use GetContent\cGetContent as cGetContent;
-echo "cSingleCurl<br/>\n";
+echo "cTor<br/>\n";
 
 $functions = array(
 	'searchFreePort',

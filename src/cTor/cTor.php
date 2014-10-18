@@ -23,6 +23,7 @@ class cTor {
 	private $pathToConfig;
 	private $host = '127.0.0.1';
 	private $port = '9050';
+	private $config;
 	private $configPattern = 'SocksListenAddress %s
 SocksPort %d
 PidFile %s/tor%d.pid
@@ -66,6 +67,7 @@ GeoIPFile %s';
 	public function setPort($port) {
 		if(preg_match('%^\d+$%',$port) && $port >= self::keyPullStart && $port <= self::keyPullEnd && $this->isFreePort($port)){
 			$this->port = $port;
+			$this->file->open($this->getPortFileName($this->getPort()));
 		}
 	}
 
@@ -85,7 +87,14 @@ GeoIPFile %s';
 	 * @param array $ipCountries
 	 */
 	public function setIpCountries($ipCountries) {
-		$this->ipCountries = $ipCountries;
+		$this->ipCountries = is_array($ipCountries)?$ipCountries:array($ipCountries);
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getConfig() {
+		return $this->config;
 	}
 
 	function __construct($port = false){
@@ -108,11 +117,12 @@ GeoIPFile %s';
 	}
 
 	private function execCommand($command){
-		//echo $command . "\n";
+		echo $command . "\n";
 		$output = array();
 		$return_val = null;
 		exec($command, $output, $return_val);
-		return $output ? implode("\n", $output) : $return_val;
+		$result = $output ? implode("\n", $output) : $return_val;
+		return $result;
 	}
 
 	public function start(){
@@ -170,9 +180,9 @@ GeoIPFile %s';
 
 	public function createConfig(){
 		if($this->isFreePort($this->port)){
-			if($this->file->open($this->getPortFileName($this->getPort())) && $this->file->lock()){
+			if($this->file->lock()){
 				$this->file->clear();
-				$config = sprintf(
+				$this->config = sprintf(
 					$this->configPattern,
 					$this->host,
 					$this->getPort(),
@@ -186,13 +196,13 @@ GeoIPFile %s';
 					$this->host,$this->getDirPort()
 				);
 				if($this->ipCountries){
-					$config .= "\n" . sprintf(
+					$this->config .= "\n" . sprintf(
 							$this->geoIpPattern,
 							implode('},{',$this->ipCountries),
 							$this->geoIpFile
 						);
 				}
-				return $this->file->write($config);
+				return $this->file->write($this->config);
 			}
 		}
 		return false;

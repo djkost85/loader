@@ -21,7 +21,8 @@ $functions = array(
 	//'getContentPhantomToCurl', //TODO wont fix
 	//'checkAnswerValid',
 	//'prepareContent', //TODO wont fix
-	'useTor',
+	//'useTor',
+	//'setTorCountry',//TODO wont fix
 );
 
 runTest($functions, 'cGetContent_');
@@ -85,27 +86,36 @@ function cGetContent_prepareContent(){
 }
 
 function cGetContent_useTor(){
+	$ipPull = array('66.225.221.237', '66.225.221.238');
 	$tor = new \GetContent\cTor();
 	$tor->start();
 	$gc = new cGetContent('cSingleCurl');
 	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
 	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
 	$answer = $gc->load('bpteam.net');
-	return  preg_match('%380632359213%ims', $answer);
+	$answer2 = $gc->load('2ip.ru');
+	$newIp = \GetContent\cStringWork::getIp($answer2);
+	return  preg_match('%380632359213%ims', $answer) && $newIp[0] && !in_array($newIp[0], $ipPull);
 }
 
-function setTorCountry(){
+function cGetContent_setTorCountry(){
+	$ipPull = array('66.225.221.237', '66.225.221.238');
+	$regEx = '%<td[^>]*>(<br\s*/>)*<strong\s*title="(?<title>[^"]*)">[^<]*</strong>(<br\s*/>)*</td>\s*<td[^>]*>(?<value>[^<]*)</td>%imsu';
+	echo "REAL IP IS ". implode(',', $ipPull);
 	$tor = new \GetContent\cTor();
-	$tor->start();
 	$gc = new cGetContent('cSingleCurl');
 	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
+	var_dump($gc->load('2ip.ru'));
+	$tor->start();
+	var_dump($tor->getConfig());
 	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	$start = time();
-	for($i = 0 ; $i < 4; $i++){
-		$answer = $gc->load('2ip.ru');
-		$newIp = \GetContent\cStringWork::getIp($answer);
-		echo (isset($newIp[0])?$newIp[0]:'not found IP')."\n";
-		echo '['.(time() - $start) . "]\n";
-	}
-	return preg_match('%380632359213%ims', $answer);
+	var_dump($gc->load('2ip.ru'));
+	$tor->setIpCountries('gb');
+	$tor->restart();
+	var_dump($tor->getConfig());
+	var_dump($gc->load('2ip.ru'));
+	$tor->setIpCountries(array('ua'));
+	$tor->restart();
+	var_dump($tor->getConfig());
+	var_dump($gc->load('2ip.ru'));
 }
