@@ -14,7 +14,7 @@ namespace GetContent;
 abstract class cCurl{
 
 	protected $scheme = 'http';
-	protected $schemeDefaultPort = array('http' => 80, 'https' => 443);
+	protected $schemeDefaultPort = array('http' => 80, 'https' => 443, 'ftp' => 21);
 	protected $url;
 	protected $answer;
 	protected $referer = '';
@@ -39,7 +39,7 @@ abstract class cCurl{
 	 * @var cUserAgent
 	 */
 	public $userAgent;
-	public $descriptor;
+	public $descriptor = array();
 	protected $shareDescriptor;
 	public $defaultOptions = array(
 		CURLOPT_URL => '',
@@ -98,10 +98,10 @@ abstract class cCurl{
 	 */
 	public function setReferer($newReferer,&$descriptor = false){
 		if(!$descriptor){
-			$descriptor = $this->getDescriptor();
+			$descriptor =& $this->getDescriptor();
 		}
 		$this->referer = $newReferer;
-		$this->setOption($descriptor, CURLOPT_REFERER, $this->referer);
+		$this->setOption($descriptor, CURLOPT_REFERER, $newReferer);
 	}
 
 	/**
@@ -339,7 +339,7 @@ abstract class cCurl{
 				break;
 			case CURLOPT_URL:
 				$urlInfo = cStringWork::parseUrl($descriptor['option'][$option]);
-				if($urlInfo['scheme'] != $this->scheme){
+				if(isset($urlInfo['scheme']) && $urlInfo['scheme'] != $this->scheme){
 					$this->setScheme($urlInfo['scheme']);
 				}
 				break;
@@ -355,7 +355,7 @@ abstract class cCurl{
 
 	protected function saveOption(&$descriptorCurl){
 		if (!$this->getSaveOption()){
-			unset($descriptorCurl['option']);
+			$descriptorCurl['option'] = array();
 		}
 	}
 

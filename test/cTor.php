@@ -26,7 +26,7 @@ runTest($functions, 'cTor_');
 
 function cTor_searchFreePort(){
 	$tor = new cTor();
-	return $tor::keyPullStart <= $tor->getPort() && $tor::keyPullEnd >= $tor->getPort();
+	return $tor::KEY_PULL_START <= $tor->getPort() && $tor::KEY_PULL_END >= $tor->getPort();
 }
 
 function cTor_createConfig(){

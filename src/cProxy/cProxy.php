@@ -222,4 +222,12 @@ class cProxy {
 			return false;
 		}
 	}
+
+	protected function loadList(&$proxyList, $proxySource){
+		foreach(explode("\n", $proxySource) as $challenger){
+			if(cStringWork::isIp($challenger)){
+				$proxyList['content'][$challenger]['proxy'] = $challenger;
+			}
+		}
+	}
 } 

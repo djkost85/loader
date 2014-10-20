@@ -15,10 +15,10 @@ $functions = array(
 	'init',
 	'setOption',
 	'setOptions',
+	'usePort',
 	'setReferer',
 	'getContent',
 	'getHeader',
-	'usePort',
 );
 
 runTest($functions, 'cSingleCurl_');
@@ -67,11 +67,11 @@ function cSingleCurl_getHeader(){
 }
 
 function cSingleCurl_setReferer(){
-	$url = 'http://test1.ru/loader/test/support/referer.php';
+	$url = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/support/referer.php';
 	$referer = 'http://iamreferer.net';
 	$gc = new cSingleCurl();
-	$descriptor=& $gc->getDescriptor();
-	$gc->setReferer($descriptor, $referer);
+	$gc->setDefaultOption(CURLOPT_PORT, 8888);
+	$gc->setReferer($referer);
 	$gc->load($url);
 	$text = $gc->getAnswer();
 	return preg_match('%iamreferer%ims', $text);

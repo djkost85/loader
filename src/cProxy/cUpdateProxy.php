@@ -170,12 +170,7 @@ class cUpdateProxy extends cProxy {
 	public function downloadAllProxy() {
 		$proxy['content'] = array();
 		foreach (glob($this->getDirSourceList() . DIRECTORY_SEPARATOR . '*.' . $this->_sourceExt) as $fileSource) {
-			$tmpProxy = file_get_contents($fileSource);
-			foreach(explode("\n", $tmpProxy) as $challenger){
-				if(cStringWork::isIp($challenger)){
-					$proxy['content'][$challenger]['proxy'] = $challenger;
-				}
-			}
+			$this->loadList($proxy, file_get_contents($fileSource));
 		}
 		return $proxy;
 	}
@@ -188,12 +183,7 @@ class cUpdateProxy extends cProxy {
 
 	public function downloadArchiveProxy(){
 		$proxy['content'] = array();
-		$tmpProxy = file_get_contents($this->getFileNameSourceList($this->_archiveProxy));
-		foreach(explode("\n", $tmpProxy) as $challenger){
-			if(cStringWork::isIp($challenger)){
-				$proxy['content'][$challenger]['proxy'] = $challenger;
-			}
-		}
+		$this->loadList($proxy, file_get_contents($this->getFileNameSourceList($this->_archiveProxy)));
 		return $proxy;
 	}
 

@@ -19,7 +19,7 @@ class cTor {
 	private $exePath = '/etc/init.d/tor';
 	private $ipCountries = array();
 	private $geoIpFile = '/usr/share/tor/geoip';
-	const dataDirectory = '/etc/tor';
+	const DATA_DIRECTORY = '/etc/tor';
 	private $pathToConfig;
 	private $host = '127.0.0.1';
 	private $port = '9050';
@@ -37,8 +37,8 @@ DirPort %d
 DirListenAddress %s:%d';
 	private $geoIpPattern = 'ExcludeNodes {%s}
 GeoIPFile %s';
-	const keyPullStart = 20000;
-	const keyPullEnd = 29999;
+	const KEY_PULL_START = 20000;
+	const KEY_PULL_END = 29999;
 
 	/**
 	 * @return string
@@ -65,7 +65,7 @@ GeoIPFile %s';
 	 * @param string $port
 	 */
 	public function setPort($port) {
-		if(preg_match('%^\d+$%',$port) && $port >= self::keyPullStart && $port <= self::keyPullEnd && $this->isFreePort($port)){
+		if(preg_match('%^\d+$%',$port) && $port >= self::KEY_PULL_START && $port <= self::KEY_PULL_END && $this->isFreePort($port)){
 			$this->port = $port;
 			$this->file->open($this->getPortFileName($this->getPort()));
 		}
@@ -117,7 +117,7 @@ GeoIPFile %s';
 	}
 
 	private function execCommand($command){
-		echo $command . "\n";
+		//echo $command . "\n";
 		$output = array();
 		$return_val = null;
 		exec($command, $output, $return_val);
@@ -167,7 +167,7 @@ GeoIPFile %s';
 
 	public function searchFreePort(){
 		do {
-			for ($port = rand(self::keyPullStart, self::keyPullEnd); $port < self::keyPullEnd; $port++) {
+			for ($port = rand(self::KEY_PULL_START, self::KEY_PULL_END); $port < self::KEY_PULL_END; $port++) {
 				if($this->isFreePort($port)) {
 					$this->setPort($port);
 					return $port;
@@ -186,8 +186,8 @@ GeoIPFile %s';
 					$this->configPattern,
 					$this->host,
 					$this->getPort(),
-					self::dataDirectory,$this->getPort(),
-					self::dataDirectory,$this->getPort(),
+					self::DATA_DIRECTORY,$this->getPort(),
+					self::DATA_DIRECTORY,$this->getPort(),
 					$this->getControlPort(),
 					$this->getORPort(),
 					$this->host,$this->getORPort(),

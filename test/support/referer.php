@@ -7,4 +7,4 @@
  * Email: bpteam22@gmail.com
  */
 
-echo $_SERVER['HTTP_REFERER'];
+var_dump($_SERVER['HTTP_REFERER']);
