@@ -54,9 +54,10 @@ function cSingleCurl_setOptions(){
 
 function cSingleCurl_getContent(){
 	$gc = new cSingleCurl();
-	$gc->load('ya.ru', '%yandex%ims');
+	$gc->load('ya.ru');
 	$answer = $gc->getAnswer();
-	return preg_match('%yandex%ims', $answer);
+	$answer2 = $gc->load('vk.com');
+	return preg_match('%yandex%ims', $answer) && preg_match('%vk\.com%ims', $answer2);
 }
 
 function cSingleCurl_getHeader(){

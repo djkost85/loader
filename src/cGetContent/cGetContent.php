@@ -258,7 +258,7 @@ class cGetContent {
 		}
 	}
 
-	protected function moveCookies(){
+	public function moveCookies(){
 		$old = $this->getOldLoadName();
 		$new = $this->getLoaderName();
 		if($new && $old && $this->canMoveCookies($new) && $this->canMoveCookies($old)){

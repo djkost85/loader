@@ -15,13 +15,13 @@ echo "cGetContent<br/>\n";
 define('FILE_NAME', dirname(__FILE__).'/support/testCFile.txt');
 
 $functions = array(
-	//'getContentSingleCurl',
-	//'getContentPhantom',
-	//'getContentCurlToPhantom', //TODO wont fix
-	//'getContentPhantomToCurl', //TODO wont fix
-	//'checkAnswerValid',
-	//'prepareContent', //TODO wont fix
-	//'useTor',
+	'getContentSingleCurl',
+	'getContentPhantom',
+	'getContentCurlToPhantom', //TODO wont fix
+	'getContentPhantomToCurl', //TODO wont fix
+	'checkAnswerValid',
+	'prepareContent',
+	'useTor',
 	//'setTorCountry',//TODO wont fix
 );
 
@@ -45,8 +45,8 @@ function cGetContent_getContentCurlToPhantom(){
 	$gc = new cGetContent();
 	$gc->setLoader('cSingleCurl');
 	$gc->load('http://ya.ru');
-	$gc->setLoader('phantom');
-	$cookies = $gc->cookie->fromFilePhantomJS();
+	$gc->setLoader('cPhantomJS');
+	$cookies = $gc->moveCookies();
 	return isset($cookies['yandexuid']);
 }
 
@@ -55,7 +55,7 @@ function cGetContent_getContentPhantomToCurl(){
 	$gc->setLoader('cPhantomJS');
 	$gc->load('http://ya.ru');
 	$gc->setLoader('cSingleCurl');
-	$cookies = $gc->cookie->fromFileCurl();
+	$cookies = $gc->moveCookies();
 	return isset($cookies['yandexuid']);
 }
 
@@ -71,7 +71,7 @@ function cGetContent_checkAnswerValid() {
 }
 
 function cGetContent_prepareContent(){
-	$url = 'vk.com';
+	$url = 'http://www.aptechka.ru/programs/social_card.shtml0';
 	$withoutEncoding = 'windows-1251';
 	$needEncoding = 'UTF-8';
 	$gc = new cGetContent();

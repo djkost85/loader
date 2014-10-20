@@ -26,9 +26,13 @@ function cSimpleHTTP_load(){
 }
 
 function cSimpleHTTP_useTor(){
+	$ipPull = array('66.225.221.237', '66.225.221.238');
 	$simpleHTTP = new GetContent\cSimpleHTTP();
-	$simpleHTTP->setUseProxy('127.0.0.1:20001');
+	$tor = new GetContent\cTor();
+	$tor->start();
+	$simpleHTTP->setUseProxy($tor->getTorConnection());
 	$answer = $simpleHTTP->load('http://2ip.ru');
 	$newIp = \GetContent\cStringWork::getIp($answer);
-	echo (isset($newIp[0])?$newIp[0]:'not found IP')."\n";
+	//echo (isset($newIp[0])?$newIp[0]:'not found IP')."\n";
+	return !in_array($newIp[0], $ipPull);
 }

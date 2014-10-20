@@ -52,14 +52,14 @@ function cPhantomJS_renderPDF(){
 function cPhantomJS_sendPost(){
 	$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
 	$post = 'url=vk.com&test=test_post';
-	$source = 'http://test1.ru/loader/test/support/post_test.php';
+	$source = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/support/post_test.php';
 	$text = $phantomJS->sendPost($source,$post);
 	return preg_match('%test_post%ims', $text);
 }
 
 function cPhantomJS_setReferer(){
 	$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
-	$source = 'http://test1.ru/loader/test/support/referer.php';
+	$source = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/support/referer.php';
 	$referer = 'http://iamreferer.net';
 	$phantomJS->setReferer($referer);
 	$text = $phantomJS->renderText($source);
