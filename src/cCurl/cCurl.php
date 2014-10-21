@@ -193,6 +193,7 @@ abstract class cCurl{
 				break;
 			case false:
 				$proxy = false;
+				$this->unsetDefaultOption(CURLOPT_PROXY);
 				$this->unsetDefaultOption(CURLOPT_PROXYTYPE);
 				break;
 			default:

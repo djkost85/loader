@@ -15,6 +15,11 @@ class cHeaderHTTP {
 
 	protected static $redirectCode = array(300,301,302,303,304,305,306,307);
 
+	const TYPE_CONTENT_TEXT = 'text';
+	const TYPE_CONTENT_IMG = 'img';
+	const TYPE_CONTENT_HTML = 'html';
+	const TYPE_CONTENT_FILE = 'file';
+
 	public static function cutHeader(&$answer){
 		$header = array();
 		if($answer){
@@ -28,11 +33,11 @@ class cHeaderHTTP {
 
 	public static function checkMimeType($mime, $type) {
 		switch ($type) {
-			case 'file':
+			case self::TYPE_CONTENT_FILE:
 				return true;
-			case 'img':
+			case self::TYPE_CONTENT_IMG:
 				return preg_match('%image/(gif|p?jpeg|png|svg\+xml|tiff|vnd\.microsoft\.icon|vnd\.wap\.wbmp)%i', $mime);
-			case 'html':
+			case self::TYPE_CONTENT_HTML:
 				return (preg_match('%text/html%i', $mime));
 			default:
 				return true;

@@ -136,12 +136,13 @@ GeoIPFile %s';
 	}
 
 	public function stop(){
-		for($i = 0; $i < 10; $i++) {
+		$result = false;
+		for($i = 0; $i < 25; $i++) {
 			$result = $this->execCommand($this->exePath . ' stop tor' . $this->getPort());
 			if(!$this->isExist()){
 				break;
 			}
-			usleep(100000);
+			usleep(200000);
 		}
 		return $result;
 	}

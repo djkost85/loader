@@ -18,7 +18,7 @@ $url = array(
 	'ya.ru',
 	'vk.com',
 	'odnoklassniki.ru',
-	'slando.ua',
+	'olx.ua',
 	'vk.lg.ua',
 );
 for($i=0; $i < $maxIterations; $i++){

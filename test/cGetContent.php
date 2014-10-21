@@ -22,6 +22,7 @@ $functions = array(
 	'checkAnswerValid',
 	'prepareContent',
 	'useTor',
+	'useTorMulti',
 	//'setTorCountry',//TODO wont fix
 );
 
@@ -96,6 +97,25 @@ function cGetContent_useTor(){
 	$answer2 = $gc->load('2ip.ru');
 	$newIp = \GetContent\cStringWork::getIp($answer2);
 	return  preg_match('%380632359213%ims', $answer) && $newIp[0] && !in_array($newIp[0], $ipPull);
+}
+
+function cGetContent_useTorMulti(){
+	$ipPull = array('66.225.221.237', '66.225.221.238');
+	$tor = new \GetContent\cTor();
+	$tor->start();
+	$gc = new cGetContent('cMultiCurl');
+	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
+	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$answer = $gc->load('bpteam.net');
+	$answer2 = $gc->load(array('2ip.ru','2ip.com.ua', 'myip.ru'));
+	$newIp = \GetContent\cStringWork::getIp($answer2[0]);
+	$newIp1 = \GetContent\cStringWork::getIp($answer2[1]);
+	$newIp2 = \GetContent\cStringWork::getIp($answer2[2]);
+	var_dump($newIp,$newIp1,$newIp2);
+	$newIp = $newIp[0] && !in_array($newIp[0], $ipPull);
+	$newIp1 = $newIp1[0] && !in_array($newIp1[0], $ipPull);
+	$newIp2 = $newIp2[0] && !in_array($newIp2[0], $ipPull);
+	return  preg_match('%380632359213%ims', $answer[0]) && $newIp && $newIp1 && $newIp2;
 }
 
 function cGetContent_setTorCountry(){

@@ -23,10 +23,6 @@ class cGetContent {
 	 */
 	public $cookie;
 
-	/**
-	 * @var cHeaderHTTP
-	 */
-	public $http;
 	private $loaderName;
 	private $oldLoadName = false;
 	private $key;
@@ -54,7 +50,7 @@ class cGetContent {
 	 * [text] Текст
 	 * [html] html страницы
 	 */
-	protected $typeContent = 'text';
+	protected $typeContent = cHeaderHTTP::TYPE_CONTENT_TEXT;
 
 	protected $checkAnswer = false;
 
@@ -70,7 +66,7 @@ class cGetContent {
 	 * @param string $typeContent text | img | html | file
 	 * @return bool
 	 */
-	public function setTypeContent($typeContent = "text") {
+	public function setTypeContent($typeContent = cHeaderHTTP::TYPE_CONTENT_TEXT) {
 		$this->typeContent = $typeContent;
 	}
 
@@ -274,6 +270,10 @@ class cGetContent {
 		return $name != 'cMultiCurl' && $name != 'cSimpleHTTP';
 	}
 
+	protected function canMultiQuery($name){
+		return $name == 'cMultiCurl';
+	}
+
 	function __construct($loaderName = 'cSimpleHTTP'){
 		$this->cookie = new cCookie();
 		$this->genKey();
@@ -297,8 +297,8 @@ class cGetContent {
 	}
 
 	public function load($url, $checkRegEx = false){
-		$url = cStringWork::checkUrlProtocol($url);
-		return is_array($url) ? $this->multiQuery($url, $checkRegEx) : $this->singleQuery($url, $checkRegEx);
+		$url = is_array($url) ? array_map(function($n){return cStringWork::checkUrlProtocol($n);}, $url) : cStringWork::checkUrlProtocol($url);
+		return is_array($url) || $this->canMultiQuery($this->getLoaderName()) ? $this->multiQuery($url, $checkRegEx) : $this->singleQuery($url, $checkRegEx);
 	}
 
 	protected function singleQuery($url, $checkRegEx = false){
@@ -358,7 +358,7 @@ class cGetContent {
 	}
 
 	protected function checkAnswerValid($answer, $info = array()) {
-		return (!isset($info['http_code']) || $this->http->checkCode($info['http_code'])) && $this->checkSizeAnswer($answer) && (!isset($info['content_type']) || $this->checkTypeContent($info['content_type']));
+		return (!isset($info['http_code']) || cHeaderHTTP::checkCode($info['http_code'])) && $this->checkSizeAnswer($answer) && (!isset($info['content_type']) || $this->checkTypeContent($info['content_type']));
 	}
 
 	protected function checkSizeAnswer($answer){
@@ -367,12 +367,12 @@ class cGetContent {
 
 	protected function checkTypeContent($type){
 		switch ($this->getTypeContent()) {
-			case 'file':
-				return ($this->http->checkMimeType($type, 'file'));
-			case 'img':
-				return ($this->http->checkMimeType($type, 'img'));
-			case 'html':
-				return ($this->http->checkMimeType($type, 'html'));
+			case cHeaderHTTP::TYPE_CONTENT_FILE:
+				return (cHeaderHTTP::checkMimeType($type, cHeaderHTTP::TYPE_CONTENT_FILE));
+			case cHeaderHTTP::TYPE_CONTENT_IMG:
+				return (cHeaderHTTP::checkMimeType($type, cHeaderHTTP::TYPE_CONTENT_IMG));
+			case cHeaderHTTP::TYPE_CONTENT_HTML:
+				return (cHeaderHTTP::checkMimeType($type, cHeaderHTTP::TYPE_CONTENT_HTML));
 			default:
 				return true;
 		}
@@ -380,10 +380,10 @@ class cGetContent {
 
 	protected function prepareContent($answer) {
 		switch ($this->getTypeContent()) {
-			case 'text':
+			case cHeaderHTTP::TYPE_CONTENT_TEXT:
 				$answer = $this->encodingAnswerText($answer);
 				break;
-			case 'html':
+			case cHeaderHTTP::TYPE_CONTENT_HTML:
 				$answer = $this->encodingAnswerText($answer);
 				break;
 		}
