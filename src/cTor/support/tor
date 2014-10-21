@@ -4,6 +4,7 @@
 #~~~~~~~~~~~~~~~~~~~~COPY ME TO /etc/init.d~~~~~~~~~~~~~~~~~~~~~~~~~~#
 
 ### BEGIN INIT INFO
+# Create dir /var/run/tor and chown debian-tor chmod 700
 # Provides:          tor
 # Required-Start:    $local_fs $remote_fs $network $named $time
 # Required-Stop:     $local_fs $remote_fs $network $named $time
@@ -180,8 +181,8 @@ case $1 in
 		fi
 		;;
 	stop)
-		echo Stopping $DESC
-		pid= cat $TORPID
+		echo 'Stopping '$DESC
+		pid=`cat $TORPID 2>/dev/null` || true
 		if ! [ -f $TORPID ]; then
 			echo not running - there is no $TORPID
 			return 0

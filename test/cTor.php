@@ -70,5 +70,6 @@ function cTor_stopAll(){
 	$tor2->start();
 	$tor3->start();
 	$tor1->stopAll();
+	sleep(5);
 	return !$tor1->isExist() && !$tor2->isExist() && !$tor3->isExist();
 }

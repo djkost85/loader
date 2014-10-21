@@ -126,25 +126,27 @@ GeoIPFile %s';
 	}
 
 	public function start(){
+		$result = false;
 		if($this->createConfig()) {
 			$result = $this->execCommand($this->exePath . ' start tor' . $this->getPort());
-			return $result;
-		} else {
-			return false;
+			$this->waitExec(true);
 		}
-
+		return $result;
 	}
 
 	public function stop(){
-		$result = false;
+		$result = $this->execCommand($this->exePath . ' stop tor' . $this->getPort());
+		$this->waitExec(false);
+		return $result;
+	}
+
+	protected function waitExec($need = true){
 		for($i = 0; $i < 25; $i++) {
-			$result = $this->execCommand($this->exePath . ' stop tor' . $this->getPort());
-			if(!$this->isExist()){
+			if($this->isExist() == $need){
 				break;
 			}
 			usleep(200000);
 		}
-		return $result;
 	}
 
 	public function stopAll(){
