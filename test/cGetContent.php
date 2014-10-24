@@ -15,15 +15,16 @@ echo "cGetContent<br/>\n";
 define('FILE_NAME', dirname(__FILE__).'/support/testCFile.txt');
 
 $functions = array(
-	'getContentSingleCurl',
-	'getContentPhantom',
-	'getContentCurlToPhantom', //TODO wont fix
-	'getContentPhantomToCurl', //TODO wont fix
-	'checkAnswerValid',
-	'prepareContent',
-	'useTor',
-	'useTorMulti',
+	//'getContentSingleCurl',
+	//'getContentPhantom',
+	//'getContentCurlToPhantom', //TODO wont fix
+	//'getContentPhantomToCurl', //TODO wont fix
+	//'checkAnswerValid',
+	//'prepareContent',
+	//'useTor',
+	//'useTorMulti',
 	//'setTorCountry',//TODO wont fix
+	'checkTorRestartMultiCurl',
 );
 
 runTest($functions, 'cGetContent_');
@@ -106,6 +107,7 @@ function cGetContent_useTorMulti(){
 	$gc = new cGetContent('cMultiCurl');
 	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
 	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$gc->setDefaultOption(CURLOPT_PORT, 8888);
 	$answer = $gc->load('bpteam.net');
 	$answer2 = $gc->load(array('2ip.ru','2ip.com.ua', 'myip.ru'));
 	$newIp = \GetContent\cStringWork::getIp($answer2[0]);
@@ -138,4 +140,34 @@ function cGetContent_setTorCountry(){
 	$tor->restart();
 	var_dump($tor->getConfig());
 	var_dump($gc->load('2ip.ru'));
+}
+
+function cGetContent_checkTorRestartMultiCurl(){
+	$gc = new cGetContent('cMultiCurl');
+	$tor = new \GetContent\cTor();
+	$tor->start();
+	$gc->setMinSizeAnswer(2);
+	$gc->setWaitExecMSec(500000);
+	$gc->setDefaultOption(CURLOPT_PORT,8888);
+	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$gc->setCheckAnswer(true);
+	$gc->setDefaultOption(CURLOPT_TIMEOUT, 60);
+	$gc->setTypeContent(\GetContent\cHeaderHTTP::TYPE_CONTENT_TEXT);
+	if(isset($_SERVER['HTTP_HOST']) && isset($_SERVER['SCRIPT_NAME'])) {
+		$url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/support/header.php';
+	} else {
+		$url = 'http://track.hamstersgangsters.com/_coolLib/loader/test/support/header.php';
+	}
+	$urls = array($url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,);
+	echo "load 1 \n";
+	$gc->load($urls);
+	echo "load 2 \n";
+	$answer = $gc->load($urls);
+	var_dump($answer[0]);
+	echo "tor restart \n";
+	sleep(5);
+	$tor->restart();
+	echo "load 3 \n";
+	$answer = $gc->load($urls);
+	var_dump($answer[0]);
 }

@@ -205,10 +205,11 @@ class cMultiCurl extends cCurl{
 	public function getAnswer($getAllAnswer = false){
 		if (!$getAllAnswer) {
 			$a = array();
+			$descriptorKey = 0;
 			$descriptorArray = $this->getDescriptorArray();
 			foreach ($this->answer as $key => $value) {
-				$a[$key] = cStringWork::getBiggestString($value, $descriptorKey);
-				$this->answerInfo[$key] = $descriptorArray[$descriptorKey]['info'];
+				$a[$key] = $value && is_array($value) ? cStringWork::getBiggestString($value, $descriptorKey) : false;
+				$this->answerInfo[$key] = $value && is_array($value) ? $descriptorArray[$descriptorKey]['info'] : false;
 			}
 			return $a;
 		} else{

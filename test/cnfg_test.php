@@ -20,8 +20,8 @@ function runTest($functions, $prefix = ''){
 	echo date("[H:i:s Y/m/d]", $start)."[$memStart]\n\n";
 	echo "Method\tResult\ttime\tmemory";
 	foreach($functions as $function){
-		echo "\n";
-		echo "$function\t\t";
+		echo "\n\n";
+		echo "$function\t";
 		$funStart = microtime(true);
 		$memFunStart = memory_get_usage(true);
 		$nameFunction = $prefix.$function;

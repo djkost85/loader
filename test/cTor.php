@@ -58,8 +58,10 @@ function cTor_stop(){
 
 function cTor_restart(){
 	$tor = new cTor();
+	$tor->start();
+	$res = $tor->isExist();
 	$tor->restart();
-	return $tor->isExist();
+	return $res && $tor->isExist();
 }
 
 function cTor_stopAll(){

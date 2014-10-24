@@ -4,7 +4,7 @@
  * User: EC
  * Date: 10.10.2014
  * Time: 10:46
- * Project: loader-curl-phantomjs-proxy
+ * Project: loader
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 require_once dirname(__FILE__) . '/cnfg_test.php';

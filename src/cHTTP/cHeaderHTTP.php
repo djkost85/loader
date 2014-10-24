@@ -4,7 +4,7 @@
  * User: EC
  * Date: 07.10.2014
  * Time: 18:52
- * Project: loader-curl-phantomjs-proxy
+ * Project: loader
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 

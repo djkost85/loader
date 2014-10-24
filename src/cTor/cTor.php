@@ -128,25 +128,25 @@ GeoIPFile %s';
 	public function start(){
 		$result = false;
 		if($this->createConfig()) {
-			$result = $this->execCommand($this->exePath . ' start tor' . $this->getPort());
-			$this->waitExec(true);
+			$result = $this->waitExecComplete($this->exePath . ' start tor' . $this->getPort(), true);
 		}
 		return $result;
 	}
 
 	public function stop(){
-		$result = $this->execCommand($this->exePath . ' stop tor' . $this->getPort());
-		$this->waitExec(false);
-		return $result;
+		return $this->waitExecComplete($this->exePath . ' stop tor' . $this->getPort(), false);
 	}
 
-	protected function waitExec($need = true){
+	protected function waitExecComplete($cmd, $need = true){
+		$result = false;
 		for($i = 0; $i < 25; $i++) {
-			if($this->isExist() == $need){
+			$result = $this->execCommand($cmd);
+			if($this->isExist() === $need){
 				break;
 			}
 			usleep(200000);
 		}
+		return $result;
 	}
 
 	public function stopAll(){
@@ -159,8 +159,9 @@ GeoIPFile %s';
 	}*/
 
 	public function restart(){
-		$this->stop();
-		$this->start();
+		$result['stop'] = $this->stop();
+		$result['start'] = $this->start();
+		return $result;
 	}
 
 	public function status(){
@@ -216,7 +217,7 @@ GeoIPFile %s';
 	}
 
 	public function isExist(){
-		return preg_match('%is running%', $this->status());
+		return (bool)preg_match('%is running%', $this->status());
 	}
 
 	public function getPortFileName($port){

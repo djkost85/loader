@@ -299,12 +299,12 @@ class cStringWork
 		$bigKey = 0;
 		foreach ($text as $key => $value) {
 			$thisA = mb_strlen($value, 'utf-8');
-			if ($thisA > $bigA) {
+			if ($thisA >= $bigA) {
 				$bigA = $thisA;
 				$bigKey = $key;
 			}
 		}
 		$bestKey = $bigKey;
-		return $text[$bigKey];
+		return isset($text[$bigKey]) ? $text[$bigKey] : false;
 	}
 }
