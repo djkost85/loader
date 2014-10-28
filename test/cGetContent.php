@@ -15,16 +15,15 @@ echo "cGetContent<br/>\n";
 define('FILE_NAME', dirname(__FILE__).'/support/testCFile.txt');
 
 $functions = array(
-	//'getContentSingleCurl',
-	//'getContentPhantom',
-	//'getContentCurlToPhantom', //TODO wont fix
-	//'getContentPhantomToCurl', //TODO wont fix
-	//'checkAnswerValid',
-	//'prepareContent',
-	//'useTor',
-	//'useTorMulti',
-	//'setTorCountry',//TODO wont fix
-	'checkTorRestartMultiCurl',
+	'getContentSingleCurl',
+	'getContentPhantom',
+	'getContentCurlToPhantom', //TODO wont fix
+	'getContentPhantomToCurl', //TODO wont fix
+	'checkAnswerValid',
+	'prepareContent',
+	'useTor',
+	'useTorMulti',
+	//'checkTorRestartMultiCurl',
 );
 
 runTest($functions, 'cGetContent_');
@@ -118,28 +117,6 @@ function cGetContent_useTorMulti(){
 	$newIp1 = $newIp1[0] && !in_array($newIp1[0], $ipPull);
 	$newIp2 = $newIp2[0] && !in_array($newIp2[0], $ipPull);
 	return  preg_match('%380632359213%ims', $answer[0]) && $newIp && $newIp1 && $newIp2;
-}
-
-function cGetContent_setTorCountry(){
-	$ipPull = array('66.225.221.237', '66.225.221.238');
-	$regEx = '%<td[^>]*>(<br\s*/>)*<strong\s*title="(?<title>[^"]*)">[^<]*</strong>(<br\s*/>)*</td>\s*<td[^>]*>(?<value>[^<]*)</td>%imsu';
-	echo "REAL IP IS ". implode(',', $ipPull);
-	$tor = new \GetContent\cTor();
-	$gc = new cGetContent('cSingleCurl');
-	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
-	var_dump($gc->load('2ip.ru'));
-	$tor->start();
-	var_dump($tor->getConfig());
-	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	var_dump($gc->load('2ip.ru'));
-	$tor->setIpCountries('gb');
-	$tor->restart();
-	var_dump($tor->getConfig());
-	var_dump($gc->load('2ip.ru'));
-	$tor->setIpCountries(array('ua'));
-	$tor->restart();
-	var_dump($tor->getConfig());
-	var_dump($gc->load('2ip.ru'));
 }
 
 function cGetContent_checkTorRestartMultiCurl(){

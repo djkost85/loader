@@ -17,7 +17,7 @@ class cTor {
 	 */
 	private $file;
 	private $exePath = '/etc/init.d/tor';
-	private $ipCountries = array();
+	private $ipCountries = array(); //https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
 	private $geoIpFile = '/usr/share/tor/geoip';
 	const DATA_DIRECTORY = '/etc/tor';
 	private $pathToConfig;
@@ -35,10 +35,11 @@ ORListenAddress %s:%d
 Nickname tor%d
 DirPort %d
 DirListenAddress %s:%d';
-	private $geoIpPattern = 'ExcludeNodes {%s}
-GeoIPFile %s';
+	private $geoIpPattern = 'ExitNodes {%s}';
 	const KEY_PULL_START = 20000;
 	const KEY_PULL_END = 29999;
+	private $maxRepeatExecute = 25;
+	private $sleepOnExecute = 200000;
 
 	/**
 	 * @return string
@@ -97,6 +98,34 @@ GeoIPFile %s';
 		return $this->config;
 	}
 
+	/**
+	 * @return int
+	 */
+	public function getMaxRepeatExecute() {
+		return $this->maxRepeatExecute;
+	}
+
+	/**
+	 * @param int $maxRepeatExecute
+	 */
+	public function setMaxRepeatExecute($maxRepeatExecute) {
+		$this->maxRepeatExecute = $maxRepeatExecute;
+	}
+
+	/**
+	 * @return int
+	 */
+	public function getSleepOnExecute() {
+		return $this->sleepOnExecute;
+	}
+
+	/**
+	 * @param int $sleepOnExecute
+	 */
+	public function setSleepOnExecute($sleepOnExecute) {
+		$this->sleepOnExecute = $sleepOnExecute;
+	}
+
 	function __construct($port = false){
 		$this->file = new cFile();
 		$this->file->setLockAccess(true);
@@ -139,12 +168,12 @@ GeoIPFile %s';
 
 	protected function waitExecComplete($cmd, $need = true){
 		$result = false;
-		for($i = 0; $i < 25; $i++) {
+		for($i = 0; $i < $this->getMaxRepeatExecute(); $i++) {
 			$result = $this->execCommand($cmd);
 			if($this->isExist() === $need){
 				break;
 			}
-			usleep(200000);
+			usleep($this->getSleepOnExecute());
 		}
 		return $result;
 	}
@@ -202,8 +231,7 @@ GeoIPFile %s';
 				if($this->ipCountries){
 					$this->config .= "\n" . sprintf(
 							$this->geoIpPattern,
-							implode('},{',$this->ipCountries),
-							$this->geoIpFile
+							implode('},{',$this->ipCountries)
 						);
 				}
 				return $this->file->write($this->config);

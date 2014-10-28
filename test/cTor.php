@@ -13,13 +13,15 @@ use GetContent\cTor as cTor;
 echo "cTor<br/>\n";
 
 $functions = array(
-	'searchFreePort',
+	/*'searchFreePort',
 	'createConfig',
 	'getTorConnection',
 	'start',
 	'stop',
 	'restart',
-	'stopAll',
+	'stopAll',*/
+	//'setTorCountry',
+	'lookHeaders',
 );
 
 runTest($functions, 'cTor_');
@@ -74,4 +76,49 @@ function cTor_stopAll(){
 	$tor1->stopAll();
 	sleep(5);
 	return !$tor1->isExist() && !$tor2->isExist() && !$tor3->isExist();
+}
+
+function cTor_lookHeaders(){
+	echo "<pre>\n";
+	if(isset($_SERVER['HTTP_HOST']) && isset($_SERVER['SCRIPT_NAME'])) {
+		$url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/support/header.php';
+	} else {
+		$url = 'http://track.hamstersgangsters.com/_coolLib/loader/test/support/header.php';
+	}
+	$url = 'http://m.torg.ua/kiev/kvartiry/sdam/1-komnatnye';
+	$gc = new \GetContent\cGetContent('cSingleCurl');
+
+	$tor = new \GetContent\cTor();
+	$tor->setIpCountries('us');
+	var_dump($tor->start());
+	$gc->setCheckAnswer(false);
+	$gc->setMinSizeAnswer(2);
+	//$gc->setDefaultOption(CURLOPT_PORT,8888);
+	var_dump($tor->getTorConnection());
+	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$answer = $gc->load($url);
+	var_dump($gc->getInfo());
+	var_dump($answer);
+	echo "</pre>\n";
+}
+
+function cTor_setTorCountry(){
+	$ipPull = array('66.225.221.237', '66.225.221.238');
+	$url = 'icanhazip.com';
+	$regEx = '%<td[^>]*>(<br\s*/>)*<strong\s*title="(?<title>[^"]*)">[^<]*</strong>(<br\s*/>)*</td>\s*<td[^>]*>(?<value>[^<]*)</td>%imsu';
+	echo "REAL IP IS ". implode(',', $ipPull);
+	$tor = new \GetContent\cTor();
+	$tor->setIpCountries('ua');
+	$gc = new \GetContent\cGetContent('cSingleCurl');
+	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
+	var_dump($gc->load($url));
+	$tor->start();
+	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	var_dump($gc->load($url));
+	$tor->setIpCountries('ca');
+	$tor->restart();
+	var_dump($gc->load($url));
+	$tor->setIpCountries(array('ua'));
+	$tor->restart();
+	var_dump($gc->load($url));
 }
