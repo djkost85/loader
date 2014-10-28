@@ -9,13 +9,13 @@
  */
 
 require_once dirname(__FILE__)."/../../../include.php";
-use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cGetContent as cGetContent;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 //return array();
 $urlSource = "http://stopinfection.narod.ru/Proxy.htm";
 $nameSource = "stopinfection.narod.ru";
-$curl = new cSingleCurl();
+$curl = new cGetContent('cSingleCurl');
 $updateProxy = new cUpdateProxy();
 $curl->setEncodingAnswer(true);
 $curl->setEncodingName('UTF-8');

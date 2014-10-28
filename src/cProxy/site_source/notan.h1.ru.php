@@ -9,7 +9,7 @@
  */
 
 require_once dirname(__FILE__)."/../../../include.php";
-use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cGetContent as cGetContent;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 $nameSource = "notan.h1.ru";
@@ -17,7 +17,7 @@ $proxyNotanProxy = array();
 $updateProxy = new cUpdateProxy();
 for($i=1;$i<=10;$i++){
 	$urlSource="http://notan.h1.ru/hack/xwww/proxy".$i.".html";
-	$curl = new cSingleCurl();
+	$curl = new cGetContent('cSingleCurl');
 	$curl->setTypeContent("html");
 	$answerNotan = $curl->load($urlSource);
 	if(!$answerNotan) break;

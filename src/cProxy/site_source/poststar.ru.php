@@ -9,13 +9,13 @@
  */
 
 require_once dirname(__FILE__)."/../../../include.php";
-use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cGetContent as cGetContent;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://www.poststar.ru/proxy.htm";
 $nameSource = "poststar.ru";
-$curl = new cSingleCurl();
+$curl = new cGetContent('cSingleCurl');
 $updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
 $answerPoststar = $curl->load($urlSource);

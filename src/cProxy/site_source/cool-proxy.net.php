@@ -9,13 +9,13 @@
  */
 
 require_once dirname(__FILE__)."/../../../include.php";
-use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cGetContent as cGetContent;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://www.cool-proxy.net/proxies/http_proxy_list/page:";
 $nameSource = "cool-proxy.net";
-$curl = new cSingleCurl();
+$curl = new cGetContent('cSingleCurl');
 $updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
 $i = 1;

@@ -9,13 +9,13 @@
  */
 
 require_once dirname(__FILE__)."/../../../include.php";
-use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cGetContent as cGetContent;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://foxtools.ru/Proxy?page=";
 $nameSource = "foxtools.ru";
-$curl = new cSingleCurl();
+$curl = new cGetContent('cSingleCurl');
 $updateProxy = new cUpdateProxy();
 $curl->setTypeContent("html");
 $proxyFoxtools = array();

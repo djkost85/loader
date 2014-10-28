@@ -9,12 +9,12 @@
  */
 
 require_once dirname(__FILE__)."/../../../include.php";
-use GetContent\cSingleCurl as cSingleCurl;
+use GetContent\cGetContent as cGetContent;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 $urlSource = "http://www.cool-tests.com/all-working-proxies.php";
 $nameSource = "cool-tests.com";
-$curl = new cSingleCurl();
+$curl = new cGetContent('cSingleCurl');
 $updateProxy = new cUpdateProxy();
 $curl->setEncodingAnswer(true);
 $curl->setEncodingName('UTF-8');
