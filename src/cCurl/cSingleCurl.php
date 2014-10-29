@@ -94,7 +94,7 @@ class cSingleCurl extends cCurl{
 		$descriptor['info']['header'] = cHeaderHTTP::cutHeader($answer);
 		if(cHeaderHTTP::isRedirect($descriptor['info']['http_code'])){
 			if($this->useRedirect()){
-				$this->setReferer($descriptor, $url);
+				$this->setReferer($url, $descriptor);
 				$answer = $this->load($descriptor['info']['redirect_url']);
 			}
 		}
