@@ -150,6 +150,11 @@ case $1 in
 			fi
 		fi
 
+		if ! [ -f /var/run/tor ]; then
+			mkdir -p /var/run/tor -m 700
+			chown debian-tor:debian-tor /var/run/tor
+		fi
+
 		check_torpiddir
 		check_torlogdir
 		check_config

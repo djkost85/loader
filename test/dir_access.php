@@ -24,9 +24,9 @@ checkDir($loaderDir.'src/cPhantomJS/storage', 'is_writable', true);
 checkDir($loaderDir.'src/cProxy/proxy_list', 'is_writable', true);
 checkDir($loaderDir.'src/cProxy/proxy_list/source', 'is_writable', true);
 
-checkDir('/var/run/tor', 'fileowner', posix_getpwnam('debian-tor')['uid'], 'owner is not debian-tor pls exec command "chown debian-tor:debian-tor /var/run/tor"');
-checkDir('/etc/tor', 'fileowner', posix_getpwnam('debian-tor')['uid'], 'owner is not debian-tor pls exec command "chown debian-tor:debian-tor /etc/tor"');
-checkDir('/var/log/tor', 'fileowner', posix_getpwnam('debian-tor')['uid'], 'owner is not debian-tor pls exec command "chown debian-tor:debian-tor /var/log/tor"');
+checkDir('/var/run/tor', 'fileowner', posix_getpwnam('debian-tor')['uid'], 'ERROR owner is not debian-tor pls exec command "chown debian-tor:debian-tor /var/run/tor"');
+checkDir('/etc/tor', 'fileowner', posix_getpwnam('debian-tor')['uid'], 'ERROR owner is not debian-tor pls exec command "chown debian-tor:debian-tor /etc/tor"');
+checkDir('/var/log/tor', 'fileowner', posix_getpwnam('debian-tor')['uid'], 'ERROR owner is not debian-tor pls exec command "chown debian-tor:debian-tor /var/log/tor"');
 
 
 echo "</pre>\n";
