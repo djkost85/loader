@@ -206,6 +206,21 @@ class cUpdateProxy extends cProxy {
 		return false;
 	}
 
+	/**
+	 * @param $proxyFunctions
+	 * @param array $needFunctions list of functions:
+	 *                             anonym=(true|false)
+	 *                             referer=(true|false)
+	 *                             post=(true|false)
+	 *                             get=(true|false)
+	 *                             cookie=(true|false)
+	 *                             starttransfer= < float
+	 *                             country= name of country
+	 *                             last_check= > int
+	 *                             upload_speed= > float
+	 *                             download_speed= > float
+	 * @return bool
+	 */
 	protected function checkProxyFunctions($proxyFunctions, $needFunctions){
 		foreach($needFunctions as $name => $value){
 			switch(true){
@@ -213,12 +228,12 @@ class cUpdateProxy extends cProxy {
 					if($proxyFunctions[$name] != $value){
 						return false;
 					}
-					break;
+					continue;
 				case in_array($name, array('starttransfer')):
 					if($proxyFunctions[$name] > $value){
 						return false;
 					}
-					break;
+					continue;
 				case in_array( $name, array('country')):
 					if($value){
 						if((is_array($value) && !in_array( $proxyFunctions[$name], $value))
@@ -226,17 +241,17 @@ class cUpdateProxy extends cProxy {
 							return false;
 						}
 					}
-					break;
+					continue;
 				case in_array( $name, array('last_check', 'upload_speed', 'download_speed')):
 					if($proxyFunctions[$name] < $value){
 						return false;
 					}
-					break;
+					continue;
 				/*case in_array( $name, array('source', 'protocol')):
 					if(!array_key_exists( $value, $proxyFunctions[$name])){
 						return false;
 					}
-					break;*/
+					continue;*/
 			}
 		}
 		return true;
