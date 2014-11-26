@@ -209,7 +209,7 @@ abstract class cCurl{
 		return $this->proxy;
 	}
 
-	private function setOptionProxy(&$descriptor){
+	protected function setOptionProxy(&$descriptor){
 		if (is_object($this->proxy)) {
 			$proxy = $this->proxy->getProxy($descriptor['descriptor_key'], $descriptor['option'][CURLOPT_URL]);
 			if (is_string($proxy['proxy']) && cStringWork::isIp($proxy['proxy'])){
@@ -222,7 +222,7 @@ abstract class cCurl{
 		}
 	}
 
-	private function setOptionCookie(&$descriptor){
+	protected function setOptionCookie(&$descriptor){
 		$this->cookie->open($descriptor['descriptor_key']);
 		$this->setOption($descriptor, CURLOPT_COOKIEJAR, $this->cookie->getFileCurlName());
 		$this->setOption($descriptor, CURLOPT_COOKIEFILE, $this->cookie->getFileCurlName());

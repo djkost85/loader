@@ -404,5 +404,50 @@ class cGetContent {
 		return $text;
 	}
 
+	#####################Methods with references###################################
+
+	public function &getDescriptor(){
+		$name = __FUNCTION__;
+		if(method_exists($this->loader, $name)) {
+			return $this->loader->$name();
+		}
+		return false;
+	}
+
+	/**
+	 * @return array|bool
+	 */
+	public function &getDescriptorArray(){
+		$name = __FUNCTION__;
+		if(method_exists($this->loader, $name)) {
+			return $this->loader->$name();
+		}
+		return false;
+	}
+
+	public function setReferer($newReferer, &$descriptor = false){
+		$name = __FUNCTION__;
+		if(method_exists($this->loader, $name)) {
+			return $this->loader->$name($newReferer, $descriptor);
+		}
+		return false;
+	}
+
+	public function setOption(&$descriptor, $options, $value = null){
+		$name = __FUNCTION__;
+		if(method_exists($this->loader, $name)) {
+			return $this->loader->$name($descriptor, $options, $value);
+		}
+		return false;
+	}
+
+	public function setOptions(&$descriptor, $options = array()){
+		$name = __FUNCTION__;
+		if(method_exists($this->loader, $name)) {
+			return $this->loader->$name($descriptor, $options);
+		}
+		return false;
+	}
+
 
 }

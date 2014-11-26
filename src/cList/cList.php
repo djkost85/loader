@@ -234,9 +234,9 @@ class cList {
 		}
 	}
 
-	public function write($levelName, $value, $key = false){
+	public function write($levelName, $value, $key = null){
 		$levelData =& $this->getLevel($levelName);
-		if($key !== false){
+		if(!empty($key)){
 			$levelData[$key] = $value;
 		} else {
 			$this->push($levelName, $value);

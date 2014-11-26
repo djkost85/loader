@@ -95,9 +95,10 @@ class cUpdateProxy extends cProxy {
 	}
 
 
-	function __construct($checkUrl = 'http://test1.ru/proxy_check.php', $port = 80, $serverIp = '', $urlCheckServerIp = 'http://bpteam.net/server_ip.php'){
+	function __construct($checkUrl = 'http://test1.ru/proxy_check.php', $port = 80, $serverIp = false, $urlCheckServerIp = 'http://bpteam.net/server_ip.php'){
 		parent::__construct();
 		$this->_curl = new cGetContent('cMultiCurl');
+		$this->_curl->setUseCookie(true);
 		$this->setUrlCheckServerIp($urlCheckServerIp);
 		$this->_curl->setTypeContent('file');
 		$this->_curl->setSleepTime(500000);
