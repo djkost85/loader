@@ -14,7 +14,7 @@ register_shutdown_function('sendMessage');
 $countStream = 1000;
 $start = microtime(true);
 echo date('[H:i:s Y/m/d]', $start);
-$proxy= new cUpdateProxy('http://66.225.221.237/proxy_check.php', 8888);
+$proxy= new cUpdateProxy('http://hamstersgangsters.com/proxy_check.php', 8888);
 $proxy->updateArchive();
 $proxyList = $proxy->downloadArchiveProxy();
 $countChallengers = count($proxyList['content']);
