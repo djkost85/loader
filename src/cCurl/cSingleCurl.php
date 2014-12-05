@@ -64,6 +64,10 @@ class cSingleCurl extends cCurl{
 		parent::__construct();
 	}
 
+	function __destruct(){
+		parent::__destruct();
+	}
+
 	public function init(){
 		$descriptor =& $this->getDescriptor();
 		if (!isset($descriptor['descriptor_key']) || !$descriptor['descriptor_key']){

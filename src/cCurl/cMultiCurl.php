@@ -81,6 +81,10 @@ class cMultiCurl extends cCurl{
 		parent::__construct();
 	}
 
+	function __destruct(){
+		parent::__destruct();
+	}
+
 	public function init(){
 		$descriptor =& $this->getDescriptor();
 		$descriptorArray =& $this->getDescriptorArray();
