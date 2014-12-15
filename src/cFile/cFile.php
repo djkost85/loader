@@ -235,8 +235,9 @@ class cFile {
 			foreach ($files as $file) {
 				(is_dir("$dir/$file")) ? $this->delDir("$dir/$file") : unlink("$dir/$file");
 			}
-			rmdir($dir);
+			return rmdir($dir);
 		}
+		return false;
 	}
 
 	public function clear(){

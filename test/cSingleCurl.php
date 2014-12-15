@@ -81,7 +81,7 @@ function cSingleCurl_setReferer(){
 function cSingleCurl_usePort(){
 	$gc = new cSingleCurl();
 	$gc->setDefaultOption(CURLOPT_PORT, 8888);
-	$gc->load('track.hamstersgangsters.com', '%380632359213%ims');
+	$gc->load('localhost');
 	$answer = $gc->getAnswer();
 	return preg_match('%380632359213%ims', $answer);
 }
