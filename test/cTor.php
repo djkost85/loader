@@ -80,12 +80,11 @@ function cTor_stopAll(){
 
 function cTor_lookHeaders(){
 	echo "<pre>\n";
-	if(isset($_SERVER['HTTP_HOST']) && isset($_SERVER['SCRIPT_NAME'])) {
-		$url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/support/header.php';
-	} else {
-		$url = 'http://track.hamstersgangsters.com/_coolLib/loader/test/support/header.php';
-	}
-	$url = 'http://m.torg.ua/kiev/kvartiry/sdam/1-komnatnye';
+	$url = 'http://bpteam.net/header.php';
+	//$url = 'http://m.torg.ua/kiev/kvartiry/sdam/1-komnatnye';
+	/**
+	 * @var \GetContent\cGetContent|\GetContent\cSingleCurl $gc
+	 */
 	$gc = new \GetContent\cGetContent('cSingleCurl');
 
 	$tor = new \GetContent\cTor();

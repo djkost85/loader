@@ -8,4 +8,4 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
-define('PHANTOMJS_EXE', 'C:\phantomjs\phantomjs.exe');
+define('PHANTOMJS_EXE', '/etc/phantomjs/phantomjs');

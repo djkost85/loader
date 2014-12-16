@@ -87,7 +87,7 @@ function cGetContent_prepareContent(){
 }
 
 function cGetContent_useTor(){
-	$ipPull = array('66.225.221.237', '66.225.221.238');
+	$ipPull = array('66.225.221.237', '66.225.221.238', '93.73.209.34');
 	$tor = new \GetContent\cTor();
 	$tor->start();
 	$gc = new cGetContent('cSingleCurl');
