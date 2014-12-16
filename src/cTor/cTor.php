@@ -20,7 +20,7 @@ class cTor {
 	private $ipCountries = array(); //https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
 	private $geoIpFile = '/usr/share/tor/geoip';
 	const DATA_DIRECTORY = '/etc/tor';
-	private $pathToConfig;
+	private $pathToConfig = '/etc/tor';
 	private $host = '127.0.0.1';
 	private $port = '9050';
 	private $config;
@@ -129,7 +129,6 @@ DirListenAddress %s:%d';
 	function __construct($port = false){
 		$this->file = new cFile();
 		$this->file->setLockAccess(true);
-		$this->pathToConfig = '/etc/tor';
 		if(!$port){
 			$this->searchFreePort();
 		}
