@@ -141,19 +141,19 @@ case $1 in
 			return 0
 		fi
 
-		if [ -n $MAX_FILEDESCRIPTORS ]; then
-			[ ${VERBOSE:-} != yes ] || echo 'Raising maximum number of filedescriptors (ulimit -n) for tor to '$MAX_FILEDESCRIPTORS
-			if ulimit -n $MAX_FILEDESCRIPTORS ; then
-				[ ${VERBOSE:-} != yes ] || echo 0
-			else
-				[ ${VERBOSE:-} != yes ] || echo 1
-			fi
-		fi
+		#if [ -n $MAX_FILEDESCRIPTORS ]; then
+		#	[ ${VERBOSE:-} != yes ] || echo 'Raising maximum number of filedescriptors (ulimit -n) for tor to '$MAX_FILEDESCRIPTORS
+		#	if ulimit -n $MAX_FILEDESCRIPTORS ; then
+		#		[ ${VERBOSE:-} != yes ] || echo 0
+		#	else
+		#		[ ${VERBOSE:-} != yes ] || echo 1
+		#	fi
+		#fi
 
-		if ! [ -f /var/run/tor ]; then
-			mkdir -p /var/run/tor -m 700
-			chown debian-tor:debian-tor /var/run/tor
-		fi
+		#if ! [ -f /var/run/tor ]; then
+		#	mkdir -p /var/run/tor -m 700
+		#	chown debian-tor:debian-tor /var/run/tor
+		#fi
 
 		check_torpiddir
 		check_torlogdir
