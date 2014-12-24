@@ -212,7 +212,7 @@ class cFile {
 	}
 
 	public function delete(){
-		if($this->lock()){
+		if(file_exists($this->getName()) && $this->lock()){
 			$this->close();
 			return unlink($this->getName());
 		}

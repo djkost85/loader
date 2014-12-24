@@ -163,6 +163,10 @@ class cCookie {
 		}
 	}
 
+	function __destruct(){
+		$this->deleteCookieFiles();
+	}
+
 	/**
 	 * @param string $name
 	 */
@@ -233,6 +237,18 @@ class cCookie {
 					unlink($value);
 				}
 			}
+		}
+	}
+
+	public function deleteCookieFiles(){
+		if(file_exists($this->getFileName())){
+			unlink($this->getFileName());
+		}
+		if(file_exists($this->getFileCurlName())){
+			unlink($this->getFileCurlName());
+		}
+		if(file_exists($this->getFilePhantomJSName())){
+			unlink($this->getFilePhantomJSName());
 		}
 	}
 

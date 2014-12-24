@@ -58,6 +58,11 @@ function cCookie_fromCurl(){
 }
 
 function cCookie_toCurl(){
+	$cookie1 = new cCookie();
+	$cookie1->open(FILE_NAME);
+	$cookie1->create('testName', 'testValue', '.test1.ru', '/lib3', date('l, d-M-y H:i:s e', time() + 43200), false, false, true);
+	$cookie1->create('2testName', '2testValue', '.test1.ru', '/', date('l, d-M-y H:i:s e',63200), true, true, true);
+
 	$cookie = new cCookie();
 	$cookie->open(FILE_NAME);
 	$testCookie = $cookie->getCookies('test1.ru');
@@ -75,6 +80,13 @@ function cCookie_toFileCurl(){
 }
 
 function cCookie_fromFileCurl(){
+	$cookie1 = new cCookie();
+	$cookie1->open(FILE_NAME);
+	$cookie1->create('PHPSESSID', '123456', '.test1.ru', '/', 0, true, false, true);
+	$cookie1->create('testName', 'testValue', '.test1.ru', '/lib3', date('l, d-M-y H:i:s e', time() + 43200), false, false, true);
+	$cookie1->create('2testName', '2testValue', '.test1.ru', '/', date('l, d-M-y H:i:s e',63200), true, true, true);
+	$cookie1->toFileCurl($cookie1->getCookies('test1.ru'));
+
 	$cookie = new cCookie();
 	$cookie->open(FILE_NAME);
 	$cookie->delete('.test1.ru');
