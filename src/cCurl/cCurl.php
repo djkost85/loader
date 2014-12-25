@@ -299,6 +299,8 @@ abstract class cCurl{
 		return true;
 	}
 
+	public abstract function removeOption($option);
+
 	public final function setOptions(&$descriptor, $options = array()){
 		foreach($options as $keySetting => $value){
 			$this->setOption($descriptor, $keySetting, $options[$keySetting]);
@@ -339,7 +341,7 @@ abstract class cCurl{
 				}
 				break;
 			case CURLOPT_URL:
-				$urlInfo = cStringWork::parseUrl($descriptor['option'][$option]);
+				$urlInfo = cStringWork::parseUrl($value);
 				if(isset($urlInfo['scheme']) && $urlInfo['scheme'] != $this->scheme){
 					$this->setScheme($urlInfo['scheme']);
 				}
@@ -366,6 +368,7 @@ abstract class cCurl{
 		$this->scheme = $schemeName;
 		if(isset($this->schemeDefaultPort[$schemeName])){
 			$this->setDefaultOption(CURLOPT_PORT, $this->schemeDefaultPort[$schemeName]);
+			$this->removeOption(CURLOPT_PORT);
 		}
 	}
 

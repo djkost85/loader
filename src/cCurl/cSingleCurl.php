@@ -60,6 +60,12 @@ class cSingleCurl extends cCurl{
 		return ($this->getRedirectCount()<=$this->getMaxRedirectCount());
 	}
 
+	public function removeOption($option){
+		$descriptor =& $this->getDescriptor();
+		$descriptor['option'][$option] = null;
+		$this->configOption($descriptor, $option, null);
+	}
+
 	function __construct(){
 		parent::__construct();
 	}

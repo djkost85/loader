@@ -165,6 +165,14 @@ class cMultiCurl extends cCurl{
 		}
 	}
 
+	public function removeOption($option){
+		$descriptorArray =& $this->getDescriptorArray();
+		foreach($descriptorArray as &$descriptor){
+			$descriptor['option'][$option] = null;
+			$this->configOption($descriptor, $option, null);
+		}
+	}
+
 	public function load($url = array()){
 		$goodAnswer = array();
 		$countMultiStream = $this->getCountStream();
