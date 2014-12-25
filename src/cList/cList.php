@@ -119,7 +119,7 @@ class cList {
 		$newList = $this->getList();
 		$oldList = $this->read();
 		if(is_array($newList) && is_array($oldList)){
-			$newList = $newList + $oldList;
+			$newList = array_merge($oldList, $newList);
 			$this->setList($newList);
 			$this->save();
 			return true;

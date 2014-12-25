@@ -153,8 +153,12 @@ class cUpdateProxy extends cProxy {
 		$this->selectList($this->getDefaultListName());
 		$proxyList = $this->downloadArchiveProxy();
 		$proxyList['content'] = $this->checkProxyArray($proxyList['content'], $countStream);
-		$this->_list->write('/', $proxyList['content'], 'content');
-		$this->_list->update();
+		if($proxyList['content']) {
+			$this->_list->write('/', $proxyList['content'], 'content');
+			return $this->_list->update();
+		} else {
+			return false;
+		}
 	}
 
 	public function updateList($nameList) {
