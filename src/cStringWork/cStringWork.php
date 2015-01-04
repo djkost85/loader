@@ -290,6 +290,20 @@ class cStringWork
 	}
 
 	/**
+	 * ISO 9:1995
+	 * @param $text
+	 * @return mixed
+	 */
+	public static function translitLatinToCyrillic($text){
+		$abc = array( 'E\'' => 'Э', 'Yu' => 'Ю', 'Ya' => 'Я', 'Ch' => 'Ч', 'Sh' => 'Ш', 'Shh' => 'Щ', 'Zh' => 'Ж', 'Yo' => 'Ё', 'A' => 'А', 'B' => 'Б', 'V' => 'В', 'G' => 'Г', 'D' => 'Д', 'E' => 'Е', 'Z' => 'З', 'I' => 'И', 'J' => 'Й', 'K' => 'К', 'L' => 'Л', 'M' => 'М', 'N' => 'Н', 'O' => 'О', 'P' => 'П', 'R' => 'Р', 'S' => 'С', 'T' => 'Т', 'U' => 'У', 'F' => 'Ф', 'H' => 'Х', 'C' => 'Ц', '"' => 'Ъ', 'Y' => 'Ы', '\'' => 'Ь',);
+		foreach($abc as $eng => $rus){
+			$text = preg_replace('%'.preg_quote($eng, '%').'%smu', $rus, $text);
+			$text = preg_replace('%'.preg_quote($eng, '%').'%ismu', mb_strtolower($rus, 'utf-8'), $text);
+		}
+		return $text;
+	}
+
+	/**
 	 * @param array $text
 	 * @param bool  $bestKey
 	 * @return string
