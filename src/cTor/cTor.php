@@ -17,7 +17,10 @@ class cTor {
 	 */
 	private $file;
 	private $exePath = '/etc/init.d/tor';
-	private $ipCountries = array(); //https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+	/**
+	 * @var array https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
+	 */
+	private $ipCountries = array();
 	private $geoIpFile = '/usr/share/tor/geoip';
 	const DATA_DIRECTORY = '/etc/tor';
 	private $pathToConfig = '/etc/tor';
@@ -38,6 +41,9 @@ DirListenAddress %s:%d';
 	private $geoIpPattern = 'ExitNodes {%s}';
 	const KEY_PULL_START = 20000;
 	const KEY_PULL_END = 29999;
+	const INCREMENT_CONTROL_PORT = 10000;
+	const INCREMENT_OR_PORT = 20000;
+	const INCREMENT_DIR_PORT = 30000;
 	private $maxRepeatExecute = 25;
 	private $sleepOnExecute = 200000;
 
@@ -73,15 +79,15 @@ DirListenAddress %s:%d';
 	}
 
 	public function getControlPort(){
-		return $this->getPort() + 10000;
+		return $this->getPort() + self::INCREMENT_CONTROL_PORT;
 	}
 
 	public function getORPort(){
-		return $this->getPort() + 20000;
+		return $this->getPort() + self::INCREMENT_OR_PORT;
 	}
 
 	public function getDirPort(){
-		return $this->getPort() + 30000;
+		return $this->getPort() + self::INCREMENT_DIR_PORT;
 	}
 
 	/**
