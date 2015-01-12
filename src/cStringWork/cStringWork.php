@@ -19,6 +19,8 @@ class cStringWork
 	private $cryptTagArray;
 	public static $encodingDetection = array('windows-1251' , 'koi8-r', 'iso8859-5');
 	private static $ipRegEx = '(?<address>(?<ips>\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})\:?(?<port>\d{1,5})?)';
+	private static $ABCLatinToCyrillic = array( 'E\'' => 'Э', 'Yu' => 'Ю', 'Ya' => 'Я', 'Ch' => 'Ч', 'Sh' => 'Ш', 'Shh' => 'Щ', 'Zh' => 'Ж', 'Yo' => 'Ё', 'A' => 'А', 'B' => 'Б', 'V' => 'В', 'G' => 'Г', 'D' => 'Д', 'E' => 'Е', 'Z' => 'З', 'I' => 'И', 'J' => 'Й', 'K' => 'К', 'L' => 'Л', 'M' => 'М', 'N' => 'Н', 'O' => 'О', 'P' => 'П', 'R' => 'Р', 'S' => 'С', 'T' => 'Т', 'U' => 'У', 'F' => 'Ф', 'H' => 'Х', 'C' => 'Ц', '"' => 'Ъ', 'Y' => 'Ы', '\'' => 'Ь',);
+	private static $ABCCyrillicToLatin = array( 'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'Yo', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I', 'Й' => 'J', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N', 'О' => 'O','П' => 'P',  'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch', 'Ш' => 'Sh', 'Щ' => 'Shh', 'Ъ' => '"', 'Ы' => 'Y', 'Ь' => '\'', 'Э' => 'E\'', 'Ю' => 'Yu', 'Я' => 'Ya',);
 
 	/**
 	 * Разбивает на массив текст заданной величина скрипт вырезает с сохранением предложений
@@ -107,6 +109,17 @@ class cStringWork
 	 * @return string
 	 */
 	public static function betweenTag($text, $startTag = '<div class="xxx">', $withoutTag = true, $encoding="UTF-8") {
+		$tagName = self::getTagName($text, $startTag);
+		if(!$tagName){
+			return false;
+		}
+		$startPos = mb_strpos($text, $startTag, 0,$encoding);
+		$text = mb_substr($text, $startPos, -1,$encoding);
+		$posEnd = self::getClosingTagPosition($text, $tagName, $encoding);
+		return self::cutTagText($text, $startTag, $tagName, $posEnd, $withoutTag, $encoding);
+	}
+
+	protected static function getTagName($text, &$startTag){
 		if (!preg_match('%<(?<tag>\w+)[^>]*>%im', $startTag, $tag)){
 			return false;
 		}
@@ -125,11 +138,12 @@ class cStringWork
 			preg_match('%<(?<tag>\w+)[^>]*>%i', $startTag, $tag);
 			preg_match('%<(?<tag>' . preg_quote($tag['tag'], '%') . ')[^>]*>%i', $text, $tag);
 		}
-		$tagName = $tag['tag'];
+		return $tag['tag'];
+	}
+
+	protected static function getClosingTagPosition($text, $tagName, $encoding){
 		$openTag = "<" . $tagName;
 		$closeTag = "</" . $tagName;
-		$startPos = mb_strpos($text, $startTag, 0,$encoding);
-		$text = mb_substr($text, $startPos, -1,$encoding);
 		$countOpenTag = 0;
 		$posEnd = 0;
 		$countTag = 2 * preg_match_all('%' . preg_quote($openTag, '%') . '%ims', $text, $matches);
@@ -150,9 +164,13 @@ class cStringWork
 				break;
 			}
 		}
+		return $posEnd;
+	}
+
+	protected static function cutTagText($text, $startTag, $tagName, $posEnd, $withoutTag, $encoding){
 		if($withoutTag){
-		$start = mb_strlen($startTag,$encoding);
-		$length = $posEnd - mb_strlen($startTag,$encoding) - 1;
+			$start = mb_strlen($startTag,$encoding);
+			$length = $posEnd - mb_strlen($startTag,$encoding) - 1;
 		} else {
 			$start = 0;
 			$length = $posEnd + mb_strlen($tagName,$encoding) + 2;
@@ -177,20 +195,10 @@ class cStringWork
 	public static function parsePath($url) {
 		$partUrl = parse_url($url);
 		if (isset($partUrl['query'])) {
-			$arrayQuery = explode("&", $partUrl['query']);
-			unset($partUrl['query']);
-			foreach ($arrayQuery as $value) {
-				$partQuery = explode("=", $value);
-				$partUrl['query'][$partQuery[0]] = (isset($partQuery[1])?$partQuery[1]:'');
-			}
+			self::explodeQuery($partUrl['query']);
 		}
 		if (isset($partUrl['fragment'])) {
-			$arrayFragment = explode("&", $partUrl['fragment']);
-			unset($partUrl['fragment']);
-			foreach ($arrayFragment as $value) {
-				$partFragment = explode("=", $value);
-				$partUrl['fragment'][$partFragment[0]] = (isset($partFragment[1]) ? $partFragment[1] : '');
-			}
+			self::explodeQuery($partUrl['fragment']);
 		}
 		if(isset($partUrl['path'])){
 			$partPath = pathinfo($partUrl['path']);
@@ -200,6 +208,15 @@ class cStringWork
 			$partUrl['filename'] = isset($partPath['filename']) ? $partPath['filename'] : '';
 		}
 		return $partUrl;
+	}
+
+	protected static function explodeQuery(&$query){
+		$arrayFragment = explode("&", $query);
+		$query = array();
+		foreach ($arrayFragment as $value) {
+			$part = explode("=", $value);
+			$query[$part[0]] = (isset($part[1]) ? $part[1] : '');
+		}
 	}
 
 	public static function parseUrl($url){
@@ -255,7 +272,7 @@ class cStringWork
 		$specters = array();
 		foreach (self::$encodingDetection as $encoding) {
 			$weights[$encoding] = 0;
-			$specters[$encoding] = require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'specters' . DIRECTORY_SEPARATOR . $encoding . '.php';
+			$specters[$encoding] = require 'phar://'.dirname(__FILE__) . '/specters.phar/' . $encoding . '.php';
 		}
 		foreach (str_split($text, 2) as $key) {
 			foreach (self::$encodingDetection as $encoding) {
@@ -277,28 +294,26 @@ class cStringWork
 
 	/**
 	 * ISO 9:1995
-	 * @param $text
-	 * @return mixed
+	 * @param string $text text need encoding utf-8
+	 * @return string
 	 */
 	public static function translitCyrillicToLatin($text){
-		$abc = array( 'А' => 'A', 'Б' => 'B', 'В' => 'V', 'Г' => 'G', 'Д' => 'D', 'Е' => 'E', 'Ё' => 'Yo', 'Ж' => 'Zh', 'З' => 'Z', 'И' => 'I', 'Й' => 'J', 'К' => 'K', 'Л' => 'L', 'М' => 'M', 'Н' => 'N', 'О' => 'O','П' => 'P',  'Р' => 'R', 'С' => 'S', 'Т' => 'T', 'У' => 'U', 'Ф' => 'F', 'Х' => 'H', 'Ц' => 'C', 'Ч' => 'Ch', 'Ш' => 'Sh', 'Щ' => 'Shh', 'Ъ' => '"', 'Ы' => 'Y', 'Ь' => '\'', 'Э' => 'E\'', 'Ю' => 'Yu', 'Я' => 'Ya',);
-		foreach($abc as $rus => $eng){
-			$text = preg_replace('%'.preg_quote($rus, '%').'%smu', $eng, $text);
-			$text = preg_replace('%'.preg_quote($rus, '%').'%ismu', strtolower($eng), $text);
-		}
-		return $text;
+		return self::translitText($text, self::$ABCCyrillicToLatin);
 	}
 
 	/**
 	 * ISO 9:1995
-	 * @param $text
-	 * @return mixed
+	 * @param string $text text need encoding utf-8
+	 * @return string
 	 */
 	public static function translitLatinToCyrillic($text){
-		$abc = array( 'E\'' => 'Э', 'Yu' => 'Ю', 'Ya' => 'Я', 'Ch' => 'Ч', 'Sh' => 'Ш', 'Shh' => 'Щ', 'Zh' => 'Ж', 'Yo' => 'Ё', 'A' => 'А', 'B' => 'Б', 'V' => 'В', 'G' => 'Г', 'D' => 'Д', 'E' => 'Е', 'Z' => 'З', 'I' => 'И', 'J' => 'Й', 'K' => 'К', 'L' => 'Л', 'M' => 'М', 'N' => 'Н', 'O' => 'О', 'P' => 'П', 'R' => 'Р', 'S' => 'С', 'T' => 'Т', 'U' => 'У', 'F' => 'Ф', 'H' => 'Х', 'C' => 'Ц', '"' => 'Ъ', 'Y' => 'Ы', '\'' => 'Ь',);
-		foreach($abc as $eng => $rus){
-			$text = preg_replace('%'.preg_quote($eng, '%').'%smu', $rus, $text);
-			$text = preg_replace('%'.preg_quote($eng, '%').'%ismu', mb_strtolower($rus, 'utf-8'), $text);
+		return self::translitText($text, self::$ABCLatinToCyrillic);
+	}
+
+	protected static function translitText($text, $abc){
+		foreach($abc as $from => $to){
+			$text = preg_replace('%'.preg_quote($from, '%').'%smu', $to, $text);
+			$text = preg_replace('%'.preg_quote($from, '%').'%ismu', mb_strtolower($to,'utf-8'), $text);
 		}
 		return $text;
 	}

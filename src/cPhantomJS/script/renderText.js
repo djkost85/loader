@@ -13,7 +13,7 @@ page.customHeaders = {
 };
 page.onResourceReceived = function(response) {
 	for (var key in response.headers) {
-		headers = headers + response.headers[key]['name'] + ": " + response.headers[key]['value'] + "\n";
+		headers = headers + response.headers[key].name + ": " + response.headers[key].value + "\n";
 	}
 	headers = headers + "\n";
 };
