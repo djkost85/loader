@@ -47,7 +47,7 @@ class cFile {
 	/**
 	 * @return boolean
 	 */
-	public function getLockAccess() {
+	public function hasLockAccess() {
 		return $this->_lockAccess;
 	}
 
@@ -111,7 +111,7 @@ class cFile {
 	}
 
 	private function access($function){
-		if($this->getOwn() || !$this->getLockAccess()){
+		if($this->getOwn() || !$this->hasLockAccess()){
 			$res = $function(func_get_arg(1), func_get_arg(2));
 		} elseif($this->lock()){
 			$res = $function(func_get_arg(1), func_get_arg(2));
@@ -132,7 +132,7 @@ class cFile {
 	/**
 	 * @return boolean
 	 */
-	public function getWaitFree() {
+	public function hasWaitFree() {
 		return $this->_waitFree;
 	}
 
@@ -166,7 +166,7 @@ class cFile {
 	 */
 	public function lock(){
 		if (is_resource($this->getHead())) {
-			if($this->getWaitFree()){
+			if($this->hasWaitFree()){
 				$this->setOwn(flock($this->getHead(), LOCK_EX));
 			} else {
 				$this->setOwn(flock($this->getHead(), LOCK_EX | LOCK_NB));

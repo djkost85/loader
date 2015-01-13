@@ -73,7 +73,7 @@ abstract class cCurl{
 	/**
 	 * @return boolean
 	 */
-	public function getUseCookie() {
+	public function hasUseCookie() {
 		return $this->useCookie;
 	}
 
@@ -242,7 +242,7 @@ abstract class cCurl{
 	/**
 	 * @return boolean
 	 */
-	public function getUseStaticCookie() {
+	public function hasUseStaticCookie() {
 		return $this->useStaticCookie;
 	}
 
@@ -271,7 +271,7 @@ abstract class cCurl{
 
 	function __destruct(){
 		curl_share_close($this->shareDescriptor);
-		if($this->getUseCookie()){
+		if($this->hasUseCookie()){
 			$this->cookie->deleteOldCookieFile(3600);
 		}
 	}
@@ -315,7 +315,7 @@ abstract class cCurl{
 		} elseif(isset($descriptor['option'][CURLOPT_PROXY])) {
 			unset($descriptor['option'][CURLOPT_PROXY]);
 		}
-		if($this->getUseCookie()){
+		if($this->hasUseCookie()){
 			$this->setOptionCookie($descriptor);
 		}
 		$this->setOptionShare($descriptor);

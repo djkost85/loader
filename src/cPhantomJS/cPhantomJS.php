@@ -345,7 +345,16 @@ class cPhantomJS {
 
 	public function renderText($path, $screenWidthPx = 1280, $screenHeightPx = 720){
 		$this->setUrl($path);
-		$answer = $this->customScript('renderText', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $screenWidthPx, $screenHeightPx));
+		$answer = $this->customScript(
+			'renderText',
+			array(
+				$this->userAgent->getRandomUserAgent(),
+				$this->getReferer(),
+				'path' => $path,
+				$screenWidthPx,
+				$screenHeightPx
+			)
+		);
 		$this->info['header'] = $this->cutHeader($answer);
 		return $answer;
 	}
@@ -357,17 +366,48 @@ class cPhantomJS {
 
 	public function sendPost($path, $postStr, $screenWidthPx = 1280, $screenHeightPx = 720){
 		$this->setUrl($path);
-		return $this->customScript('sendPost', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $postStr, $screenWidthPx, $screenHeightPx));
+		return $this->customScript(
+			'sendPost',
+			array(
+				$this->userAgent->getRandomUserAgent(),
+				$this->getReferer(),
+				'path' => $path,
+				$postStr,
+				$screenWidthPx,
+				$screenHeightPx
+			)
+		);
 	}
 
 	public function renderImage($path, $screenWidthPx = 1280, $screenHeightPx = 720, $formatImg = 'PNG'){
-		$data = $this->customScript('renderImage', array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $screenWidthPx, $screenHeightPx, $formatImg));
+		$data = $this->customScript(
+			'renderImage',
+			array(
+				$this->userAgent->getRandomUserAgent(),
+				$this->getReferer(),
+				'path' => $path,
+				$screenWidthPx,
+				$screenHeightPx,
+				$formatImg
+			)
+		);
 		$pic = base64_decode($data);
 		return $pic;
 	}
 
 	public function renderPdf($path, $fileName = 'MyPdf.pdf', $format = 'A4', $orientation = 'portrait', $marginCm = 1){
-		return $this->customScript('renderPdf',array($this->userAgent->getRandomUserAgent(), $this->getReferer(), 'path' => $path, $fileName, $format, $orientation, $marginCm . 'cm'));
+		return $this->customScript(
+			'renderPdf',
+			array(
+				$this->userAgent->getRandomUserAgent(),
+				$this->getReferer(),
+				'path' => $path,
+				$fileName,
+				$format,
+				$orientation,
+				$marginCm . 'cm'
+			)
+		);
 	}
 
 	public function customScript($scriptName, $arguments = array()){
@@ -382,7 +422,7 @@ class cPhantomJS {
 	}
 
 	/**
-	 * @internal Если зависает на выполнении этой функции ознакомьтесь с Issue https://github.com/ariya/phantomjs/issues/10845 or send me e-mail to <bpteam22@gmail.com>
+	 * @internal if infinity run Issue https://github.com/ariya/phantomjs/issues/10845
 	 * @param $command
 	 * @return string
 	 */

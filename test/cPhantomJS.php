@@ -34,8 +34,8 @@ function cPhantomJS_renderImage(){
 	$picFormat = 'PNG';
 	$phantomJS = new cPhantomJS(PHANTOMJS_EXE);
 	$img = $phantomJS->renderImage($source, $width, $height, $picFormat);
-	$ih = imagecreatefromstring($img);
-	return imagesy($ih) == $height && imagesx($ih) == $width;
+	$imgHead = imagecreatefromstring($img);
+	return imagesy($imgHead) == $height && imagesx($imgHead) == $width;
 }
 
 function cPhantomJS_renderPDF(){

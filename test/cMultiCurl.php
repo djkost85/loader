@@ -19,10 +19,10 @@ $functions = array(
 runTest($functions, 'cMultiCurl_');
 
 function cMultiCurl_init(){
-	$gc = new cMultiCurl();
-	$descriptor =& $gc->getDescriptor();
-	$gc->setCountStream(2);
-	$descriptorArray =& $gc->getDescriptorArray();
+	$getContent = new cMultiCurl();
+	$descriptor =& $getContent->getDescriptor();
+	$getContent->setCountStream(2);
+	$descriptorArray =& $getContent->getDescriptorArray();
 	return is_resource($descriptor['descriptor'])
 	       && is_resource($descriptorArray[0]['descriptor'])
 	       && is_resource($descriptorArray[1]['descriptor']);
@@ -33,10 +33,10 @@ function cMultiCurl_getContent(){
 		'vk.com',
 		'ya.ru'
 	);
-	$gc = new cMultiCurl();
-	$gc->setCountStream(5);
-	$gc->load($url);
-	$answer = $gc->getAnswer();
+	$getContent = new cMultiCurl();
+	$getContent->setCountStream(5);
+	$getContent->load($url);
+	$answer = $getContent->getAnswer();
 	return preg_match('%vk\.me%ims', $answer[0]) && preg_match('%yandex%ims', $answer[1]);
 }
 

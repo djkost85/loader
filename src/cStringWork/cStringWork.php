@@ -87,8 +87,8 @@ class cStringWork
 	 * @return string
 	 */
 	public function decryptTag($text) {
-		foreach ($this->cryptTagArray['hash'] as $key => $value) {
-			$text = preg_replace("#" . preg_quote($this->cryptTagArray['hash'][$key], '#') . "#ms", $this->cryptTagArray['tag'][$key], $text);
+		foreach ($this->cryptTagArray['hash'] as $key => $hash) {
+			$text = preg_replace("#" . preg_quote($hash, '#') . "#ms", $this->cryptTagArray['tag'][$key], $text);
 		}
 		return $text;
 	}
@@ -146,7 +146,7 @@ class cStringWork
 		$closeTag = "</" . $tagName;
 		$countOpenTag = 0;
 		$posEnd = 0;
-		$countTag = 2 * preg_match_all('%' . preg_quote($openTag, '%') . '%ims', $text, $matches);
+		$countTag = 2 * preg_match_all('%' . preg_quote($openTag, '%') . '%ims', $text);
 		for ($i = 0; $i < $countTag; $i++) {
 			$posOpenTag = mb_strpos($text, $openTag, $posEnd,$encoding);
 			$posCloseTag = mb_strpos($text, $closeTag, $posEnd,$encoding);
@@ -202,9 +202,9 @@ class cStringWork
 		}
 		if(isset($partUrl['path'])){
 			$partPath = pathinfo($partUrl['path']);
-			$partUrl['dirname'] = isset($partPath['dirname'])?$partPath['dirname']:'';
-			$partUrl['basename'] = isset($partPath['basename'])?$partPath['basename']:'';
-			$partUrl['extension'] = isset($partPath['extension'])?$partPath['extension']:'';
+			$partUrl['dirname'] = isset($partPath['dirname']) ? $partPath['dirname'] : '';
+			$partUrl['basename'] = isset($partPath['basename']) ? $partPath['basename'] : '';
+			$partUrl['extension'] = isset($partPath['extension']) ? $partPath['extension'] : '';
 			$partUrl['filename'] = isset($partPath['filename']) ? $partPath['filename'] : '';
 		}
 		return $partUrl;

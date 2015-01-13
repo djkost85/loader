@@ -56,11 +56,11 @@ class cSavePage {
 
 	function __construct($tablePrefix){
 		$this->setTablePrefix($tablePrefix);
-		$this->InitTable();
+		$this->initTable();
 		$this->setSession(time());
 	}
 
-	public function InitTable(){
+	public function initTable(){
 		$query = "CREATE TABLE IF NOT EXISTS `{$this->dbName}`.`sp_{$this->tablePrefix}` (
   `id` INT UNSIGNED NOT NULL AUTO_INCREMENT,
   `session` VARCHAR(45) NULL,
@@ -82,13 +82,15 @@ class cSavePage {
 	}
 
 	private function connect() {
-		if(is_null($this->dbConnect) || !is_object($this->dbConnect) || (is_object($this->dbConnect) && get_class($this->dbConnect) == 'mysqli' && !$this->dbConnect->ping())){
+		if(!is_object($this->dbConnect)){
 			$this->dbConnect = new \mysqli($this->dbHost, $this->dbUser, $this->dbPassword, $this->dbName);
 			if ($this->dbConnect->connect_error) {
-				exit("Не удалось подключиться к БД.(" . $this->dbConnect->connect_errno . ')' . $this->dbConnect->connect_error);
+				echo "Не удалось подключиться к БД.(" . $this->dbConnect->connect_errno . ')' . $this->dbConnect->connect_error;
+				return false;
 			}
 			$this->dbConnect->set_charset("utf8");
 		}
+		return true;
 	}
 
 	private function escape($string){
@@ -160,6 +162,6 @@ class cSavePage {
 			$this->tablePrefix,
 			$where
 		);
-		$result = $this->query($query);
+		return $this->query($query);
 	}
 } 

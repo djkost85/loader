@@ -21,7 +21,7 @@ class cTor {
 	 * @var array https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2
 	 */
 	private $ipCountries = array();
-	private $geoIpFile = '/usr/share/tor/geoip';
+	//private $geoIpFile = '/usr/share/tor/geoip';
 	const DATA_DIRECTORY = '/etc/tor';
 	private $pathToConfig = '/etc/tor';
 	private $host = '127.0.0.1';

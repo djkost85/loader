@@ -106,7 +106,7 @@ class cProxy {
 	/**
 	 * @return boolean
 	 */
-	public function getDeleteProxy() {
+	public function hasDeleteProxy() {
 		return $this->_deleteProxy;
 	}
 
@@ -179,13 +179,13 @@ class cProxy {
 	}
 
 	public function deleteInList($proxy){
-		return $this->getDeleteProxy() ? $this->_list->clear($proxy, 'content') : false;
+		return $this->hasDeleteProxy() ? $this->_list->clear($proxy, 'content') : false;
 
 	}
+	//TODO: make that function pls
+	/*public function removeAllRentFromKey($key){
 
-	public function removeAllRentFromKey($key){
-
-	}
+	}*/
 
 	/**
 	 * @param string $proxy
@@ -201,8 +201,11 @@ class cProxy {
 	}
 
 	public function getProxy($key = false, $url = false){
-		$proxy = $this->_list->getNextRecord('content');
-		return is_array($proxy) ? $proxy : false;
+		if(!$key && !$url) {
+			$proxy = $this->_list->getNextRecord('content');
+			return is_array($proxy) ? $proxy : false;
+		}
+		return false;
 	}
 
 	public function shuffleProxyList(){

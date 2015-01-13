@@ -29,45 +29,45 @@ $functions = array(
 runTest($functions, 'cGetContent_');
 
 function cGetContent_getContentSingleCurl(){
-	$gc = new cGetContent();
-	$gc->setLoader('cSingleCurl');
-	$answer = $gc->load('http://ya.ru');
+	$getContent = new cGetContent();
+	$getContent->setLoader('cSingleCurl');
+	$answer = $getContent->load('http://ya.ru');
 	return preg_match('%yandex%ims',$answer);
 }
 
 function cGetContent_getContentPhantom(){
-	$gc = new cGetContent();
-	$gc->setLoader('cPhantomJS');
-	$answer = $gc->load('http://ya.ru');
+	$getContent = new cGetContent();
+	$getContent->setLoader('cPhantomJS');
+	$answer = $getContent->load('http://ya.ru');
 	return preg_match('%yandex%ims',$answer);
 }
 
 function cGetContent_getContentCurlToPhantom(){
-	$gc = new cGetContent();
-	$gc->setLoader('cSingleCurl');
-	$gc->load('http://ya.ru');
-	$gc->setLoader('cPhantomJS');
-	$cookies = $gc->moveCookies();
+	$getContent = new cGetContent();
+	$getContent->setLoader('cSingleCurl');
+	$getContent->load('http://ya.ru');
+	$getContent->setLoader('cPhantomJS');
+	$cookies = $getContent->moveCookies();
 	return isset($cookies['yandexuid']);
 }
 
 function cGetContent_getContentPhantomToCurl(){
-	$gc = new cGetContent();
-	$gc->setLoader('cPhantomJS');
-	$gc->load('http://ya.ru');
-	$gc->setLoader('cSingleCurl');
-	$cookies = $gc->moveCookies();
+	$getContent = new cGetContent();
+	$getContent->setLoader('cPhantomJS');
+	$getContent->load('http://ya.ru');
+	$getContent->setLoader('cSingleCurl');
+	$cookies = $getContent->moveCookies();
 	return isset($cookies['yandexuid']);
 }
 
 function cGetContent_checkAnswerValid() {
 	$url = 'ya.ru';
-	$gc = new cGetContent();
-	$gc->setCheckAnswer(true);
-	$gc->setMinSizeAnswer(1000);
-	$answerTrue = $gc->load($url);
-	$gc->setMinSizeAnswer(strlen($answerTrue) + 1000000);
-	$answerFalse = $gc->load($url);
+	$getContent = new cGetContent();
+	$getContent->setCheckAnswer(true);
+	$getContent->setMinSizeAnswer(1000);
+	$answerTrue = $getContent->load($url);
+	$getContent->setMinSizeAnswer(strlen($answerTrue) + 1000000);
+	$answerFalse = $getContent->load($url);
 	return $answerTrue && !(bool)$answerFalse;
 }
 
@@ -75,13 +75,13 @@ function cGetContent_prepareContent(){
 	$url = 'http://www.aptechka.ru/programs/social_card.shtml0';
 	$withoutEncoding = 'windows-1251';
 	$needEncoding = 'UTF-8';
-	$gc = new cGetContent();
-	$gc->setEncodingAnswer(false);
-	$answer = $gc->load($url);
+	$getContent = new cGetContent();
+	$getContent->setEncodingAnswer(false);
+	$answer = $getContent->load($url);
 	$encoding1 = \GetContent\cStringWork::getEncodingName($answer);
-	$gc->setEncodingAnswer(true);
-	$gc->setEncodingName($needEncoding);
-	$answer = $gc->load($url);
+	$getContent->setEncodingAnswer(true);
+	$getContent->setEncodingName($needEncoding);
+	$answer = $getContent->load($url);
 	$encoding2 = \GetContent\cStringWork::getEncodingName($answer);
 	return $encoding1 == $withoutEncoding && $needEncoding == $encoding2;
 }
@@ -90,11 +90,11 @@ function cGetContent_useTor(){
 	$ipPull = array('66.225.221.237', '66.225.221.238', '93.73.209.34');
 	$tor = new \GetContent\cTor();
 	$tor->start();
-	$gc = new cGetContent('cSingleCurl');
-	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
-	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	$answer = $gc->load('bpteam.net');
-	$answer2 = $gc->load('2ip.ru');
+	$getContent = new cGetContent('cSingleCurl');
+	$getContent->setDefaultOption(CURLOPT_TIMEOUT,90);
+	$getContent->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$answer = $getContent->load('bpteam.net');
+	$answer2 = $getContent->load('2ip.ru');
 	$newIp = \GetContent\cStringWork::getIp($answer2);
 	return  preg_match('%380632359213%ims', $answer) && $newIp[0] && !in_array($newIp[0], $ipPull);
 }
@@ -103,12 +103,12 @@ function cGetContent_useTorMulti(){
 	$ipPull = array('66.225.221.237', '66.225.221.238');
 	$tor = new \GetContent\cTor();
 	$tor->start();
-	$gc = new cGetContent('cMultiCurl');
-	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
-	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	$gc->setDefaultOption(CURLOPT_PORT, 8888);
-	$answer = $gc->load('bpteam.net');
-	$answer2 = $gc->load(array('2ip.ru','2ip.com.ua', 'myip.ru'));
+	$getContent = new cGetContent('cMultiCurl');
+	$getContent->setDefaultOption(CURLOPT_TIMEOUT,90);
+	$getContent->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$getContent->setDefaultOption(CURLOPT_PORT, 8888);
+	$answer = $getContent->load('bpteam.net');
+	$answer2 = $getContent->load(array('2ip.ru','2ip.com.ua', 'myip.ru'));
 	$newIp = \GetContent\cStringWork::getIp($answer2[0]);
 	$newIp1 = \GetContent\cStringWork::getIp($answer2[1]);
 	$newIp2 = \GetContent\cStringWork::getIp($answer2[2]);
@@ -120,16 +120,16 @@ function cGetContent_useTorMulti(){
 }
 
 function cGetContent_checkTorRestartMultiCurl(){
-	$gc = new cGetContent('cMultiCurl');
+	$getContent = new cGetContent('cMultiCurl');
 	$tor = new \GetContent\cTor();
 	$tor->start();
-	$gc->setMinSizeAnswer(2);
-	$gc->setWaitExecMSec(500000);
-	$gc->setDefaultOption(CURLOPT_PORT,8888);
-	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	$gc->setCheckAnswer(true);
-	$gc->setDefaultOption(CURLOPT_TIMEOUT, 60);
-	$gc->setTypeContent(\GetContent\cHeaderHTTP::TYPE_CONTENT_TEXT);
+	$getContent->setMinSizeAnswer(2);
+	$getContent->setWaitExecMSec(500000);
+	$getContent->setDefaultOption(CURLOPT_PORT,8888);
+	$getContent->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$getContent->setCheckAnswer(true);
+	$getContent->setDefaultOption(CURLOPT_TIMEOUT, 60);
+	$getContent->setTypeContent(\GetContent\cHeaderHTTP::TYPE_CONTENT_TEXT);
 	if(isset($_SERVER['HTTP_HOST']) && isset($_SERVER['SCRIPT_NAME'])) {
 		$url = 'http://' . $_SERVER['HTTP_HOST'] . dirname($_SERVER['SCRIPT_NAME']) . '/support/header.php';
 	} else {
@@ -137,14 +137,14 @@ function cGetContent_checkTorRestartMultiCurl(){
 	}
 	$urls = array($url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,$url,);
 	echo "load 1 \n";
-	$gc->load($urls);
+	$getContent->load($urls);
 	echo "load 2 \n";
-	$answer = $gc->load($urls);
+	$answer = $getContent->load($urls);
 	var_dump($answer[0]);
 	echo "tor restart \n";
 	sleep(5);
 	$tor->restart();
 	echo "load 3 \n";
-	$answer = $gc->load($urls);
+	$answer = $getContent->load($urls);
 	var_dump($answer[0]);
 }

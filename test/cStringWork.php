@@ -32,9 +32,9 @@ function cStringWork_divideOnSentence(){
 
 function cStringWork_encryptDecryptTag(){
 	$text = 'Hello</br><h1>WOW</h1><p>in teg text</p>';
-	$st = new cStringWork();
-	$encryptText = $st->encryptTag($text);
-	$decryptText = $st->decryptTag($encryptText);
+	$stringWork = new cStringWork();
+	$encryptText = $stringWork->encryptTag($text);
+	$decryptText = $stringWork->decryptTag($encryptText);
 	return $text == $decryptText;
 }
 

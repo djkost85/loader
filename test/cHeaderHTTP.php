@@ -18,9 +18,9 @@ $functions = array(
 runTest($functions, 'cHeaderHTTP_');
 
 function cHeaderHTTP_checkMimeType(){
-	$gc = new cHeaderHTTP();
-	return $gc->checkMimeType('audio/mpeg', 'file')
-	&& $gc->checkMimeType('image/png', 'img')
-	&& $gc->checkMimeType('text/html', 'html')
-	&& !$gc->checkMimeType('image/png', 'html');
+	$http = new cHeaderHTTP();
+	return $http->checkMimeType('audio/mpeg', 'file')
+	&& $http->checkMimeType('image/png', 'img')
+	&& $http->checkMimeType('text/html', 'html')
+	&& !$http->checkMimeType('image/png', 'html');
 }

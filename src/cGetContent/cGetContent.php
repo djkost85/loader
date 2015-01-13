@@ -128,7 +128,7 @@ class cGetContent {
 	/**
 	 * @return boolean
 	 */
-	public function getEncodingAnswer() {
+	public function hasEncodingAnswer() {
 		return $this->encodingAnswer;
 	}
 
@@ -297,8 +297,8 @@ class cGetContent {
 	}
 
 	public function load($url, $checkRegEx = false){
-		$url = is_array($url) ? array_map(function($n){return cStringWork::checkUrlProtocol($n);}, $url) : cStringWork::checkUrlProtocol($url);
-		return is_array($url) || $this->canMultiQuery($this->getLoaderName()) ? $this->multiQuery($url, $checkRegEx) : $this->singleQuery($url, $checkRegEx);
+		$url = is_array($url) ? array_map(function($currentUrl){return cStringWork::checkUrlProtocol($currentUrl);}, $url) : cStringWork::checkUrlProtocol($url);
+		return (is_array($url) || $this->canMultiQuery($this->getLoaderName())) ? $this->multiQuery($url, $checkRegEx) : $this->singleQuery($url, $checkRegEx);
 	}
 
 	protected function singleQuery($url, $checkRegEx = false){
@@ -391,14 +391,14 @@ class cGetContent {
 	}
 
 	public function encodingAnswerText($text) {
-		if ($this->getEncodingAnswer()) {
-			$from = $this->getEncodingAnswerName();
-			$to = $this->getEncodingName();
-			if(!$from){
-				$from = cStringWork::getEncodingName($text);
+		if ($this->hasEncodingAnswer()) {
+			$fromEncoding = $this->getEncodingAnswerName();
+			$toEncoding = $this->getEncodingName();
+			if(!$fromEncoding){
+				$fromEncoding = cStringWork::getEncodingName($text);
 			}
-			if (!preg_match('%'.preg_quote($from,'%').'%i',$to)){
-				$text = mb_convert_encoding( $text, $to, $from);
+			if (!preg_match('%'.preg_quote($fromEncoding,'%').'%i',$toEncoding)){
+				$text = mb_convert_encoding( $text, $toEncoding, $fromEncoding);
 			}
 		}
 		return $text;

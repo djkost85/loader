@@ -24,18 +24,18 @@ $functions = array(
 runTest($functions, 'cSingleCurl_');
 
 function cSingleCurl_init(){
-	$gc = new cSingleCurl();
-	$descriptor =& $gc->getDescriptor();
+	$curl = new cSingleCurl();
+	$descriptor =& $curl->getDescriptor();
 	return is_resource($descriptor['descriptor']);
 }
 
 function cSingleCurl_setOption(){
-	$gc = new cSingleCurl();
-	$descriptor=& $gc->getDescriptor();
-	$gc->setOption($descriptor, CURLOPT_TIMEOUT, 5);
+	$curl = new cSingleCurl();
+	$descriptor=& $curl->getDescriptor();
+	$curl->setOption($descriptor, CURLOPT_TIMEOUT, 5);
 	$check1 = $descriptor['option'][CURLOPT_TIMEOUT] == 5;
-	$gc->setOption($descriptor, CURLOPT_TIMEOUT);
-	$check2 = $descriptor['option'][CURLOPT_TIMEOUT] == $gc->getDefaultOption(CURLOPT_TIMEOUT);
+	$curl->setOption($descriptor, CURLOPT_TIMEOUT);
+	$check2 = $descriptor['option'][CURLOPT_TIMEOUT] == $curl->getDefaultOption(CURLOPT_TIMEOUT);
 	return $check1 && $check2;
 }
 
@@ -44,44 +44,44 @@ function cSingleCurl_setOptions(){
 		CURLOPT_TIMEOUT => 20,
 		CURLOPT_POSTFIELDS => 'qwer=1234&asdf=5678',
 	);
-	$gc = new cSingleCurl();
-	$gc->setOptions($gc->getDescriptor(), $options);
-	$descriptor =& $gc->getDescriptor();
+	$curl = new cSingleCurl();
+	$curl->setOptions($curl->getDescriptor(), $options);
+	$descriptor =& $curl->getDescriptor();
 	return $descriptor['option'][CURLOPT_TIMEOUT] == $options[CURLOPT_TIMEOUT]
 	       && $descriptor['option'][CURLOPT_POST]
 	       && $descriptor['option'][CURLOPT_POSTFIELDS] == $options[CURLOPT_POSTFIELDS];
 }
 
 function cSingleCurl_getContent(){
-	$gc = new cSingleCurl();
-	$gc->load('ya.ru');
-	$answer = $gc->getAnswer();
-	$answer2 = $gc->load('vk.com');
+	$curl = new cSingleCurl();
+	$curl->load('ya.ru');
+	$answer = $curl->getAnswer();
+	$answer2 = $curl->load('vk.com');
 	return preg_match('%yandex%ims', $answer) && preg_match('%vk\.com%ims', $answer2);
 }
 
 function cSingleCurl_getHeader(){
-	$gc = new cSingleCurl();
-	$gc->load('ya.ru', '%yandex%ims');
-	$descriptor = $gc->getDescriptor();
+	$curl = new cSingleCurl();
+	$curl->load('ya.ru', '%yandex%ims');
+	$descriptor = $curl->getDescriptor();
 	return $descriptor['info']['header'];
 }
 
 function cSingleCurl_setReferer(){
 	$url = 'http://'.$_SERVER['HTTP_HOST'].dirname($_SERVER['SCRIPT_NAME']).'/support/referer.php';
 	$referer = 'http://iamreferer.net';
-	$gc = new cSingleCurl();
-	$gc->setDefaultOption(CURLOPT_PORT, 8888);
-	$gc->setReferer($referer);
-	$gc->load($url);
-	$text = $gc->getAnswer();
+	$curl = new cSingleCurl();
+	$curl->setDefaultOption(CURLOPT_PORT, 8888);
+	$curl->setReferer($referer);
+	$curl->load($url);
+	$text = $curl->getAnswer();
 	return preg_match('%iamreferer%ims', $text);
 }
 
 function cSingleCurl_usePort(){
-	$gc = new cSingleCurl();
-	$gc->setDefaultOption(CURLOPT_PORT, 8888);
-	$gc->load('localhost');
-	$answer = $gc->getAnswer();
+	$curl = new cSingleCurl();
+	$curl->setDefaultOption(CURLOPT_PORT, 8888);
+	$curl->load('localhost');
+	$answer = $curl->getAnswer();
 	return preg_match('%380632359213%ims', $answer);
 }

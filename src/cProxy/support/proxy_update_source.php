@@ -25,6 +25,6 @@ $time = round(($end-$start)/60);
 echo $text = $time." m  $text";
 
 function sendMessage(){
-	global $text;
+	//global $text;
 	//mail("zking.nothingz@gmail.com", "update proxy source", $text);
 }

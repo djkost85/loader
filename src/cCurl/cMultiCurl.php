@@ -117,7 +117,7 @@ class cMultiCurl extends cCurl{
 			usleep($this->waitExecMSec);
 		} while ($running > 0);
 		$answer = array();
-		foreach ($descriptorArray as $key => $value){
+		foreach (array_keys($descriptorArray) as $key){
 			$answer[$key] = curl_multi_getcontent($descriptorArray[$key]['descriptor']);
 		}
 		return $answer;
@@ -126,7 +126,7 @@ class cMultiCurl extends cCurl{
 	public function close(){
 		$descriptor =& $this->getDescriptor();
 		$descriptorArray =& $this->getDescriptorArray();
-		foreach ($descriptorArray as $key => &$descriptorCurl) {
+		foreach ($descriptorArray as &$descriptorCurl) {
 			if (isset($descriptorCurl['descriptor'])) {
 				if(is_resource($descriptorCurl['descriptor'])){
 					$this->removeDescriptors($descriptor, $descriptorCurl);
@@ -178,15 +178,15 @@ class cMultiCurl extends cCurl{
 		$countMultiStream = $this->getCountStream();
 		$this->setCountCurl(count($url));
 		$descriptorArray =& $this->getDescriptorArray();
-		$j = 0;
+		$descriptorKey = 0;
 		$urlDescriptorsLink = array();
 		foreach ($url as $keyUrl => $valueUrl) {
 			for ($i = 0; $i < $countMultiStream; $i++) {
-				$urlDescriptorsLink[$keyUrl][] = $j;
-				if (isset($descriptorArray[$j]['descriptor'])) {
-					$this->setOption($descriptorArray[$j], CURLOPT_URL, $valueUrl);
+				$urlDescriptorsLink[$keyUrl][] = $descriptorKey;
+				if (isset($descriptorArray[$descriptorKey]['descriptor'])) {
+					$this->setOption($descriptorArray[$descriptorKey], CURLOPT_URL, $valueUrl);
 				}
-				$j++;
+				$descriptorKey++;
 			}
 		}
 		foreach ($descriptorArray as &$value){
@@ -216,14 +216,14 @@ class cMultiCurl extends cCurl{
 
 	public function getAnswer($getAllAnswer = false){
 		if (!$getAllAnswer) {
-			$a = array();
+			$answer = array();
 			$descriptorKey = 0;
 			$descriptorArray = $this->getDescriptorArray();
 			foreach ($this->answer as $key => $value) {
-				$a[$key] = $value && is_array($value) ? cStringWork::getBiggestString($value, $descriptorKey) : false;
+				$answer[$key] = $value && is_array($value) ? cStringWork::getBiggestString($value, $descriptorKey) : false;
 				$this->answerInfo[$key] = $value && is_array($value) ? $descriptorArray[$descriptorKey]['info'] : false;
 			}
-			return $a;
+			return $answer;
 		} else{
 			return $this->answer;
 		}

@@ -83,20 +83,20 @@ function cTor_lookHeaders(){
 	$url = 'http://bpteam.net/header.php';
 	//$url = 'http://m.torg.ua/kiev/kvartiry/sdam/1-komnatnye';
 	/**
-	 * @var \GetContent\cGetContent|\GetContent\cSingleCurl $gc
+	 * @var \GetContent\cGetContent|\GetContent\cSingleCurl $getContent
 	 */
-	$gc = new \GetContent\cGetContent('cSingleCurl');
+	$getContent = new \GetContent\cGetContent('cSingleCurl');
 
 	$tor = new \GetContent\cTor();
 	$tor->setIpCountries('us');
 	var_dump($tor->start());
-	$gc->setCheckAnswer(false);
-	$gc->setMinSizeAnswer(2);
+	$getContent->setCheckAnswer(false);
+	$getContent->setMinSizeAnswer(2);
 	//$gc->setDefaultOption(CURLOPT_PORT,8888);
 	var_dump($tor->getTorConnection());
-	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	$answer = $gc->load($url);
-	var_dump($gc->getInfo());
+	$getContent->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	$answer = $getContent->load($url);
+	var_dump($getContent->getInfo());
 	var_dump($answer);
 	echo "</pre>\n";
 }
@@ -104,20 +104,20 @@ function cTor_lookHeaders(){
 function cTor_setTorCountry(){
 	$ipPull = array('66.225.221.237', '66.225.221.238');
 	$url = 'icanhazip.com';
-	$regEx = '%<td[^>]*>(<br\s*/>)*<strong\s*title="(?<title>[^"]*)">[^<]*</strong>(<br\s*/>)*</td>\s*<td[^>]*>(?<value>[^<]*)</td>%imsu';
+	//$regEx = '%<td[^>]*>(<br\s*/>)*<strong\s*title="(?<title>[^"]*)">[^<]*</strong>(<br\s*/>)*</td>\s*<td[^>]*>(?<value>[^<]*)</td>%imsu';
 	echo "REAL IP IS ". implode(',', $ipPull);
 	$tor = new \GetContent\cTor();
 	$tor->setIpCountries('ua');
-	$gc = new \GetContent\cGetContent('cSingleCurl');
-	$gc->setDefaultOption(CURLOPT_TIMEOUT,90);
-	var_dump($gc->load($url));
+	$getContent = new \GetContent\cGetContent('cSingleCurl');
+	$getContent->setDefaultOption(CURLOPT_TIMEOUT,90);
+	var_dump($getContent->load($url));
 	$tor->start();
-	$gc->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
-	var_dump($gc->load($url));
+	$getContent->setUseProxy($tor->getTorConnection(), CURLPROXY_SOCKS5);
+	var_dump($getContent->load($url));
 	$tor->setIpCountries('ca');
 	$tor->restart();
-	var_dump($gc->load($url));
+	var_dump($getContent->load($url));
 	$tor->setIpCountries(array('ua'));
 	$tor->restart();
-	var_dump($gc->load($url));
+	var_dump($getContent->load($url));
 }
