@@ -6,4 +6,4 @@
  * Time: 10:59
  * Email: bpteam22@gmail.com
  */
-require_once dirname(__FILE__) . '/thread.php';
+require_once __DIR__ . '/thread.php';

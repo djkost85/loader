@@ -272,7 +272,7 @@ class cStringWork
 		$specters = array();
 		foreach (self::$encodingDetection as $encoding) {
 			$weights[$encoding] = 0;
-			$specters[$encoding] = require 'phar://'.dirname(__FILE__) . '/specters.phar/' . $encoding . '.php';
+			$specters[$encoding] = require 'phar://'.__DIR__ . '/specters.phar/' . $encoding . '.php';
 		}
 		foreach (str_split($text, 2) as $key) {
 			foreach (self::$encodingDetection as $encoding) {

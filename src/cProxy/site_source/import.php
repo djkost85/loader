@@ -8,13 +8,13 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
-require_once dirname(__FILE__)."/../../../include.php";
+require_once __DIR__."/../../../include.php";
 
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;
 
 
-$urlSource = dirname(__FILE__) . "/../proxy_list/source/import.page";
+$urlSource = __DIR__ . "/../proxy_list/source/import.page";
 $nameSource = "import";
 
 $updateProxy = new cUpdateProxy();

@@ -9,7 +9,7 @@
  * @link bpteam.net
  */
 
-require_once dirname(__FILE__) . '/cnfg_test.php';
+require_once __DIR__ . '/cnfg_test.php';
 use GetContent\cProxy as cProxy;
 echo "cProxy<br/>\n";
 

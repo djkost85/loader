@@ -10,7 +10,7 @@
 
 use GetContent\cPhantomJS as cPhantomJS;
 if(isset($_POST['url'])){
-require_once dirname(__FILE__) . "/../include.php";
+require_once __DIR__ . "/../include.php";
 
 $phantomJS = new cPhantomJS(PHANTOMJS_EXE);
 var_dump($_POST['url']);

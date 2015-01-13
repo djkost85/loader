@@ -6,7 +6,7 @@
  * Time: 11:40
  * Email: bpteam22@gmail.com
  */
-require_once dirname(__FILE__)."/../../../include.php";
+require_once __DIR__."/../../../include.php";
 
 use GetContent\cUpdateProxy as cUpdateProxy;
 set_time_limit(3600);

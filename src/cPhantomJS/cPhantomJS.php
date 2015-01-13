@@ -338,7 +338,7 @@ class cPhantomJS {
 		if($phantomExePath){
 			$this->setExePath($phantomExePath);
 		}
-		$this->setPhantomFilesPath(dirname(__FILE__));
+		$this->setPhantomFilesPath(__DIR__);
 		$this->setKeyStream(microtime(1) . mt_rand());
 		$this->userAgent = new cUserAgent('desktop');
 	}

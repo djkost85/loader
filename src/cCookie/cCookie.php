@@ -157,7 +157,7 @@ class cCookie {
 	 */
 	function __construct($name = false){
 		$this->_list = new cList();
-		$this->setDir(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'cookies');
+		$this->setDir(__DIR__ . DIRECTORY_SEPARATOR . 'cookies');
 		if($name){
 			$this->open($name);
 		}

@@ -15,7 +15,7 @@
 $start = microtime(true);
 $str='';
 $plus='';
-$headLogFile=dirname(__FILE__).'/head.log';
+$headLogFile=__DIR__.'/head.log';
 if(!isset($_GET['str']))
 {
 	$anonym='1';

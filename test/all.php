@@ -6,11 +6,11 @@
  * Time: 18:01
  * Email: bpteam22@gmail.com
  */
-require_once dirname(__FILE__) . '/cFile.php';
-require_once dirname(__FILE__) . '/cList.php';
-require_once dirname(__FILE__) . '/cCookie.php';
-require_once dirname(__FILE__) . '/cCurl.php';
-require_once dirname(__FILE__) . '/cPhantomJS.php';
-require_once dirname(__FILE__) . '/cStringWork.php';
-require_once dirname(__FILE__) . '/cProxy.php';
-require_once dirname(__FILE__) . '/cUpdateProxy.php';
+require_once __DIR__ . '/cFile.php';
+require_once __DIR__ . '/cList.php';
+require_once __DIR__ . '/cCookie.php';
+require_once __DIR__ . '/cCurl.php';
+require_once __DIR__ . '/cPhantomJS.php';
+require_once __DIR__ . '/cStringWork.php';
+require_once __DIR__ . '/cProxy.php';
+require_once __DIR__ . '/cUpdateProxy.php';

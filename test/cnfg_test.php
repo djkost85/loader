@@ -10,7 +10,7 @@ ini_set('default_charset', 'utf-8');
 ini_set('display_errors',1);
 ini_set('memory_limit','1024M');
 error_reporting(E_ALL);
-require_once dirname(__FILE__) . '/../include.php';
+require_once __DIR__ . '/../include.php';
 
 echo "<a href='index.php'>..</a>";
 

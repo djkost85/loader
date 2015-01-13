@@ -9,7 +9,7 @@
  * @link bpteam.net
  */
 
-require_once dirname(__FILE__) . '/cnfg_test.php';
+require_once __DIR__ . '/cnfg_test.php';
 use GetContent\cStringWork as cStringWork;
 echo "cStringWork<br/>\n";
 
@@ -64,7 +64,7 @@ function cStringWork_clearNote(){
 }
 
 function cStringWork_getEncodingName(){
-	$dir = dirname(__FILE__);
+	$dir = __DIR__;
 	$text_cp1251 = file_get_contents($dir . '/support/cp1251.txt');
 	$text_utf8 = file_get_contents($dir . '/support/utf8.txt');
 	$cp1251 = cStringWork::getEncodingName($text_cp1251);

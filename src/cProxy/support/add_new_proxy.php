@@ -1,5 +1,5 @@
 <?php
-require_once dirname(__FILE__) . "/../../../include.php";
+require_once __DIR__ . "/../../../include.php";
 ini_set('default_charset', 'utf-8');
 
 if(isset($_POST['proxy'])){

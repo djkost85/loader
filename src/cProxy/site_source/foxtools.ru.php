@@ -8,7 +8,7 @@
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
 
-require_once dirname(__FILE__)."/../../../include.php";
+require_once __DIR__."/../../../include.php";
 use GetContent\cGetContent as cGetContent;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;

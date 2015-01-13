@@ -9,7 +9,7 @@
  * Модуль к классу  cProxy для скачивания списка прокси адресов с сайта seprox.ru
  */
 
-require_once dirname(__FILE__)."/../../../include.php";
+require_once __DIR__."/../../../include.php";
 use GetContent\cGetContent as cGetContent;
 use GetContent\cStringWork as cStringWork;
 use GetContent\cUpdateProxy as cUpdateProxy;

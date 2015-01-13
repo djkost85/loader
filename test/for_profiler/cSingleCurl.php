@@ -6,7 +6,7 @@
  * Time: 15:11
  * Email: bpteam22@gmail.com
  */
-require_once dirname(__FILE__) . '/cnfg_test.php';
+require_once __DIR__ . '/cnfg_test.php';
 use GetContent\cSingleCurl as cSingleCurl;
 $maxIterations = 10;
 for($i=0; $i < $maxIterations; $i++){

@@ -8,11 +8,11 @@
  * @author: Evgeny Pynykh <bpteam22@gmail.com>
  * @link bpteam.net
  */
-require_once dirname(__FILE__) . '/cnfg_test.php';
+require_once __DIR__ . '/cnfg_test.php';
 use GetContent\cGetContent as cGetContent;
 echo "cGetContent<br/>\n";
 
-define('FILE_NAME', dirname(__FILE__).'/support/testCFile.txt');
+define('FILE_NAME', __DIR__.'/support/testCFile.txt');
 
 $functions = array(
 	'getContentSingleCurl',

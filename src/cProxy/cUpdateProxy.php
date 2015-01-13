@@ -104,8 +104,8 @@ class cUpdateProxy extends cProxy {
 		$this->_curl->setSleepTime(500000);
 		$this->_curl->setDefaultOption(CURLOPT_PORT, $port);
 		$this->_curl->setDefaultOption(CURLOPT_TIMEOUT, 15);
-		$this->setDirSiteSource(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'site_source');
-		$this->setDirSourceList(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'proxy_list' . DIRECTORY_SEPARATOR . 'source');
+		$this->setDirSiteSource(__DIR__ . DIRECTORY_SEPARATOR . 'site_source');
+		$this->setDirSourceList(__DIR__ . DIRECTORY_SEPARATOR . 'proxy_list' . DIRECTORY_SEPARATOR . 'source');
 		$this->setCheckFunctionUrl($checkUrl);
 		$this->setServerIp($serverIp);
 	}

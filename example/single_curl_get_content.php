@@ -6,7 +6,7 @@
  * Time: 14:16
  * Email: bpteam22@gmail.com
  */
-require_once dirname(__FILE__) . "/../include.php";
+require_once __DIR__ . "/../include.php";
 
 use GetContent\cSingleCurl as cSingleCurl;
 

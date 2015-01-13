@@ -7,7 +7,7 @@
  * Email: bpteam22@gmail.com
  */
 
-require_once dirname(__FILE__) . '/cnfg_test.php';
+require_once __DIR__ . '/cnfg_test.php';
 echo "cCurl<br/>\n";
-require_once dirname(__FILE__) . '/cSingleCurl.php';
-require_once dirname(__FILE__) . '/cMultiCurl.php';
+require_once __DIR__ . '/cSingleCurl.php';
+require_once __DIR__ . '/cMultiCurl.php';

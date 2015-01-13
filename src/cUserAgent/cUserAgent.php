@@ -23,7 +23,7 @@ class cUserAgent {
 	 * @param string $type 'desktop' || 'mobile' || 'bot'
 	 */
 	public function setUserAgentList($type = 'desktop') {
-		$this->_userAgentList = require dirname(__FILE__) . DIRECTORY_SEPARATOR . 'useragent_list' . DIRECTORY_SEPARATOR . $type . ".php";
+		$this->_userAgentList = require __DIR__ . DIRECTORY_SEPARATOR . 'useragent_list' . DIRECTORY_SEPARATOR . $type . ".php";
 	}
 
 	/**

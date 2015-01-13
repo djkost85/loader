@@ -117,7 +117,7 @@ class cProxy {
 	function __construct(){
 		$this->setNameList($this->getDefaultListName());
 		$this->_list = new cList();
-		$this->setDirList(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'proxy_list');
+		$this->setDirList(__DIR__ . DIRECTORY_SEPARATOR . 'proxy_list');
 	}
 
 	public function selectList($name){

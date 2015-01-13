@@ -7,7 +7,7 @@
  * Project: fo_realty
  * @author: Evgeny Pynykh bpteam22@gmail.com
  */
-$coolLibDir = dirname(__FILE__).'/../../'; // in _coolLib
+$coolLibDir = __DIR__.'/../../'; // in _coolLib
 $loaderDir = $coolLibDir.'loader/';
 $gd2ocrDir = $coolLibDir.'gd2-php-ocr/';
 $parserDir = $coolLibDir.'parser/';

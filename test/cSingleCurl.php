@@ -7,7 +7,7 @@
  * Email: bpteam22@gmail.com
  */
 
-require_once dirname(__FILE__) . '/cnfg_test.php';
+require_once __DIR__ . '/cnfg_test.php';
 use GetContent\cSingleCurl as cSingleCurl;
 echo "cSingleCurl<br/>\n";
 
