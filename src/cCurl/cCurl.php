@@ -14,7 +14,7 @@ namespace GetContent;
 abstract class cCurl{
 
 	protected $scheme = 'http';
-	protected $schemeDefaultPort = array('http' => 80, 'https' => 443, 'ftp' => 21);
+	protected $schemeDefaultPort = ['http' => 80, 'https' => 443, 'ftp' => 21];
 	protected $url;
 	protected $answer;
 	protected $referer = '';
@@ -39,7 +39,7 @@ abstract class cCurl{
 	 * @var cUserAgent
 	 */
 	public $userAgent;
-	public $descriptor = array();
+	public $descriptor = [];
 	protected $shareDescriptor;
 	public $defaultOptions = array(
 		CURLOPT_URL => '',
@@ -58,7 +58,7 @@ abstract class cCurl{
 		CURLOPT_SSL_VERIFYPEER => false,
 		CURLOPT_COOKIEJAR => false,
 		CURLOPT_COOKIEFILE => false,
-		CURLOPT_HTTPHEADER => array(),
+		CURLOPT_HTTPHEADER => [],
 		CURLOPT_PORT => 80,
 		CURLOPT_MAXREDIRS => 25,
 	);
@@ -301,7 +301,7 @@ abstract class cCurl{
 
 	public abstract function removeOption($option);
 
-	public final function setOptions(&$descriptor, $options = array()){
+	public final function setOptions(&$descriptor, $options = []){
 		foreach($options as $keySetting => $value){
 			$this->setOption($descriptor, $keySetting, $options[$keySetting]);
 		}
@@ -358,7 +358,7 @@ abstract class cCurl{
 
 	protected function saveOption(&$descriptorCurl){
 		if (!$this->getSaveOption()){
-			$descriptorCurl['option'] = array();
+			$descriptorCurl['option'] = [];
 		}
 	}
 

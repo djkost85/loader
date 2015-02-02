@@ -260,7 +260,7 @@ class cGetContent {
 		if($new && $old && $this->canMoveCookies($new) && $this->canMoveCookies($old)){
 			$name = $old . 'To' . $new;
 			if(method_exists($this, $name)) {
-				return call_user_func(array($this, $name));
+				return call_user_func([$this, $name]);
 			}
 		}
 		return false;
@@ -284,7 +284,7 @@ class cGetContent {
 
 	public function __call($name, $arguments){
 		if(method_exists($this->loader, $name)) {
-			return call_user_func_array(array($this->loader, $name), $arguments);
+			return call_user_func_array([$this->loader, $name], $arguments);
 		}
 		return false;
 	}

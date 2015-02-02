@@ -116,7 +116,7 @@ class cMultiCurl extends cCurl{
 			curl_multi_exec($descriptor['descriptor'], $running);
 			usleep($this->waitExecMSec);
 		} while ($running > 0);
-		$answer = array();
+		$answer = [];
 		foreach (array_keys($descriptorArray) as $key){
 			$answer[$key] = curl_multi_getcontent($descriptorArray[$key]['descriptor']);
 		}
@@ -173,13 +173,13 @@ class cMultiCurl extends cCurl{
 		}
 	}
 
-	public function load($url = array()){
-		$goodAnswer = array();
+	public function load($url = []){
+		$goodAnswer = [];
 		$countMultiStream = $this->getCountStream();
 		$this->setCountCurl(count($url));
 		$descriptorArray =& $this->getDescriptorArray();
 		$descriptorKey = 0;
-		$urlDescriptorsLink = array();
+		$urlDescriptorsLink = [];
 		foreach ($url as $keyUrl => $valueUrl) {
 			for ($i = 0; $i < $countMultiStream; $i++) {
 				$urlDescriptorsLink[$keyUrl][] = $descriptorKey;

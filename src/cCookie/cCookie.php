@@ -97,7 +97,7 @@ class cCookie {
 	}
 
 	public function getFileName($prefix = ''){
-		return $this->getDir() . DIRECTORY_SEPARATOR . $this->getName() . $prefix . '.cookie';
+		return $this->getDir() . '/' . $this->getName() . $prefix . '.cookie';
 	}
 
 	public function getFileCurlName(){
@@ -157,7 +157,7 @@ class cCookie {
 	 */
 	function __construct($name = false){
 		$this->_list = new cList();
-		$this->setDir(__DIR__ . DIRECTORY_SEPARATOR . 'cookies');
+		$this->setDir(__DIR__ . '/' . 'cookies');
 		if($name){
 			$this->open($name);
 		}
