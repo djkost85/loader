@@ -23,6 +23,7 @@ class cTor {
 	private $ipCountries = array();
 	//private $geoIpFile = '/usr/share/tor/geoip';
 	const DATA_DIRECTORY = '/etc/tor';
+	private $authCode = '';
 	private $pathToConfig = '/etc/tor';
 	private $host = '127.0.0.1';
 	private $port = '9050';
@@ -214,6 +215,24 @@ DirListenAddress %s:%d';
 			echo "Free port not found, wait a minutes\n";
 		}while(sleep(60));
 		return false;
+	}
+
+	public function changeNode(){
+		$fp = fsockopen($this->host, $this->getControlPort(), $errorNumber, $errorString, 30);
+		if (!$fp) return false;
+
+		fputs($fp, "AUTHENTICATE $this->authCode\r\n");
+		$response = fread($fp, 1024);
+		$code = explode(' ', $response, 2);
+		if ($code[0] != '250') return false;
+
+		fputs($fp, "signal NEWNYM\r\n");
+		$response = fread($fp, 1024);
+		$code = explode(' ', $response, 2);
+		if ($code[0] != '250') return false;
+		fclose($fp);
+
+		return true;
 	}
 
 	public function createConfig(){
